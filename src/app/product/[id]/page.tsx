@@ -137,15 +137,42 @@ export default function ProductDetailPage() {
   };
 
   const isFavorite = product ? hasItem(product.id) : false;
-
   const productImages = (product?.image_urls?.length ? product.image_urls : [product?.image_url]).filter(Boolean);
 
   if (!isLoading && !product) return null;
+
+  // Structured Data for SEO
+  const jsonLd = product ? {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": productImages,
+    "description": product.specs,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://zicashgh.com/product/${product.id}`,
+      "priceCurrency": "GHS",
+      "price": product.price,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  } : null;
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
       
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+
       <main className="flex-1 container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900">
         {isLoading ? (
           <ProductPageSkeleton />

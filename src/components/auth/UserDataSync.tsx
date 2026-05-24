@@ -17,35 +17,43 @@ export function UserDataSync() {
 
   // Sync from DB on Login
   useEffect(() => {
+    let active = true;
+
     const handleSyncFromDb = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (session?.user) {
+      if (session?.user && active) {
         isSyncingFromDb.current = true;
 
-        // Fetch Cart
-        const { data: cartData } = await supabase
-          .from("carts")
-          .select("items")
-          .eq("user_id", session.user.id)
-          .single();
+        try {
+          // Fetch Cart
+          const { data: cartData } = await supabase
+            .from("carts")
+            .select("items")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
 
-        if (cartData?.items) {
-          setCartItems(cartData.items);
+          if (cartData?.items && active) {
+            setCartItems(cartData.items);
+          }
+
+          // Fetch Wishlist
+          const { data: wishlistData } = await supabase
+            .from("wishlists")
+            .select("items")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+
+          if (wishlistData?.items && active) {
+            setWishlistItems(wishlistData.items);
+          }
+        } catch (err) {
+          console.error("Sync Error:", err);
+        } finally {
+          if (active) {
+            setTimeout(() => { isSyncingFromDb.current = false; }, 500);
+          }
         }
-
-        // Fetch Wishlist
-        const { data: wishlistData } = await supabase
-          .from("wishlists")
-          .select("items")
-          .eq("user_id", session.user.id)
-          .single();
-
-        if (wishlistData?.items) {
-          setWishlistItems(wishlistData.items);
-        }
-
-        setTimeout(() => { isSyncingFromDb.current = false; }, 500);
       }
     };
 
@@ -55,9 +63,15 @@ export function UserDataSync() {
       if (event === 'SIGNED_IN' && session?.user) {
         handleSyncFromDb();
       }
+      if (event === 'SIGNED_OUT') {
+        // Optional: clear state on logout if desired
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, [setCartItems, setWishlistItems]);
 
   // Sync Cart to DB
@@ -78,7 +92,7 @@ export function UserDataSync() {
       }
     };
 
-    const timeoutId = setTimeout(syncCart, 1000);
+    const timeoutId = setTimeout(syncCart, 1500); // Increased debounce
     return () => clearTimeout(timeoutId);
   }, [cartItems]);
 
@@ -103,7 +117,7 @@ export function UserDataSync() {
       }
     };
 
-    const timeoutId = setTimeout(syncWishlist, 1000);
+    const timeoutId = setTimeout(syncWishlist, 1500); // Increased debounce
     return () => clearTimeout(timeoutId);
   }, [wishlistItems]);
 

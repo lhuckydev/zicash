@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-laptop",
+      "description": "Premium sleek dark laptop",
+      "imageUrl": "https://picsum.photos/seed/laptop1/1200/600",
+      "imageHint": "sleek laptop"
+    },
+    {
+      "id": "laptop-pro",
+      "description": "High performance workstation laptop",
+      "imageUrl": "https://picsum.photos/seed/tech1/600/400",
+      "imageHint": "gaming laptop"
+    },
+    {
+      "id": "laptop-air",
+      "description": "Ultralight portable laptop",
+      "imageUrl": "https://picsum.photos/seed/tech2/600/400",
+      "imageHint": "ultrabook"
+    },
+    {
+      "id": "accessory-keyboard",
+      "description": "Mechanical gaming keyboard",
+      "imageUrl": "https://picsum.photos/seed/kb1/600/400",
+      "imageHint": "mechanical keyboard"
+    },
+    {
+      "id": "accessory-mouse",
+      "description": "Ergonomic precision mouse",
+      "imageUrl": "https://picsum.photos/seed/mouse1/600/400",
+      "imageHint": "gaming mouse"
+    }
+  ]
+}

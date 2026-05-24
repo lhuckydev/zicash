@@ -5,19 +5,26 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   if (typeof window !== 'undefined') {
-    console.warn('ZiCash: Supabase credentials missing. Check environment variables.');
+    console.error('ZiCash: Critical initialization failure. Supabase credentials missing.');
   }
 }
 
-// Ensure URL is clean and starts with https
-const formattedUrl = supabaseUrl?.startsWith('http') 
-  ? supabaseUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '')
-  : `https://${supabaseUrl?.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '')}`;
+// Production-ready URL sanitation
+const sanitizeUrl = (url: string | undefined) => {
+  if (!url) return '';
+  return url.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+};
 
-export const supabase = createClient(formattedUrl || '', supabaseAnonKey || '', {
+const formattedUrl = sanitizeUrl(supabaseUrl);
+
+export const supabase = createClient(formattedUrl, supabaseAnonKey || '', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
+    detectSessionInUrl: true,
+    storageKey: 'zicash-auth-token',
+  },
+  db: {
+    schema: 'public',
+  },
 });

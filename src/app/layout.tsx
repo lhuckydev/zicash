@@ -12,7 +12,6 @@ export const metadata: Metadata = {
   },
   description: 'Your premium destination for curated products, lifestyle essentials, and professional services in Ghana. All You Need, All For You.',
   keywords: ['marketplace', 'Ghana', 'electronics', 'laptops', 'phones', 'lifestyle', 'ZiCash'],
-  authors: [{ name: 'ZiCash Digital' }],
   metadataBase: new URL('https://zicashgh.com'),
   alternates: {
     canonical: '/',
@@ -38,10 +37,6 @@ export const metadata: Metadata = {
     title: 'ZiCash GH Limited',
     description: 'Premium hardware and lifestyle marketplace in Ghana.',
     images: ['https://i.ibb.co/v4p0sdxs/zicash.jpg'],
-  },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
   }
 };
 

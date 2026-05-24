@@ -20,19 +20,24 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/update-password`,
-    });
-
-    if (error) {
-      toast({ variant: "destructive", title: "Request Failed", description: error.message });
-    } else {
-      toast({ 
-        title: "Recovery Sent", 
-        description: "If an account exists for this email, you will receive a reset link shortly." 
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/update-password`,
       });
+
+      if (error) {
+        toast({ variant: "destructive", title: "Request Failed", description: error.message });
+      } else {
+        toast({ 
+          title: "Recovery Sent", 
+          description: "If an account exists for this email, you will receive a reset link shortly." 
+        });
+      }
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: "System connection failure." });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

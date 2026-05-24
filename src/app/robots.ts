@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin/', '/profile/', '/checkout/', '/api/'],
+      disallow: ['/admin/', '/profile/', '/checkout/', '/api/', '/auth/'],
     },
     sitemap: 'https://zicashgh.com/sitemap.xml',
   };

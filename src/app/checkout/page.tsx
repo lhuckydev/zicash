@@ -143,10 +143,14 @@ export default function CheckoutPage() {
       const amountFormatted = `GHS ${Number(grandTotal).toLocaleString()}`;
       const customerName = profile?.full_name || "Customer";
 
-      // Notify Admin Node (Updated with the new contact)
-      const adminNumbers = ["0597204494", "0256985825"];
+      // Notify Admin Nodes dynamically from environment variables
+      const envNumbers = process.env.NEXT_PUBLIC_ADMIN_PHONE_NUMBERS || "0597204494,0256985825";
+      const adminNumbers = envNumbers.split(',').map(n => n.trim());
+      
       for (const num of adminNumbers) {
-        await sendSms(num, `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}.`);
+        if (num) {
+          await sendSms(num, `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}.`);
+        }
       }
       
       // Notify Customer

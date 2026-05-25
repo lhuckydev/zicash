@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -116,7 +115,7 @@ export default function InvoicePrintPage() {
               <p className="text-blue-600 font-black italic tracking-widest uppercase text-[10px]">"All You Need, All For You"</p>
               <p className="flex items-center gap-2"><MapPin className="w-3 h-3" /> Accra, Ghana</p>
               <p className="flex items-center gap-2"><Phone className="w-3 h-3" /> +233 59 720 4494</p>
-              <p className="flex items-center gap-2"><Globe className="w-3 h-3" /> www.zicashgh.com</p>
+              <p className="flex items-center gap-2"><Globe className="w-3 h-3" /> www.zicash.online</p>
             </div>
           </div>
           <div className="text-right space-y-2">

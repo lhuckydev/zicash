@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/profile/', '/checkout/', '/api/', '/auth/'],
     },
-    sitemap: 'https://zicashgh.com/sitemap.xml',
+    sitemap: 'https://zicash.online/sitemap.xml',
   };
 }

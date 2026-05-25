@@ -12,14 +12,14 @@ export const metadata: Metadata = {
   },
   description: 'Your premium destination for curated products, lifestyle essentials, and professional services in Ghana. All You Need, All For You.',
   keywords: ['marketplace', 'Ghana', 'electronics', 'laptops', 'phones', 'lifestyle', 'ZiCash'],
-  metadataBase: new URL('https://zicashgh.com'),
+  metadataBase: new URL('https://zicash.online'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'ZiCash GH Limited | Premium Online Marketplace',
     description: 'Curated products and professional services delivered across Ghana.',
-    url: 'https://zicashgh.com',
+    url: 'https://zicash.online',
     siteName: 'ZiCash GH Limited',
     images: [
       {

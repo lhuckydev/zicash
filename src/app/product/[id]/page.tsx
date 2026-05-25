@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: Props) {
     },
     "offers": {
       "@type": "Offer",
-      "url": `https://zicashgh.com/product/${product.id}`,
+      "url": `https://zicash.online/product/${product.id}`,
       "priceCurrency": "GHS",
       "price": product.price,
       "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

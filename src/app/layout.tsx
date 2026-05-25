@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  verification: {
+    google: 'google66d2fe87cd910a3d',
+  },
   openGraph: {
     title: 'ZiCash GH Limited | Premium Online Marketplace',
     description: 'Curated products and professional services delivered across Ghana.',

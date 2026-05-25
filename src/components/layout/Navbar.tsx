@@ -119,7 +119,16 @@ export function Navbar() {
                       <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center p-2">
                         <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={40} height={40} className="rounded-full object-cover" />
                       </div>
-                      <SheetTitle className="text-xl font-headline font-bold">Zi<span className="text-blue-600 text-xs block">Cash GH Limited</span></SheetTitle>
+                      <SheetTitle className="text-left">
+                        <div className="flex flex-col">
+                          <span className="text-xl font-bold font-headline leading-none text-slate-900">
+                            Zi<span className="text-blue-600">Cash</span>
+                          </span>
+                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
+                            GH Limited
+                          </span>
+                        </div>
+                      </SheetTitle>
                     </div>
                   </SheetHeader>
                   <div className="flex flex-col p-6 space-y-2">

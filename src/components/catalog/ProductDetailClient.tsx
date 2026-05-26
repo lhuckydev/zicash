@@ -64,6 +64,34 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
   );
 }
 
+const SafeShoppingCard = () => (
+  <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden h-fit relative">
+    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
+    <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
+    
+    <div className="space-y-8 relative z-10">
+       <div className="flex gap-5">
+          <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
+          <div>
+             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
+             <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
+          </div>
+       </div>
+       <div className="flex gap-5">
+          <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
+          <div>
+             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
+             <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
+          </div>
+       </div>
+    </div>
+
+    <div className="pt-8 border-t border-white/10 relative z-10">
+       <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
+    </div>
+  </Card>
+);
+
 export default function ProductDetailClient({ initialProduct }: { initialProduct: Product }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -79,12 +107,26 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [openSpecs, setOpenSpecs] = useState<Record<string, boolean>>({});
+  const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category);
 
   useEffect(() => {
-    async function fetchFullProduct() {
+    async function fetchFullData() {
       const { supabase } = await import('@/lib/supabase');
+      
+      // Fetch Ratings
+      const { data: ratingData } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('product_id', initialProduct.id);
+      
+      if (ratingData && ratingData.length > 0) {
+        const average = ratingData.reduce((acc, r) => acc + r.rating, 0) / ratingData.length;
+        setRatingInfo({ average, count: ratingData.length });
+      }
+
+      // Fetch Full Product
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -101,7 +143,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         }
       }
     }
-    fetchFullProduct();
+    fetchFullData();
   }, [initialProduct.id, selectedVariant]);
 
   useEffect(() => {
@@ -147,7 +189,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
         {/* Primary Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* Left Column: Visuals & Narrative */}
+          {/* Left Column: Visuals, Narrative & Desktop Reviews */}
           <div className="lg:col-span-6 space-y-20">
             {/* Image Section */}
             <div className="flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
@@ -215,9 +257,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  {product.description || "No detailed description provided."}
                </p>
             </div>
+
+            {/* DESKTOP REVIEWS: Appears under About on PC */}
+            <div className="hidden lg:block">
+              <ProductReviews productId={product.id} />
+            </div>
           </div>
 
-          {/* Right Column: Specs & Procurement */}
+          {/* Right Column: Specs, Procurement & Trust */}
           <div className="lg:col-span-6 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -231,8 +278,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 {product.name}
               </h1>
               <div className="flex items-center gap-4">
-                 <div className="flex text-amber-400"><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /></div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Quality Verified</span>
+                 <div className="flex text-amber-400">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={cn("w-4 h-4", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
+                    ))}
+                 </div>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                   {ratingInfo ? `${ratingInfo.count} Verified Client Logs` : 'Premium Quality Verified'}
+                 </span>
               </div>
             </div>
 
@@ -275,12 +328,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
                             </div>
 
-                            {/* Specifications Grid */}
+                            {/* Specifications Grid - Collapsible */}
                             {!isSimpleCategory && (
                               <div className="space-y-4">
                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                   <CollapsibleContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
-                                    {/* Core & Advanced Specs Grid */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 pt-8 border-t border-slate-100/50">
                                       {product.category === "Laptops" ? (
                                         <>
@@ -327,7 +379,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
                             )}
 
-                            {/* Action Button inside card */}
+                            {/* Action Button */}
                             <div className="pt-6 border-t border-slate-50">
                                <Button 
                                  onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
@@ -378,40 +430,20 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>
                </div>
             </div>
-          </div>
-        </div>
 
-        {/* Secondary Grid: Ratings and Trust Module */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mt-10">
-          <div className="lg:col-span-6">
-            <ProductReviews productId={product.id} />
-          </div>
-          <div className="lg:col-span-6">
-             <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden h-fit">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-                <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
-                
-                <div className="space-y-8 relative z-10">
-                   <div className="flex gap-5">
-                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
-                      <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
-                         <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
-                      </div>
-                   </div>
-                   <div className="flex gap-5">
-                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
-                      <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-                         <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
-                      </div>
-                   </div>
-                </div>
+            {/* DESKTOP SAFE SHOPPING: Appears on right on PC */}
+            <div className="hidden lg:block pt-10">
+              <SafeShoppingCard />
+            </div>
 
-                <div className="pt-8 border-t border-white/10 relative z-10">
-                   <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
-                </div>
-             </Card>
+            {/* MOBILE REVIEWS: Appears after specs on mobile */}
+            <div className="lg:hidden mt-10">
+              <ProductReviews productId={product.id} />
+            </div>
+            {/* MOBILE SAFE SHOPPING: Appears at very bottom on mobile */}
+            <div className="lg:hidden mt-10">
+              <SafeShoppingCard />
+            </div>
           </div>
         </div>
       </div>

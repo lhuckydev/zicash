@@ -141,14 +141,17 @@ export default function CheckoutPage() {
       const amountFormatted = `GHS ${Number(grandTotal).toLocaleString()}`;
       const customerName = profile?.full_name || "Customer";
 
-      // Notify Admins using separate variables
+      // Explicit transmission to both Admin nodes
       const admin1 = process.env.NEXT_PUBLIC_ADMIN_PHONE_1 || "0597204494";
       const admin2 = process.env.NEXT_PUBLIC_ADMIN_PHONE_2 || "0256985825";
       
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}.`;
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}. Check Admin Panel for details.`;
       
-      if (admin1) await sendSms(admin1, adminMessage);
-      if (admin2) await sendSms(admin2, adminMessage);
+      // Perform parallel SMS transmissions
+      await Promise.all([
+        sendSms(admin1, adminMessage),
+        sendSms(admin2, adminMessage)
+      ]);
       
       if (profile?.contact) {
         await sendSms(profile.contact, `Hi ${customerName}, your order for ${mainItem} (${amountFormatted}) has been received. We are processing it now. Thank you for shopping with ZiCash!`);
@@ -325,7 +328,7 @@ export default function CheckoutPage() {
                       onClick={handlePlaceOrder}
                       disabled={isSubmitting || (paymentType === "Prepayment" && isPaymentInfoMissing) || isAddressIncomplete || isLoading}
                     >
-                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-6 h-6" /> : <CheckCircle2 className="mr-3 w-6 h-6" />} Transmit Order
+                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-6 h-6" /> : <CheckCircle2 className="mr-3 w-6 h-6" />} Place Order
                     </Button>
 
                     <p className="text-[8px] text-center text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">

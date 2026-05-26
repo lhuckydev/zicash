@@ -132,10 +132,29 @@ export default function CheckoutPage() {
     }
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
-        setIsLocating(false);
-        toast({ title: "Location Saved", description: "Your exact delivery address has been recorded." });
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCoords({ lat: latitude, lon: longitude });
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+            { headers: { 'User-Agent': 'ZiCash-App' } }
+          );
+          
+          const data = await response.json();
+          const readableAddress = data.display_name || "Location found";
+          
+          // Update the Landmark field with the fetched address for this order
+          setCommunity(readableAddress);
+          
+          toast({ title: "Address Found", description: "We've updated your landmark with your current location." });
+        } catch (err) {
+          console.error("Geocoding error:", err);
+          toast({ title: "Location Saved", description: "Exact coordinates saved, but we couldn't get a readable address." });
+        } finally {
+          setIsLocating(false);
+        }
       },
       () => {
         setIsLocating(false);
@@ -153,7 +172,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!region || !area || !community) { toast({ variant: "destructive", title: "Address Required" }); return; }
     if (paymentChoice === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { 
-      toast({ variant: "destructive", title: "Payment Proof Required", description: "Please upload your payment photo and enter your account name." }); 
+      toast({ variant: "destructive", title: "Payment Photo Required", description: "Please upload your payment photo and enter your account name." }); 
       return; 
     }
     
@@ -207,7 +226,7 @@ export default function CheckoutPage() {
       const mainItem = items[0]?.name || "Product";
       const customerName = profile?.full_name || "Customer";
       const admin1 = "0597204494";
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Shop Manager.`;
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Manager.`;
       
       await sendSms(admin1, adminMessage);
       if (profile?.contact) {
@@ -285,7 +304,7 @@ export default function CheckoutPage() {
                               )}
                              >
                                {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : (coords ? <CheckCircle2 className="w-4 h-4" /> : <Navigation className="w-4 h-4" />)}
-                               {isLocating ? "Locating..." : (coords ? "Exact Location Saved" : "Get My Precise Location for Delivery")}
+                               {isLocating ? "Finding your spot..." : (coords ? "Location Updated in Form" : "Use My Current Location for Delivery")}
                              </Button>
                           </div>
                        </div>
@@ -382,7 +401,7 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
-                        <MessageSquareQuote className="w-4 h-4" /> Extra Notes
+                        <MessageSquareQuote className="w-4 h-4" /> Special Instructions
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0">

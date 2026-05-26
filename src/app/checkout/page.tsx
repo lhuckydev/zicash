@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCartStore, getEffectivePrice } from "@/store/useCartStore";
+import { useCartStore } from "@/store/useCartStore";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,8 @@ import {
   MessageSquareQuote,
   PencilLine,
   Package,
-  Hash
+  Hash,
+  Settings2
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -74,7 +74,7 @@ export default function CheckoutPage() {
       try {
         const [profileRes, settingsRes] = await Promise.all([
           supabase.from("profiles").select("*").eq("id", currentSession.user.id).maybeSingle(),
-          supabase.from("settings").select("*").eq("key", 'momo_payment_details').maybeSingle()
+          supabase.from("settings").select("*").eq('key', 'momo_payment_details').maybeSingle()
         ]);
 
         if (profileRes.data) {
@@ -129,142 +129,158 @@ export default function CheckoutPage() {
         const { data: { publicUrl } } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
         screenshotUrl = publicUrl;
       }
+      
       const { error: orderError } = await supabase.from("orders").insert([{
-        user_id: session.user.id, customer_name: profile?.full_name || session.user.email?.split('@')[0], customer_email: session.user.email,
-        total_amount: grandTotal, status: "Pending", payment_type: paymentType, momo_sender_name: momoSenderName || null,
-        payment_screenshot_url: screenshotUrl || null, is_accra: isAccra, extra_notes: extraNotes,
-        shipping_region: region, shipping_area: area, shipping_community: community,
-        items: items.map(i => ({ id: i.id, name: i.name, price: getEffectivePrice(i), quantity: i.quantity, image_url: i.image_url }))
+        user_id: session.user.id, 
+        customer_name: profile?.full_name || session.user.email?.split('@')[0], 
+        customer_email: session.user.email,
+        total_amount: grandTotal, 
+        status: "Pending", 
+        payment_type: paymentType, 
+        momo_sender_name: momoSenderName || null,
+        payment_screenshot_url: screenshotUrl || null, 
+        is_accra: isAccra, 
+        extra_notes: extraNotes,
+        shipping_region: region, 
+        shipping_area: area, 
+        shipping_community: community,
+        items: items.map(i => ({ 
+          id: i.id, 
+          name: i.name, 
+          price: i.selectedVariant ? i.selectedVariant.price : i.price, 
+          quantity: i.quantity, 
+          image_url: i.image_url,
+          variant_label: i.selectedVariant?.label,
+          variant_id: i.selectedVariant?.id
+        }))
       }]);
+      
       if (orderError) throw orderError;
       
       const mainItem = items[0]?.name || "Item";
       const amountFormatted = `GHS ${Number(grandTotal).toLocaleString()}`;
       const customerName = profile?.full_name || "Customer";
 
-      // Send notifications to administrators
-      const admin1 = process.env.NEXT_PUBLIC_ADMIN_PHONE_1 || "0597204494";
-      const admin2 = process.env.NEXT_PUBLIC_ADMIN_PHONE_2 || "0256985825";
+      const admin1 = "0597204494";
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}. Check ZiCash Admin Panel.`;
       
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}. Check the Admin Panel for details.`;
-      
-      await Promise.all([
-        sendSms(admin1, adminMessage),
-        sendSms(admin2, adminMessage)
-      ]);
+      await sendSms(admin1, adminMessage);
       
       if (profile?.contact) {
-        await sendSms(profile.contact, `Hi ${customerName}, your order for ${mainItem} (${amountFormatted}) has been received. We are processing it now. Thank you for shopping with ZiCash!`);
+        await sendSms(profile.contact, `Hi ${customerName}, your hardware order for ${mainItem} has been received. Our procurement team is now verifying your request. Thank you!`);
       }
 
       clearCart();
-      toast({ title: "Order Placed", description: "We have received your order details!" });
+      toast({ title: "Order Archived", description: "Your hardware request has been added to our delivery queue." });
       router.push("/orders");
-    } catch (err: any) { toast({ variant: "destructive", title: "Order Failed", description: err.message }); }
-    finally { setIsSubmitting(false); }
+    } catch (err: any) { 
+      toast({ variant: "destructive", title: "Order Failed", description: err.message }); 
+    } finally { 
+      setIsSubmitting(false); 
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen tech-grid">
+    <div className="flex flex-col min-h-screen tech-grid font-body bg-[#FBFBFE]">
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-12 pb-24 md:pb-12 text-slate-900">
         <div className="max-w-5xl mx-auto space-y-10">
           <div className="flex items-center gap-4">
-             <Link href="/cart"><Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-primary"><ArrowLeft /></Button></Link>
-             <h1 className="text-3xl md:text-5xl font-bold font-headline uppercase">Finalize <span className="text-primary italic">Order</span></h1>
+             <Link href="/cart"><Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-blue-600"><ArrowLeft /></Button></Link>
+             <h1 className="text-3xl md:text-6xl font-black font-headline uppercase italic">Archive <span className="text-blue-600">Order</span></h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-7 space-y-8">
               {isLoading ? (
-                <>
-                  <Skeleton className="h-64 w-full rounded-[2rem]" />
-                  <Skeleton className="h-48 w-full rounded-[2rem]" />
-                </>
+                <div className="space-y-6">
+                  <Skeleton className="h-64 w-full rounded-[3rem]" />
+                  <Skeleton className="h-48 w-full rounded-[3rem]" />
+                </div>
               ) : (
                 <>
-                  <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500">
-                    <CardHeader className="p-8 pb-4">
-                      <CardTitle className="text-sm font-black uppercase tracking-[0.15em] flex items-center gap-3">
-                        <MapPin className="w-5 h-5 text-primary" /> Delivery Address
+                  <Card className="rounded-[3rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500">
+                    <CardHeader className="p-10 pb-4">
+                      <CardTitle className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
+                        <MapPin className="w-5 h-5" /> Delivery Coordinates
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 pt-0 space-y-6">
+                    <CardContent className="p-10 pt-0 space-y-6">
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Region</label>
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Archive Region</label>
                              <Select value={region} onValueChange={setRegion}>
-                               <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-900 focus:ring-2 focus:ring-primary/20">
+                               <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-bold text-slate-900 shadow-inner">
                                  <SelectValue placeholder="Select Region" />
                                </SelectTrigger>
-                               <SelectContent className="rounded-2xl border-none shadow-2xl bg-slate-950 text-white overflow-hidden p-1">
+                               <SelectContent className="rounded-2xl border-none shadow-2xl bg-slate-900 text-white p-1">
                                  {GHANA_REGIONS.map(r => (
-                                   <SelectItem key={r} value={r} className="font-bold py-3 px-4 focus:bg-primary focus:text-white transition-colors">{r}</SelectItem>
+                                   <SelectItem key={r} value={r} className="font-bold py-3 px-4 focus:bg-blue-600 focus:text-white transition-colors">{r}</SelectItem>
                                  ))}
                                </SelectContent>
                              </Select>
                           </div>
                           <div className="space-y-2">
-                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Town / Area</label>
-                             <Input placeholder="e.g., East Legon" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={area} onChange={(e) => setArea(e.target.value)} />
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Archive Area</label>
+                             <Input placeholder="e.g., East Legon" className="h-14 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" value={area} onChange={(e) => setArea(e.target.value)} />
                           </div>
                           <div className="space-y-2 md:col-span-2">
-                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specific Address / Notable Landmark</label>
-                             <Input placeholder="House number or nearby landmark" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={community} onChange={(e) => setCommunity(e.target.value)} />
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Specific Address / Notable Node</label>
+                             <Input placeholder="House number or nearby landmark" className="h-14 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" value={community} onChange={(e) => setCommunity(e.target.value)} />
                           </div>
                        </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500 delay-75">
-                    <CardHeader className="p-8 pb-4">
-                      <CardTitle className="text-sm font-black uppercase tracking-[0.15em] flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-primary" /> How to Pay
+                  <Card className="rounded-[3rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500 delay-100">
+                    <CardHeader className="p-10 pb-4">
+                      <CardTitle className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
+                        <CreditCard className="w-5 h-5" /> Financial Sync
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-8 pt-0">
+                    <CardContent className="p-10 pt-0">
                       {isAccra ? (
-                        <div className="flex items-center gap-6 p-8 bg-emerald-50 text-emerald-700 rounded-[2rem] border border-emerald-100/50">
-                          <div className="p-4 bg-emerald-100/50 rounded-2xl"><Banknote className="w-8 h-8" /></div>
+                        <div className="flex items-center gap-6 p-10 bg-emerald-50 text-emerald-700 rounded-[2.5rem] border border-emerald-100/50 shadow-inner">
+                          <div className="p-4 bg-white rounded-2xl shadow-sm"><Banknote className="w-8 h-8" /></div>
                           <div>
-                            <p className="font-black uppercase tracking-tight text-lg">Pay on Delivery</p>
-                            <p className="text-xs font-medium opacity-70 mt-1 uppercase tracking-widest">Available for the Greater Accra Region.</p>
+                            <p className="font-black uppercase tracking-tight text-lg italic">Payment on Receipt</p>
+                            <p className="text-xs font-bold opacity-70 mt-1 uppercase tracking-widest">Confirmed for Greater Accra Region.</p>
                           </div>
                         </div>
                       ) : (
                         <div className="space-y-6">
-                          <div className="p-8 bg-blue-50 text-blue-900 rounded-[2rem] border border-blue-100 flex items-center gap-6">
-                            <div className="p-4 bg-blue-100/50 rounded-2xl"><Smartphone className="w-8 h-8" /></div>
+                          <div className="p-10 bg-blue-50 text-blue-900 rounded-[2.5rem] border border-blue-100 flex items-center gap-6 shadow-inner">
+                            <div className="p-4 bg-white rounded-2xl shadow-sm"><Smartphone className="w-8 h-8 text-blue-600" /></div>
                             <div>
-                               <p className="font-black uppercase tracking-tight text-lg">MoMo Prepayment Required</p>
-                               <p className="text-sm font-bold mt-1 text-blue-600">{momoName}: {momoNumber}</p>
-                               <p className="text-[10px] font-black uppercase opacity-40 mt-1">Required for regional deliveries.</p>
+                               <p className="font-black uppercase tracking-tight text-lg italic">MoMo Prepayment Active</p>
+                               <p className="text-sm font-black mt-1 text-blue-600">{momoName}: {momoNumber}</p>
+                               <p className="text-[10px] font-black uppercase opacity-40 mt-1">Archive verification required for regional links.</p>
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-1 gap-6">
+                          <div className="grid grid-cols-1 gap-8">
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">Momo Sender Name (Required)</label>
+                               <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">Momo Sender Identity</label>
                                <Input 
-                                 placeholder="Name on the account used" 
-                                 className="h-14 rounded-2xl bg-white border-2 border-blue-600 font-black text-blue-900 shadow-xl shadow-blue-500/5 focus-visible:ring-blue-600/30 text-lg placeholder:text-slate-300" 
+                                 placeholder="Account Name Used" 
+                                 className="h-16 rounded-2xl bg-white border-2 border-blue-600 font-black text-blue-900 shadow-xl shadow-blue-500/5 focus-visible:ring-blue-600/30 text-xl placeholder:text-slate-200" 
                                  value={momoSenderName} 
                                  onChange={(e) => setMomoSenderName(e.target.value)} 
                                />
                              </div>
                              
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Receipt / Screenshot</label>
-                               <div onClick={() => document.getElementById('payment-upload')?.click()} className="border-2 border-dashed border-slate-200 rounded-[2rem] p-10 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-all group">
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Archival Screenshot</label>
+                               <div onClick={() => document.getElementById('payment-upload')?.click()} className="border-2 border-dashed border-slate-200 rounded-[3rem] p-12 flex flex-col items-center justify-center cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-all group shadow-inner">
                                  <input type="file" id="payment-upload" className="hidden" accept="image/*" onChange={handleFileSelect} />
                                  {previewUrl ? (
-                                   <div className="relative w-40 h-40 rounded-2xl overflow-hidden shadow-2xl">
+                                   <div className="relative w-48 h-48 rounded-3xl overflow-hidden shadow-2xl">
                                      <Image src={previewUrl} alt="Preview" fill className="object-cover" />
                                    </div>
                                  ) : (
                                    <>
-                                     <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform"><ImageIcon className="w-8 h-8 text-slate-300" /></div>
-                                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Upload Payment Confirmation</p>
+                                     <div className="p-5 bg-white rounded-full shadow-md mb-4 group-hover:scale-110 transition-transform"><ImageIcon className="w-10 h-10 text-slate-300" /></div>
+                                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Upload Transaction Data</p>
                                    </>
                                  )}
                                </div>
@@ -279,61 +295,69 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-5 space-y-8">
-               <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden sticky top-24">
-                  <div className="p-8 bg-slate-950 text-white flex items-center justify-between">
-                    <h3 className="text-base font-black uppercase tracking-widest italic">Order <span className="text-blue-500">Summary</span></h3>
-                    <Badge className="bg-blue-600 border-none text-[8px] font-black uppercase">{items.length} Units</Badge>
+               <Card className="rounded-[3rem] border-none shadow-2xl bg-white overflow-hidden sticky top-32">
+                  <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
+                    <h3 className="text-base font-black uppercase tracking-[0.2em] italic">Archive <span className="text-blue-500">Summary</span></h3>
+                    <Badge className="bg-blue-600 border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">{items.length} Units</Badge>
                   </div>
-                  <CardContent className="p-8 space-y-8">
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto scrollbar-hide pr-2">
+                  <CardContent className="p-10 space-y-8">
+                    <div className="space-y-6 max-h-[400px] overflow-y-auto scrollbar-hide pr-2">
                       {items.map((item) => {
-                        const price = getEffectivePrice(item);
+                        const price = item.selectedVariant ? item.selectedVariant.price : item.price;
+                        const cartId = item.selectedVariant ? `${item.id}-${item.selectedVariant.id}` : item.id;
                         return (
-                          <div key={item.id} className="flex items-center gap-4 group">
-                            <div className="relative w-14 h-14 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
-                              <Image src={item.image_url} alt={item.name} width={40} height={40} className="object-contain p-1" />
-                              <span className="absolute -top-1 -right-1 bg-slate-900 text-white text-[8px] font-black h-4 w-4 flex items-center justify-center rounded-full border border-white">
+                          <div key={cartId} className="flex items-center gap-5 group">
+                            <div className="relative w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center shadow-inner">
+                              <Image src={item.image_url} alt={item.name} width={48} height={48} className="object-contain p-2" />
+                              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[8px] font-black h-5 w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
                                 {item.quantity}
                               </span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-black text-slate-900 truncate leading-tight uppercase group-hover:text-primary transition-colors">{item.name}</p>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Rate: GH₵{price.toLocaleString()}</p>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="text-[12px] font-black text-slate-900 truncate leading-tight uppercase group-hover:text-blue-600 transition-colors">{item.name}</p>
+                              {item.selectedVariant && (
+                                <div className="flex items-center gap-1.5">
+                                  <Settings2 className="w-3 h-3 text-blue-500" />
+                                  <p className="text-[9px] font-black text-slate-400 uppercase truncate">{item.selectedVariant.label}</p>
+                                </div>
+                              )}
                             </div>
-                            <p className="text-xs font-black text-slate-900 italic tracking-tighter shrink-0">
-                               GH₵{(price * item.quantity).toLocaleString()}
+                            <p className="text-sm font-black text-slate-900 italic tracking-tighter shrink-0">
+                               GH₵ {(price * item.quantity).toLocaleString()}
                             </p>
                           </div>
                         );
                       })}
                     </div>
 
-                    <div className="space-y-4 pt-6 border-t border-slate-50">
-                       <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <div className="space-y-5 pt-8 border-t-2 border-dashed border-slate-100">
+                       <div className="flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest">
                           <span>Subtotal</span>
-                          <span className="text-slate-900 font-black italic">GH₵{total.toLocaleString()}</span>
+                          <span className="text-slate-900 italic">GH₵ {total.toLocaleString()}</span>
                        </div>
-                       <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-                          <span>Delivery Fee</span>
-                          <span className="text-emerald-600 font-black uppercase text-[10px]">Free Delivery</span>
+                       <div className="flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest">
+                          <span>Logistics</span>
+                          <span className="text-emerald-600 uppercase text-[10px]">Included</span>
                        </div>
-                       <div className="pt-6 flex justify-between items-end">
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total to Pay</span>
-                          <span className="text-4xl font-black text-primary font-headline italic tracking-tighter">GHS {total.toLocaleString()}</span>
+                       <div className="pt-8 flex justify-between items-end">
+                          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Archival Valuation</span>
+                          <span className="text-5xl font-black text-blue-600 font-headline italic tracking-tighter">GHS {total.toLocaleString()}</span>
                        </div>
                     </div>
 
                     <Button 
-                      className="w-full h-16 bg-primary text-white font-black rounded-2xl shadow-2xl shadow-primary/30 text-lg uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                      className="w-full h-20 bg-blue-600 text-white font-black rounded-3xl shadow-2xl shadow-blue-600/30 text-xl uppercase tracking-[0.2em] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
                       onClick={handlePlaceOrder}
                       disabled={isSubmitting || (paymentType === "Prepayment" && isPaymentInfoMissing) || isAddressIncomplete || isLoading}
                     >
-                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-6 h-6" /> : <CheckCircle2 className="mr-3 w-6 h-6" />} Place Order
+                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-7 h-7" /> : <CheckCircle2 className="mr-3 w-7 h-7" />} Archive Order
                     </Button>
 
-                    <p className="text-[8px] text-center text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                      <ShieldCheck className="w-3 h-3" /> Secure Payment Process
-                    </p>
+                    <div className="flex flex-col items-center gap-4">
+                       <p className="text-[9px] text-center text-slate-400 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                         <ShieldCheck className="w-3.5 h-3.5 text-blue-500" /> ZiCash Secure Link Active
+                       </p>
+                    </div>
                   </CardContent>
                </Card>
             </div>

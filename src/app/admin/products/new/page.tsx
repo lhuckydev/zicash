@@ -8,20 +8,23 @@ import {
   Image as ImageIcon, 
   Loader2, 
   ArrowLeft,
-  Lock,
+  ArrowRight,
   Save,
   Upload,
-  Hash,
   Cpu,
   Monitor,
   Database,
   Smartphone,
-  Camera,
-  Shirt,
-  GraduationCap,
+  CheckCircle2,
   Zap,
   Info,
-  X
+  X,
+  Plus,
+  Trash2,
+  Settings2,
+  Layers,
+  ChevronRight,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,50 +37,64 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/store/useCartStore";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const SESSION_TIMEOUT = 7200000;
 
-export default function NewProductPage() {
+interface ProductVariantForm {
+  id?: string;
+  cpu?: string;
+  ram?: string;
+  storage?: string;
+  gpu?: string;
+  screen?: string;
+  touchscreen?: boolean;
+  condition?: string;
+  chipset?: string;
+  color?: string;
+  battery?: string;
+  network?: string;
+  price: number;
+  stock: number;
+}
+
+export default function NewProductWizard() {
   const router = useRouter();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  const [step, setStep] = useState(1);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const [product, setProduct] = useState<Partial<Product>>({
+  // Step 1: Basic Info
+  const [basicInfo, setBasicInfo] = useState({
     name: "",
     brand: "",
     category: "Laptops",
-    price: 0,
-    stock: 10,
-    image_url: "",
-    image_urls: [],
     description: "",
-    specs: "",
-    condition: "New",
-    clock_speed: "",
-    screen_resolution: "",
-    cpu: "",
-    ram_size: "",
-    storage_size: "",
-    gpu: "",
-    camera: "",
-    battery: "",
-    size: "",
-    material: "",
-    color: ""
+    featured: false,
+    warranty: "1 Year ZiCash Warranty",
+    stock_status: "In Stock"
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  // Step 2: Variants
+  const [variants, setVariants] = useState<ProductVariantForm[]>([
+    { price: 0, stock: 10, condition: "New", touchscreen: false }
+  ]);
+
+  // Step 3: Advanced Optional Specs
+  const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session') === 'true';
@@ -85,7 +102,6 @@ export default function NewProductPage() {
     const now = Date.now();
     if (isAuth && (now - lastActivity < SESSION_TIMEOUT)) {
       setIsAuthenticated(true);
-      localStorage.setItem('admin_last_activity', now.toString());
     }
   }, []);
 
@@ -109,30 +125,34 @@ export default function NewProductPage() {
     }
   };
 
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+  const addVariant = () => {
+    setVariants([...variants, { price: 0, stock: 10, condition: "New", touchscreen: false }]);
   };
 
-  const getPlaceholder = () => {
-    switch (product.category) {
-      case "Laptops": return "e.g., MacBook Pro 14 M3 Max";
-      case "Phones": return "e.g., iPhone 15 Pro Max";
-      case "Closet": return "e.g., ZiCash Signature Hoodie";
-      case "Accessories": return "e.g., Logitech MX Master 3S Mouse";
-      case "Educational Consult": return "e.g., Admission Support";
-      default: return "Product Name";
+  const removeVariant = (index: number) => {
+    if (variants.length > 1) {
+      setVariants(variants.filter((_, i) => i !== index));
     }
   };
 
-  const handleSave = async () => {
-    if (!product.name || !product.price) {
-      toast({ variant: "destructive", title: "Wait", description: "Name and Price are required." });
-      return;
-    }
+  const updateVariant = (index: number, field: keyof ProductVariantForm, value: any) => {
+    const newVariants = [...variants];
+    newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
+  };
 
-    if (selectedFiles.length === 0) {
-      toast({ variant: "destructive", title: "Images Required", description: "Please pick at least one image." });
+  const generateLabel = (v: ProductVariantForm) => {
+    if (basicInfo.category === "Laptops") {
+      return `${v.cpu || 'Base'} / ${v.ram || '8GB'} / ${v.storage || '256GB'}${v.gpu ? ` / ${v.gpu}` : ''}`;
+    } else if (basicInfo.category === "Phones") {
+      return `${v.ram || '8GB'} / ${v.storage || '128GB'} / ${v.color || 'Onyx'}`;
+    }
+    return "Standard Configuration";
+  };
+
+  const handleFinalSave = async () => {
+    if (!basicInfo.name || variants.some(v => !v.price)) {
+      toast({ variant: "destructive", title: "Wait", description: "Product Name and all Variant Prices are required." });
       return;
     }
 
@@ -141,57 +161,52 @@ export default function NewProductPage() {
 
     try {
       setIsUploading(true);
-      
       for (const file of selectedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `products/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('products')
-          .upload(filePath, file);
-
+        const { error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('products')
-          .getPublicUrl(filePath);
-        
+        const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(filePath);
         finalImageUrls.push(publicUrl);
       }
-      
       setIsUploading(false);
 
-      let finalSpecs = "";
-      if (product.category === "Laptops") {
-        finalSpecs = `CPU: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | GPU: ${product.gpu || "Standard"} | Screen: ${product.screen_resolution || "Standard"} | Speed: ${product.clock_speed || "Standard"}`;
-      } else if (product.category === "Phones") {
-        finalSpecs = `Chipset: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | Camera: ${product.camera || "Standard"} | Battery: ${product.battery || "Standard"}`;
-      } else if (product.category === "Closet") {
-        finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
-      } else {
-        finalSpecs = product.specs || "";
-      }
-
-      const { error } = await supabase
+      // 1. Insert Product
+      const { data: productData, error: productError } = await supabase
         .from('products')
         .insert([{
-          ...product,
-          image_url: finalImageUrls[0], 
+          ...basicInfo,
+          image_url: finalImageUrls[0] || "",
           image_urls: finalImageUrls,
-          specs: finalSpecs,
-          description: product.description || "",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }]);
+          price: Math.min(...variants.map(v => v.price)), // "Starting at" price
+          advanced_specs: advancedSpecs,
+          specs: generateLabel(variants[0]) // Fallback for old filtering
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (productError) throw productError;
 
-      toast({ title: "Product Saved", description: "Item added to the store successfully." });
+      // 2. Insert Variants
+      const variantsToInsert = variants.map((v, idx) => ({
+        ...v,
+        product_id: productData.id,
+        label: generateLabel(v),
+        is_default: idx === 0
+      }));
+
+      const { error: variantError } = await supabase
+        .from('product_variants')
+        .insert(variantsToInsert);
+
+      if (variantError) throw variantError;
+
+      toast({ title: "Inventory Synchronized", description: "Product and all variants have been archived." });
       router.push("/admin");
     } catch (err: any) {
       console.error("Save Error:", err);
-      toast({ variant: "destructive", title: "Save Failed", description: err.message });
+      toast({ variant: "destructive", title: "Wizard Failure", description: err.message });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
@@ -200,14 +215,14 @@ export default function NewProductPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6 bg-[#0F172A] tech-grid">
+      <main className="flex min-h-screen items-center justify-center p-6 bg-slate-950">
         <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
-           <div className="bg-slate-950 p-10 text-center">
-               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Login</span></h1>
+           <div className="bg-slate-900 p-10 text-center">
+               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Auth</span></h1>
            </div>
            <CardContent className="p-10">
              <form onSubmit={handleAuth} className="space-y-6">
-               <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
+               <Input type="password" placeholder="Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
                <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Login</Button>
              </form>
            </CardContent>
@@ -217,176 +232,277 @@ export default function NewProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12 font-body">
+      <div className="max-w-5xl mx-auto space-y-12">
+        
+        {/* Header Navigation */}
         <div className="flex items-center justify-between">
           <Link href="/admin">
-            <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600">
-              <ArrowLeft className="w-4 h-4" /> Dashboard
+            <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600 uppercase text-[10px] tracking-widest">
+              <ArrowLeft className="w-4 h-4" /> Cancel Upload
             </Button>
           </Link>
-          <div className="text-right">
-            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest leading-none">Admin Panel</p>
-            <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Add <span className="text-blue-600">Product</span></h1>
+          <div className="flex items-center gap-6">
+             <div className="flex items-center gap-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={cn("w-2.5 h-2.5 rounded-full transition-all duration-500", step >= i ? "bg-blue-600 w-8" : "bg-slate-200")} />
+                ))}
+             </div>
+             <div className="text-right hidden sm:block">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Step {step} of 3</p>
+                <h1 className="text-xl font-black text-slate-900 mt-1 uppercase italic">Product <span className="text-blue-600">Wizard</span></h1>
+             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1 space-y-8">
-             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">1. Category</label>
-                    <Select value={product.category} onValueChange={(val) => setProduct({ ...product, category: val })}>
-                      <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black shadow-sm focus:ring-2 focus:ring-blue-600/10">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Laptops" className="font-black">Laptops</SelectItem>
-                        <SelectItem value="Phones" className="font-black">Phones</SelectItem>
-                        <SelectItem value="Accessories" className="font-black">Accessories</SelectItem>
-                        <SelectItem value="Closet" className="font-black">Closet</SelectItem>
-                        <SelectItem value="Educational Consult" className="font-black">Educational Consult</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2 pt-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Product Images</label>
-                    <div 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-blue-600 transition-all mb-4"
-                    >
-                      <div className="text-center">
-                        <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[10px] font-black uppercase text-slate-400">Pick Images</p>
-                      </div>
-                      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-2">
-                      {previewUrls.map((url, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-100 group/img">
-                          <Image src={url} alt="Preview" fill className="object-cover" />
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/img:opacity-100 transition-opacity"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Price (GH₵)</label>
-                    <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
-                      <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Stock Amount</label>
-                    <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <Input type="number" className="pl-10 h-12 rounded-xl bg-slate-50 border-none font-black text-lg" value={product.stock} onChange={(e) => setProduct({...product, stock: parseInt(e.target.value)})} />
-                    </div>
-                  </div>
-                </div>
-             </Card>
-          </div>
-
-          <div className="lg:col-span-2 space-y-8">
-             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
-                <CardHeader className="p-10 bg-slate-950 text-white flex flex-row items-center justify-between">
-                   <div>
-                     <CardTitle className="text-2xl uppercase tracking-tighter">Product <span className="text-blue-500 italic">Details</span></CardTitle>
-                     <CardDescription className="text-white/40 text-[11px] font-black uppercase tracking-widest mt-1">Category: {product.category}</CardDescription>
-                   </div>
-                   <div className="p-3 bg-blue-600 rounded-2xl">
-                     {product.category === "Laptops" && <Monitor className="w-6 h-6" />}
-                     {product.category === "Phones" && <Smartphone className="w-6 h-6" />}
-                     {product.category === "Closet" && <Shirt className="w-6 h-6" />}
-                     {product.category === "Educational Consult" && <GraduationCap className="w-6 h-6" />}
-                     {product.category === "Accessories" && <Zap className="w-6 h-6" />}
-                   </div>
-                </CardHeader>
-                <CardContent className="p-10 space-y-8">
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Name</label>
-                        <Input placeholder={getPlaceholder()} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
-                      </div>
-                      
-                      {product.category !== "Educational Consult" && (
-                        <div className="space-y-2">
-                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand</label>
-                          <Input placeholder="e.g., Apple" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
-                        </div>
-                      )}
-
+        {/* STEP 1: BASIC INFO */}
+        {step === 1 && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <div className="lg:col-span-4 space-y-8">
+                <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
+                   <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Condition</label>
-                        <Select value={product.condition} onValueChange={(val) => setProduct({ ...product, condition: val })}>
-                           <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg"><SelectValue /></SelectTrigger>
-                           <SelectContent className="rounded-2xl">
-                              <SelectItem value="New" className="font-black">Brand New</SelectItem>
-                              <SelectItem value="Used - Grade A" className="font-black">Used - Grade A</SelectItem>
-                              <SelectItem value="Used - Grade B" className="font-black">Used - Grade B</SelectItem>
-                           </SelectContent>
+                        <label className="text-[11px] font-black uppercase text-blue-700 ml-1">Department Selection</label>
+                        <Select value={basicInfo.category} onValueChange={(val) => setBasicInfo({...basicInfo, category: val})}>
+                          <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black shadow-inner">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-2xl border-none shadow-2xl">
+                            <SelectItem value="Laptops" className="font-black">Laptops</SelectItem>
+                            <SelectItem value="Phones" className="font-black">Phones</SelectItem>
+                            <SelectItem value="Accessories" className="font-black">Accessories</SelectItem>
+                          </SelectContent>
                         </Select>
                       </div>
+
+                      <div className="pt-4 space-y-2">
+                        <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Inventory Media</label>
+                        <div 
+                          onClick={() => fileInputRef.current?.click()}
+                          className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer group hover:border-blue-600 transition-all mb-4"
+                        >
+                          <Upload className="w-8 h-8 text-slate-300 mb-2 group-hover:text-blue-600 transition-colors" />
+                          <p className="text-[9px] font-black uppercase text-slate-400">Pick Images</p>
+                          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          {previewUrls.map((url, idx) => (
+                            <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-100 group/img shadow-sm">
+                              <Image src={url} alt="Preview" fill className="object-cover" />
+                              <button onClick={() => { setPreviewUrls(p => p.filter((_, i) => i !== idx)); setSelectedFiles(f => f.filter((_, i) => i !== idx)); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/img:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                    </div>
+                </Card>
+             </div>
 
-                   {product.category === "Laptops" && (
-                     <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Cpu className="w-3 h-3" /> Processor</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Database className="w-3 h-3" /> RAM Size</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Hash className="w-3 h-3" /> Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Zap className="w-3 h-3" /> Clock Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Monitor className="w-3 h-3" /> Resolution</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Box className="w-3 h-3" /> Graphics Card</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
-                     </div>
-                   )}
-
-                   {product.category === "Phones" && (
-                     <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Cpu className="w-3 h-3" /> Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Database className="w-3 h-3" /> RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Hash className="w-3 h-3" /> Internal Memory</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Camera className="w-3 h-3" /> Camera</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Zap className="w-3 h-3" /> Battery</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
-                     </div>
-                   )}
-
-                   {product.category === "Closet" && (
-                     <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Size</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.size} onChange={(e) => setProduct({...product, size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Material</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.material} onChange={(e) => setProduct({...product, material: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Color</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.color} onChange={(e) => setProduct({...product, color: e.target.value})} /></div>
-                     </div>
-                   )}
-
-                   <div className="space-y-2">
-                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2">
-                        <Info className="w-3 h-3" /> Description
-                      </label>
-                      <Textarea 
-                        placeholder="Write a clear description for the customer..." 
-                        className="rounded-2xl bg-slate-50 border-none min-h-[160px] font-black text-lg leading-relaxed" 
-                        value={product.description || ""} 
-                        onChange={(e) => setProduct({...product, description: e.target.value})} 
-                      />
+             <div className="lg:col-span-8 space-y-8">
+                <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
+                   <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
+                      <div>
+                        <h2 className="text-2xl font-black uppercase tracking-tight">Identity <span className="text-blue-500 italic">& Purpose</span></h2>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Foundational Unit Details</p>
+                      </div>
+                      <Box className="w-10 h-10 text-blue-500 opacity-50" />
                    </div>
+                   <CardContent className="p-10 space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2 space-y-2">
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Product Title</label>
+                          <Input placeholder="e.g., MacBook Pro 14 (2024)" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand</label>
+                          <Input placeholder="Apple" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
+                          <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={e => setBasicInfo({...basicInfo, warranty: e.target.value})} />
+                        </div>
+                      </div>
 
-                   <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl shadow-blue-600/20 gap-3">
-                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Add Product
-                   </Button>
-                </CardContent>
-             </Card>
+                      <div className="space-y-2">
+                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Promotional Description</label>
+                         <Textarea placeholder="Professional marketing copy for the product..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
+                      </div>
+
+                      <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm">
+                         <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600"><Zap className="w-6 h-6" /></div>
+                            <div>
+                               <p className="font-black text-slate-900 uppercase text-xs">Featured Selection</p>
+                               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Display on landing page highlights</p>
+                            </div>
+                         </div>
+                         <Switch checked={basicInfo.featured} onCheckedChange={(val) => setBasicInfo({...basicInfo, featured: val})} className="data-[state=checked]:bg-blue-600" />
+                      </div>
+
+                      <Button onClick={() => setStep(2)} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
+                         Continue to Variants <ArrowRight className="w-6 h-6" />
+                      </Button>
+                   </CardContent>
+                </Card>
+             </div>
           </div>
-        </div>
+        )}
+
+        {/* STEP 2: VARIANTS */}
+        {step === 2 && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+             <div className="flex items-center justify-between">
+                <div>
+                   <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 italic">Variant <span className="text-blue-600">Forge</span></h2>
+                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">Configure specific hardware nodes and pricing nodes</p>
+                </div>
+                <Button onClick={addVariant} className="h-14 rounded-2xl bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black uppercase tracking-widest text-[10px] px-8 shadow-sm gap-2">
+                   <Plus className="w-4 h-4" /> Add Configuration
+                </Button>
+             </div>
+
+             <div className="grid grid-cols-1 gap-8">
+                {variants.map((v, idx) => (
+                  <Card key={idx} className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden group">
+                     <div className="p-6 bg-slate-50 flex items-center justify-between border-b border-slate-100">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">#0{idx + 1}</div>
+                           <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{generateLabel(v)}</h3>
+                        </div>
+                        {variants.length > 1 && (
+                          <Button variant="ghost" onClick={() => removeVariant(idx)} className="h-10 w-10 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"><Trash2 className="w-5 h-5" /></Button>
+                        )}
+                     </div>
+                     <CardContent className="p-10">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                           {basicInfo.category === "Laptops" ? (
+                             <>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU Model</label><Input placeholder="Core i7 13th Gen" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM Size</label><Input placeholder="16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="512GB SSD" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">GPU</label><Input placeholder="RTX 4060 (Opt)" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
+                             </>
+                           ) : (
+                             <>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="8GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="128GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input placeholder="Titanium Blue" className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
+                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chipset</label><Input placeholder="A17 Bionic" className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} /></div>
+                             </>
+                           )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6 pt-6 border-t border-slate-50">
+                           <div className="space-y-2 md:col-span-2">
+                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Configuration Price (GH₵)</label>
+                             <div className="relative">
+                               <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600">GH₵</div>
+                               <Input type="number" className="pl-14 h-14 bg-blue-50 border-none font-black text-2xl text-blue-900" value={v.price} onChange={e => updateVariant(idx, 'price', parseFloat(e.target.value))} />
+                             </div>
+                           </div>
+                           <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Units Available</label><Input type="number" className="h-14 bg-slate-50 border-none font-black text-lg" value={v.stock} onChange={e => updateVariant(idx, 'stock', parseInt(e.target.value))} /></div>
+                           <div className="space-y-2">
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</label>
+                             <Select value={v.condition} onValueChange={val => updateVariant(idx, 'condition', val)}>
+                               <SelectTrigger className="h-14 bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger>
+                               <SelectContent className="rounded-xl border-none"><SelectItem value="New" className="font-bold">New</SelectItem><SelectItem value="Used - Grade A" className="font-bold">Grade A</SelectItem><SelectItem value="Used - Grade B" className="font-bold">Grade B</SelectItem></SelectContent>
+                             </Select>
+                           </div>
+                        </div>
+                     </CardContent>
+                  </Card>
+                ))}
+             </div>
+
+             <div className="flex gap-4">
+                <Button variant="ghost" onClick={() => setStep(1)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back to Step 1</Button>
+                <Button onClick={() => setStep(3)} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">Continue to Advanced Details <ArrowRight className="w-6 h-6" /></Button>
+             </div>
+          </div>
+        )}
+
+        {/* STEP 3: ADVANCED SPECS */}
+        {step === 3 && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-left-4 duration-500">
+             <div className="lg:col-span-8 space-y-8">
+                <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
+                   <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
+                      <div>
+                        <h2 className="text-2xl font-black uppercase tracking-tight italic">Technical <span className="text-blue-500">Payload</span></h2>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Optional System Specifications</p>
+                      </div>
+                      <Settings2 className="w-10 h-10 text-blue-500 opacity-50" />
+                   </div>
+                   <CardContent className="p-10 space-y-10">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         {basicInfo.category === "Laptops" ? (
+                           <>
+                             {[
+                               { id: 'res', label: 'Display Resolution', placeholder: '2560 x 1600' },
+                               { id: 'ports', label: 'I/O Ports', placeholder: '3x TB4, HDMI 2.1' },
+                               { id: 'battery', label: 'Battery Capacity', placeholder: '70Wh Li-Po' },
+                               { id: 'os', label: 'OS Pre-installed', placeholder: 'Windows 11 Pro' },
+                               { id: 'kb', label: 'Keyboard Type', placeholder: 'Backlit English' },
+                               { id: 'audio', label: 'Audio System', placeholder: 'Harman Kardon Dual' }
+                             ].map(f => (
+                               <div key={f.id} className="space-y-2">
+                                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
+                                  <Input placeholder={f.placeholder} className="h-12 bg-slate-50 border-none font-medium" value={advancedSpecs[f.id] || ""} onChange={e => setAdvancedSpecs({...advancedSpecs, [f.id]: e.target.value})} />
+                               </div>
+                             ))}
+                           </>
+                         ) : (
+                           <>
+                             {[
+                               { id: 'camera', label: 'Camera Array', placeholder: '50MP Triple Node' },
+                               { id: 'refresh', label: 'Refresh Rate', placeholder: '120Hz LTPO' },
+                               { id: 'charge', label: 'Charging Speed', placeholder: '67W Fast Link' },
+                               { id: 'rating', label: 'Waterproof Rating', placeholder: 'IP68' },
+                               { id: 'biometrics', label: 'Security', placeholder: 'FaceID / In-screen' }
+                             ].map(f => (
+                               <div key={f.id} className="space-y-2">
+                                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
+                                  <Input placeholder={f.placeholder} className="h-12 bg-slate-50 border-none font-medium" value={advancedSpecs[f.id] || ""} onChange={e => setAdvancedSpecs({...advancedSpecs, [f.id]: e.target.value})} />
+                               </div>
+                             ))}
+                           </>
+                         )}
+                      </div>
+
+                      <div className="pt-8 border-t border-slate-50 flex gap-4">
+                        <Button variant="ghost" onClick={() => setStep(2)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back to Variants</Button>
+                        <Button onClick={handleFinalSave} disabled={isSaving} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
+                           {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck className="w-6 h-6" />} Archive Product & Variants
+                        </Button>
+                      </div>
+                   </CardContent>
+                </Card>
+             </div>
+
+             <div className="lg:col-span-4 space-y-8">
+                <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8">
+                   <h3 className="text-sm font-black uppercase tracking-widest mb-6 italic text-slate-400">Final Verification</h3>
+                   <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                         <span className="text-xs font-bold text-slate-600">{basicInfo.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                         <span className="text-xs font-bold text-slate-600">{variants.length} Configurations Loaded</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                         <span className="text-xs font-bold text-slate-600">Starting Price: GHS {Math.min(...variants.map(v => v.price)).toLocaleString()}</span>
+                      </div>
+                   </div>
+                   <div className="mt-8 pt-8 border-t border-slate-50 text-center">
+                      <Layers className="w-12 h-12 text-slate-100 mx-auto mb-4" />
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Professional Tier Inventory Management System Active</p>
+                   </div>
+                </Card>
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );

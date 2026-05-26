@@ -6,13 +6,47 @@ import { Product, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Tag, ChevronRight, Star, Zap } from "lucide-react";
+import { Heart, ChevronRight, Star, Zap, Clock } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { cardHover, buttonTap } from "@/lib/animations";
 import { supabase } from "@/lib/supabase";
+
+const CardTimer = ({ expiryDate }: { expiryDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState<{h:number, m:number, s:number} | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = new Date(expiryDate).getTime() - now;
+
+      if (distance < 0) {
+        setTimeLeft(null);
+        clearInterval(timer);
+      } else {
+        setTimeLeft({
+          h: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          m: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          s: Math.floor((distance % (1000 * 60)) / 1000)
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expiryDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 text-red-600 bg-red-50 px-2.5 py-1.5 rounded-lg border border-red-100 w-fit">
+      <Clock className="w-3 h-3 animate-pulse" />
+      <span className="text-[9px] font-black uppercase tracking-widest">
+        Ends: {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
+      </span>
+    </div>
+  );
+};
 
 export function ProductCard({ 
   product, 
@@ -21,9 +55,7 @@ export function ProductCard({
   product: Product; 
   showCategory?: boolean;
 }) {
-  const addItem = useCartStore((state) => state.addItem);
   const { toggleItem, hasItem } = useWishlistStore();
-  const { toast } = useToast();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
@@ -34,9 +66,17 @@ export function ProductCard({
 
   const isFavorite = hasItem(product.id);
   
-  // Calculate best current price among variants or base
   const discountActive = product.variants?.some(v => v.discount_price) || !!product.discount_price;
-  
+  const hasVariants = product.variants && product.variants.length > 1;
+
+  // Find the earliest expiry date for the timer
+  const earliestExpiry = product.variants
+    ? product.variants
+        .filter(v => v.discount_ends_at && v.discount_price)
+        .map(v => v.discount_ends_at!)
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
+    : product.discount_ends_at;
+
   const displayPrice = product.variants && product.variants.length > 0 
     ? Math.min(...product.variants.map(v => v.discount_price || v.price))
     : (product.discount_price || product.price);
@@ -44,8 +84,6 @@ export function ProductCard({
   const originalPrice = product.variants && product.variants.length > 0
     ? Math.min(...product.variants.map(v => v.price))
     : product.price;
-
-  const hasVariants = product.variants && product.variants.length > 1;
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -75,6 +113,8 @@ export function ProductCard({
     e.stopPropagation();
     toggleItem(product);
   };
+
+  const showPrice = !(hasVariants && discountActive);
 
   return (
     <motion.div 
@@ -132,13 +172,21 @@ export function ProductCard({
              )}
           </div>
 
-          <div className="flex flex-col pt-1">
-             {discountActive && (
-               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through mb-0.5 opacity-60">GHS {originalPrice.toLocaleString()}</p>
+          <div className="flex flex-col pt-1 min-h-[50px] justify-center">
+             {showPrice ? (
+               <>
+                 {discountActive && (
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through mb-0.5 opacity-60">GHS {originalPrice.toLocaleString()}</p>
+                 )}
+                 <p className={cn("text-xl font-black font-headline italic tracking-tighter", discountActive ? "text-red-600" : "text-blue-600")}>
+                   GH₵ {displayPrice.toLocaleString()}
+                 </p>
+               </>
+             ) : (
+               <div className="py-1">
+                 {earliestExpiry && <CardTimer expiryDate={earliestExpiry} />}
+               </div>
              )}
-             <p className={cn("text-xl font-black font-headline italic tracking-tighter", discountActive ? "text-red-600" : "text-blue-600")}>
-               GH₵ {displayPrice.toLocaleString()}
-             </p>
           </div>
         </div>
 
@@ -148,7 +196,7 @@ export function ProductCard({
               "w-full rounded-xl h-11 font-black text-white transition-all text-[10px] uppercase tracking-widest shadow-xl active:scale-95 gap-2",
               discountActive ? "bg-red-600 hover:bg-red-700 shadow-red-900/5" : "bg-slate-950 hover:bg-blue-600 shadow-slate-900/5"
             )}>
-              View Specifications <ChevronRight className="w-3 h-3" />
+              View Details <ChevronRight className="w-3 h-3" />
             </Button>
           </Link>
         </motion.div>

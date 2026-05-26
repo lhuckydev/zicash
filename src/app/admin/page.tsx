@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -28,6 +29,7 @@ import {
   TrendingUp,
   ArrowUpRight,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   Globe,
   Bell,

@@ -41,23 +41,23 @@ function ProductSkeleton() {
 
 function SuggestedProductTile({ product }: { product: Product }) {
   return (
-    <motion.div whileHover={{ y: -5 }} className="h-full px-1">
+    <motion.div whileHover={{ y: -5 }} className="h-full px-2 py-4">
       <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300 h-full">
-        <div className="relative aspect-square w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white mb-3 shadow-md border border-slate-100 group-hover:shadow-xl transition-all">
+        <div className="relative aspect-square w-full rounded-[2rem] overflow-hidden bg-white mb-4 shadow-xl border border-slate-50 group-hover:shadow-2xl transition-all">
           <Image 
             src={product.image_url || "https://picsum.photos/seed/zicash/400/400"} 
             alt={product.name} 
             fill 
             className="object-contain p-4 md:p-6 transition-transform duration-500 group-hover:scale-110" 
-            sizes="(max-width: 768px) 40vw, 20vw"
+            sizes="(max-width: 768px) 45vw, 20vw"
           />
           <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <div className="space-y-1 text-center w-full px-1">
-          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
+        <div className="space-y-1.5 text-center w-full px-2">
+          <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
             {product.name}
           </h4>
-          <p className="text-[11px] font-black text-blue-600 italic">GH₵{product.price.toLocaleString()}</p>
+          <p className="text-xs font-black text-blue-600 italic">GH₵ {product.price.toLocaleString()}</p>
         </div>
       </Link>
     </motion.div>
@@ -121,7 +121,7 @@ export default function CatalogPage() {
   
   const suggestedPicks = useMemo(() => {
     if (products.length === 0) return [];
-    return [...products].sort(() => 0.5 - Math.random()).slice(0, 12);
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 10);
   }, [products, seed]);
 
   return (
@@ -159,11 +159,11 @@ export default function CatalogPage() {
                           <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/40 shadow-inner flex items-center justify-center">
                              <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 md:p-14 transition-transform duration-1000 group-hover/item:scale-105 z-10" priority />
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent z-20" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-20" />
                           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 z-30">
-                             <div className="space-y-0.5">
-                                <h2 className="text-xl md:text-2xl font-bold text-white font-headline tracking-tight line-clamp-1 drop-shadow-md">{product.name}</h2>
-                                <p className="text-blue-200 font-bold text-lg md:text-xl drop-shadow-md">GH₵{product.price.toLocaleString()}</p>
+                             <div className="space-y-1">
+                                <h2 className="text-xl md:text-2xl font-black text-white font-headline tracking-tight line-clamp-1 drop-shadow-xl">{product.name}</h2>
+                                <p className="text-blue-300 font-black text-lg md:text-xl italic tracking-tighter drop-shadow-md">GH₵ {product.price.toLocaleString()}</p>
                              </div>
                           </div>
                         </div>
@@ -180,20 +180,20 @@ export default function CatalogPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5 overflow-hidden"
+              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center justify-between mb-8 px-2">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/20">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
+                    <Sparkles className="w-5 h-5" />
                   </div>
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Suggested <span className="text-blue-600">Picks</span></h3>
                 </div>
               </div>
               <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                <CarouselContent className="-ml-2 md:-ml-4">
+                <CarouselContent className="-ml-2">
                   {suggestedPicks.map((product) => (
-                    <CarouselItem key={`suggested-${product.id}`} className="pl-2 md:pl-4 basis-[50%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
+                    <CarouselItem key={`suggested-${product.id}`} className="pl-2 basis-[48%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
                       <SuggestedProductTile product={product} />
                     </CarouselItem>
                   ))}
@@ -205,7 +205,7 @@ export default function CatalogPage() {
           {!error && (
             <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
               <div className="flex items-center justify-between">
-                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Market Sections</motion.h2>
+                <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Market Sections</motion.h2>
                 <Link href="/categories">
                   <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
                 </Link>
@@ -234,14 +234,14 @@ export default function CatalogPage() {
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Inventory Units" : `${category} Section`}</h3>
+                  <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Inventory Units" : `${category} Section`}</h3>
                   <motion.div {...buttonTap}>
                     <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors">
                       <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
                     </Button>
                   </motion.div>
                 </div>
-                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">View All Units</Button>}
+                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-black uppercase">View All Units</Button>}
               </div>
 
               {isLoading && products.length === 0 ? (
@@ -258,7 +258,7 @@ export default function CatalogPage() {
                 </motion.div>
               ) : (
                 <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No items found in this section</p>
+                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No items found in this section</p>
                 </div>
               )}
             </section>

@@ -79,13 +79,12 @@ export function Navbar() {
   }, [searchQuery]);
 
   useEffect(() => {
-    if (isSearchOpen) {
+    if (isSearchOpen || isMenuOpen) {
       document.body.style.overflow = 'hidden';
-      setTimeout(() => inputRef.current?.focus(), 100);
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [isSearchOpen]);
+  }, [isSearchOpen, isMenuOpen]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -130,14 +129,10 @@ export function Navbar() {
 
   return (
     <>
-      <motion.nav 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className={cn(
-          "sticky top-0 w-full bg-white/95 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500",
-          isSearchOpen ? "z-[1000]" : "z-50"
-        )}
-      >
+      <nav className={cn(
+        "sticky top-0 w-full bg-white/95 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500",
+        isSearchOpen || isMenuOpen ? "z-[2000]" : "z-50"
+      )}>
         <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
           {/* Mobile Centered Branding */}
@@ -237,119 +232,142 @@ export function Navbar() {
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Side Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2500]" />
-              <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed left-0 top-0 bottom-0 w-[85%] max-w-[300px] bg-white z-[2600] shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col">
-                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shadow-sm">
-                      <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} />
-                    </div>
-                    <span className="text-xl font-black text-slate-900 font-headline uppercase">ZiCash <span className="text-blue-600">GH</span></span>
+      {/* Mobile Side Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-[3000] lg:hidden">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              onClick={() => setIsMenuOpen(false)} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+            />
+            <motion.div 
+              initial={{ x: "-100%" }} 
+              animate={{ x: 0 }} 
+              exit={{ x: "-100%" }} 
+              transition={{ type: "spring", damping: 25, stiffness: 200 }} 
+              className="relative h-full w-[85%] max-w-[300px] bg-white shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col"
+            >
+              <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shadow-sm">
+                    <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} />
                   </div>
-                  <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X className="w-6 h-6" /></button>
+                  <span className="text-xl font-black text-slate-900 font-headline uppercase">ZiCash <span className="text-blue-600">GH</span></span>
                 </div>
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X className="w-6 h-6" /></button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6 space-y-2">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">Main Navigation</p>
                 
-                <div className="flex-1 overflow-y-auto p-6 space-y-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">Main Navigation</p>
-                  
-                  {mainNavLinks.map((link) => (
+                {mainNavLinks.map((link) => (
+                  <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
+                    <link.icon className="w-5 h-5" /> {link.name}
+                  </Link>
+                ))}
+
+                {session && (
+                  <Link href="/orders" onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === "/orders" ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
+                    <ShoppingBag className="w-5 h-5" /> My Orders
+                  </Link>
+                )}
+
+                <div className="pt-8 mt-4 border-t border-slate-50">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">More Info</p>
+                  {secondaryLinks.map((link) => (
                     <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
                       <link.icon className="w-5 h-5" /> {link.name}
                     </Link>
                   ))}
-
-                  {/* Orders Field for Authenticated Users */}
-                  {session && (
-                    <Link href="/orders" onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === "/orders" ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
-                      <ShoppingBag className="w-5 h-5" /> My Orders
-                    </Link>
-                  )}
-
-                  <div className="pt-8 mt-4 border-t border-slate-50">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">More Info</p>
-                    {secondaryLinks.map((link) => (
-                      <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
-                        <link.icon className="w-5 h-5" /> {link.name}
-                      </Link>
-                    ))}
-                  </div>
-
-                  {session && (
-                    <button onClick={handleLogout} className="flex items-center gap-4 p-4 rounded-2xl font-bold text-sm text-red-500 w-full hover:bg-red-50 transition-colors mt-8">
-                      <LogOut className="w-5 h-5" /> Logout
-                    </button>
-                  )}
                 </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
 
-        {/* Full-Screen Search Overhaul Overlay */}
-        <AnimatePresence>
-          {isSearchOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[3000] flex flex-col">
-              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-              <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[3100]" onClick={(e) => e.stopPropagation()}>
-                <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-blue-50">
-                  <div className="p-3 border-b border-slate-100 flex items-center gap-2">
-                    <div className="relative flex-1 flex items-center">
-                      <Search className="absolute left-5 w-4 h-4 text-blue-600" />
-                      <form onSubmit={handleSearchSubmit} className="flex-1">
-                        <Input ref={inputRef} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for hardware..." className="pl-12 pr-12 h-14 bg-blue-50/30 border-none rounded-full text-lg font-bold focus-visible:ring-0" />
-                      </form>
-                      <div className="absolute right-2 flex items-center gap-1">
-                        {searchQuery && <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-blue-600"><X className="w-5 h-5" /></button>}
-                        <Button onClick={handleSearchSubmit} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest px-6 h-10 shadow-lg shadow-blue-600/20">Search</Button>
-                      </div>
+                {session && (
+                  <button onClick={handleLogout} className="flex items-center gap-4 p-4 rounded-2xl font-bold text-sm text-red-500 w-full hover:bg-red-50 transition-colors mt-8">
+                    <LogOut className="w-5 h-5" /> Logout
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Full-Screen Search Overhaul Overlay */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-[3000] flex flex-col">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+              onClick={() => setIsSearchOpen(false)} 
+            />
+            <motion.div 
+              initial={{ y: -50, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              exit={{ y: -50, opacity: 0 }} 
+              className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[3100]" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-blue-50">
+                <div className="p-3 border-b border-slate-100 flex items-center gap-2">
+                  <div className="relative flex-1 flex items-center">
+                    <Search className="absolute left-5 w-4 h-4 text-blue-600" />
+                    <form onSubmit={handleSearchSubmit} className="flex-1">
+                      <Input ref={inputRef} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for hardware..." className="pl-12 pr-12 h-14 bg-blue-50/30 border-none rounded-full text-lg font-bold focus-visible:ring-0" />
+                    </form>
+                    <div className="absolute right-2 flex items-center gap-1">
+                      {searchQuery && <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-blue-600"><X className="w-5 h-5" /></button>}
+                      <Button onClick={handleSearchSubmit} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest px-6 h-10 shadow-lg shadow-blue-600/20">Search</Button>
                     </div>
                   </div>
-                  <div className="max-h-[70vh] overflow-y-auto scrollbar-hide bg-white">
-                    {isSearching ? (
-                      <div className="py-20 flex flex-col items-center gap-3">
-                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Catalog...</p>
-                      </div>
-                    ) : suggestions.length > 0 ? (
-                      <div className="flex flex-col">
-                        {suggestions.map((p) => (
-                          <button key={p.id} onClick={() => { setIsSearchOpen(false); router.push(`/product/${p.id}`); }} className="flex items-center justify-between px-8 py-5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group">
-                            <div className="flex items-center gap-4">
-                              <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center p-1 border border-slate-100 shrink-0">
-                                <Image src={p.image_url} alt={p.name} width={24} height={24} className="object-contain" />
-                              </div>
-                              <span className="text-sm font-black text-slate-700 group-hover:text-blue-600 text-left">{p.name}</span>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto scrollbar-hide bg-white">
+                  {isSearching ? (
+                    <div className="py-20 flex flex-col items-center gap-3">
+                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Catalog...</p>
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <div className="flex flex-col">
+                      {suggestions.map((p) => (
+                        <button key={p.id} onClick={() => { setIsSearchOpen(false); router.push(`/product/${p.id}`); }} className="flex items-center justify-between px-8 py-5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group">
+                          <div className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center p-1 border border-slate-100 shrink-0">
+                              <Image src={p.image_url} alt={p.name} width={24} height={24} className="object-contain" />
                             </div>
-                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600" />
+                            <span className="text-sm font-black text-slate-700 group-hover:text-blue-600 text-left">{p.name}</span>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 space-y-6">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Browse Sections</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
+                          <button key={cat} onClick={() => { setIsSearchOpen(false); router.push('/categories'); }} className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group shadow-sm">
+                            <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
+                            <ChevronRight className="w-3 h-3 opacity-30 group-hover:opacity-100" />
                           </button>
                         ))}
                       </div>
-                    ) : (
-                      <div className="p-8 space-y-6">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Browse Sections</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
-                            <button key={cat} onClick={() => { setIsSearchOpen(false); router.push('/categories'); }} className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group shadow-sm">
-                              <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
-                              <ChevronRight className="w-3 h-3 opacity-30 group-hover:opacity-100" />
-                            </button>
-                          ))}
-                        </div>
-                        <button onClick={() => setIsSearchOpen(false)} className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">Close Tool <X className="w-4 h-4" /></button>
-                      </div>
-                    )}
-                  </div>
+                      <button onClick={() => setIsSearchOpen(false)} className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">Close Tool <X className="w-4 h-4" /></button>
+                    </div>
+                  )}
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

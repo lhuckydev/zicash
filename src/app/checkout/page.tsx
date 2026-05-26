@@ -141,14 +141,14 @@ export default function CheckoutPage() {
       const amountFormatted = `GHS ${Number(grandTotal).toLocaleString()}`;
       const customerName = profile?.full_name || "Customer";
 
-      const adminNumbersEnv = process.env.NEXT_PUBLIC_ADMIN_PHONE_NUMBERS || "0597204494,0256985825";
-      const adminNumbers = adminNumbersEnv.split(',').map(n => n.trim());
+      // Notify Admins using separate variables
+      const admin1 = process.env.NEXT_PUBLIC_ADMIN_PHONE_1 || "0597204494";
+      const admin2 = process.env.NEXT_PUBLIC_ADMIN_PHONE_2 || "0256985825";
       
-      for (const num of adminNumbers) {
-        if (num) {
-          await sendSms(num, `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}.`);
-        }
-      }
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}.`;
+      
+      if (admin1) await sendSms(admin1, adminMessage);
+      if (admin2) await sendSms(admin2, adminMessage);
       
       if (profile?.contact) {
         await sendSms(profile.contact, `Hi ${customerName}, your order for ${mainItem} (${amountFormatted}) has been received. We are processing it now. Thank you for shopping with ZiCash!`);

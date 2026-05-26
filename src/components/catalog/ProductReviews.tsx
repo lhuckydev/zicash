@@ -64,7 +64,7 @@ export function ProductReviews({ productId }: { productId: string }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        // Handle case where table might not exist yet during dev sync
+        // Silently handle if table isn't ready or permissions are syncing
         if (error.code === 'PGRST116' || error.message.includes('relation "reviews" does not exist')) {
           setReviews([]);
           return;
@@ -73,7 +73,6 @@ export function ProductReviews({ productId }: { productId: string }) {
       }
       setReviews(data || []);
     } catch (err: any) {
-      // Log errors only if they are not standard "table missing" errors
       if (err.message && !err.message.includes('relation')) {
         console.error("Review System Sync Error:", err.message);
       }

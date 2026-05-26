@@ -26,7 +26,9 @@ import {
   ChevronRight,
   ShieldCheck,
   GraduationCap,
-  Tag
+  Tag,
+  Keyboard,
+  MousePointer2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +58,7 @@ interface ProductVariantForm {
   gpu?: string;
   screen?: string;
   touchscreen?: boolean;
+  keyboard_light?: boolean;
   condition?: string;
   chipset?: string;
   color?: string;
@@ -89,7 +92,7 @@ export default function NewProductWizard() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [variants, setVariants] = useState<ProductVariantForm[]>([
-    { price: 0, stock: 10, condition: "New", touchscreen: false }
+    { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true }
   ]);
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
@@ -125,7 +128,7 @@ export default function NewProductWizard() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { price: 0, stock: 10, condition: "New", touchscreen: false }]);
+    setVariants([...variants, { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true }]);
   };
 
   const removeVariant = (index: number) => {
@@ -219,7 +222,10 @@ export default function NewProductWizard() {
         .select()
         .single();
 
-      if (productError) throw productError;
+      if (productError) {
+        console.error("Product Table Error:", productError);
+        throw productError;
+      }
 
       const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
         ...v,
@@ -232,7 +238,10 @@ export default function NewProductWizard() {
         .from('product_variants')
         .insert(variantsToInsert);
 
-      if (variantError) throw variantError;
+      if (variantError) {
+        console.error("Variant Table Error:", variantError);
+        throw variantError;
+      }
 
       toast({ title: "Product Uploaded", description: "The item is now live in the store." });
       router.push("/admin");
@@ -241,7 +250,7 @@ export default function NewProductWizard() {
       toast({ 
         variant: "destructive", 
         title: "Upload Failed", 
-        description: err.message || "Database permission denied. Ensure RLS is disabled." 
+        description: err.message || "Database permission denied. Ensure RLS is disabled and columns exist." 
       });
     } finally {
       setIsSaving(false);
@@ -421,13 +430,28 @@ export default function NewProductWizard() {
                      </div>
                      <CardContent className="p-10">
                         {!isSimpleCategory && (
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             {basicInfo.category === "Laptops" ? (
                               <>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU</label><Input placeholder="e.g. Core i7" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="e.g. 16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 512GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics</label><Input placeholder="Optional" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
+                                
+                                <div className="md:col-span-2 flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                   <div className="flex items-center gap-3">
+                                      <MousePointer2 className="w-4 h-4 text-blue-600" />
+                                      <span className="text-[10px] font-black uppercase text-slate-600">Touchscreen Interface</span>
+                                   </div>
+                                   <Switch checked={v.touchscreen} onCheckedChange={val => updateVariant(idx, 'touchscreen', val)} />
+                                </div>
+                                <div className="md:col-span-2 flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                   <div className="flex items-center gap-3">
+                                      <Keyboard className="w-4 h-4 text-blue-600" />
+                                      <span className="text-[10px] font-black uppercase text-slate-600">Backlit Keyboard</span>
+                                   </div>
+                                   <Switch checked={v.keyboard_light} onCheckedChange={val => updateVariant(idx, 'keyboard_light', val)} />
+                                </div>
                               </>
                             ) : (
                               <>
@@ -494,11 +518,10 @@ export default function NewProductWizard() {
                            <>
                              {[
                                { id: 'res', label: 'Screen Resolution', placeholder: 'e.g. 1920x1080' },
-                               { id: 'ports', label: 'Ports', placeholder: 'e.g. 3x USB, HDMI' },
-                               { id: 'battery', label: 'Battery Life', placeholder: 'e.g. 8 Hours' },
-                               { id: 'os', label: 'Operating System', placeholder: 'e.g. Windows 11' },
-                               { id: 'kb', label: 'Keyboard', placeholder: 'e.g. Backlit' },
-                               { id: 'audio', label: 'Speakers', placeholder: 'e.g. Stereo' }
+                               { id: 'ports', label: 'I/O Ports', placeholder: 'e.g. 3x USB, 1x HDMI, Type-C' },
+                               { id: 'battery', label: 'Battery Life', placeholder: 'e.g. 8-10 Hours' },
+                               { id: 'os', label: 'Operating System', placeholder: 'e.g. Windows 11 Pro' },
+                               { id: 'audio', label: 'Speakers/Audio', placeholder: 'e.g. Bang & Olufsen, Stereo' }
                              ].map(f => (
                                <div key={f.id} className="space-y-2">
                                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
@@ -509,11 +532,11 @@ export default function NewProductWizard() {
                          ) : (
                            <>
                              {[
-                               { id: 'camera', label: 'Camera Quality', placeholder: 'e.g. 50MP' },
-                               { id: 'refresh', label: 'Refresh Rate', placeholder: 'e.g. 120Hz' },
-                               { id: 'charge', label: 'Charging Speed', placeholder: 'e.g. 67W' },
-                               { id: 'rating', label: 'Protection', placeholder: 'e.g. IP68' },
-                               { id: 'biometrics', label: 'Security', placeholder: 'e.g. FaceID' }
+                               { id: 'camera', label: 'Camera Quality', placeholder: 'e.g. 50MP Main' },
+                               { id: 'refresh', label: 'Refresh Rate', placeholder: 'e.g. 120Hz LTPO' },
+                               { id: 'charge', label: 'Charging Speed', placeholder: 'e.g. 67W HyperCharge' },
+                               { id: 'rating', label: 'IP Rating', placeholder: 'e.g. IP68' },
+                               { id: 'biometrics', label: 'Security', placeholder: 'e.g. Under-display Fingerprint' }
                              ].map(f => (
                                <div key={f.id} className="space-y-2">
                                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>

@@ -15,7 +15,8 @@ import {
   Zap, Timer, 
   Video, Layers, Info,  
   ShoppingCart, Star, Loader2, Tag, ChevronRight, CheckCircle2,
-  Box, Maximize, SmartphoneIcon, Camera, MousePointer2
+  Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
+  Keyboard, Power, Terminal
 } from "lucide-react";
 import { 
   Carousel, 
@@ -29,7 +30,10 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 function TechTableRow({ icon: Icon, label, value }: { icon: any, label: string, value: any }) {
-  if (!value || value === "N/A" || value === "") return null;
+  if (value === undefined || value === null || value === "N/A" || value === "") return null;
+  
+  const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
+  
   return (
     <TableRow className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
       <TableCell className="py-5 pl-0">
@@ -41,7 +45,10 @@ function TechTableRow({ icon: Icon, label, value }: { icon: any, label: string, 
         </div>
       </TableCell>
       <TableCell className="py-5 text-right pr-0">
-        <span className="text-sm font-black text-slate-900 italic tracking-tight">{value}</span>
+        <span className={cn(
+          "text-sm font-black italic tracking-tight",
+          typeof value === 'boolean' ? (value ? 'text-emerald-600' : 'text-slate-400') : 'text-slate-900'
+        )}>{displayValue}</span>
       </TableCell>
     </TableRow>
   );
@@ -298,11 +305,13 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                            <TechTableRow icon={Database} label="Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
                            <TechTableRow icon={Layers} label="Graphics" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
                            <TechTableRow icon={Maximize} label="Display" value={selectedVariant?.screen || product.advanced_specs?.res} />
-                           <TechTableRow icon={Zap} label="Touchscreen" value={selectedVariant?.touchscreen ? "Yes" : "No"} />
+                           <TechTableRow icon={MousePointer2} label="Touchscreen Interface" value={selectedVariant?.touchscreen ?? product.touchscreen} />
+                           <TechTableRow icon={Keyboard} label="Backlit Keyboard" value={selectedVariant?.keyboard_light ?? product.keyboard_light} />
                            <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
-                           <TechTableRow icon={Info} label="Ports" value={product.advanced_specs?.ports} />
-                           <TechTableRow icon={Zap} label="Operating System" value={product.advanced_specs?.os} />
-                           <TechTableRow icon={Box} label="Audio" value={product.advanced_specs?.audio} />
+                           <TechTableRow icon={Zap} label="Ports & Connectivity" value={product.advanced_specs?.ports} />
+                           <TechTableRow icon={Terminal} label="Operating System" value={product.advanced_specs?.os} />
+                           <TechTableRow icon={Power} label="Battery Estimate" value={product.advanced_specs?.battery} />
+                           <TechTableRow icon={Box} label="Audio & Media" value={product.advanced_specs?.audio} />
                          </>
                        )}
                        {product.category === "Phones" && (
@@ -310,11 +319,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                            <TechTableRow icon={SmartphoneIcon} label="Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
                            <TechTableRow icon={CircuitBoard} label="RAM" value={selectedVariant?.ram || product.advanced_specs?.ram} />
                            <TechTableRow icon={Database} label="Internal Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                           <TechTableRow icon={Smartphone} label="Battery" value={selectedVariant?.battery || product.advanced_specs?.charge} />
-                           <TechTableRow icon={Video} label="Camera" value={product.advanced_specs?.camera} />
+                           <TechTableRow icon={Smartphone} label="Battery Capacity" value={selectedVariant?.battery || product.advanced_specs?.charge} />
+                           <TechTableRow icon={Video} label="Camera Quality" value={product.advanced_specs?.camera} />
                            <TechTableRow icon={Zap} label="Refresh Rate" value={product.advanced_specs?.refresh} />
                            <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
-                           <TechTableRow icon={ShieldCheck} label="Protection" value={product.advanced_specs?.rating} />
+                           <TechTableRow icon={ShieldCheck} label="IP Rating / Protection" value={product.advanced_specs?.rating} />
                          </>
                        )}
                      </TableBody>

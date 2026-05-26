@@ -13,6 +13,7 @@ export interface ProductVariant {
   gpu?: string;
   screen?: string;
   touchscreen?: boolean;
+  keyboard_light?: boolean;
   condition?: string;
   chipset?: string;
   color?: string;
@@ -35,6 +36,8 @@ export interface Product {
   price: number; // Base price or starting price
   variants?: ProductVariant[];
   advanced_specs?: any;
+  touchscreen?: boolean;
+  keyboard_light?: boolean;
   created_at?: string;
   updated_at?: string;
 }

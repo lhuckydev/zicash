@@ -203,9 +203,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
 
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-6 bg-white p-6 md:p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+              <div className="space-y-8 bg-white p-6 md:p-10 rounded-[3rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">Available Configurations</h3>
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">Available Specifications</h3>
                     <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg">{product.variants.length} Options</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-8">
@@ -216,7 +216,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
                           className={cn(
-                            "text-left p-8 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden",
+                            "text-left p-10 rounded-[3rem] border-2 transition-all group relative overflow-hidden",
                             isActive 
                               ? "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl" 
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
@@ -224,15 +224,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                         >
                           {isActive && <div className="absolute top-0 right-0 w-10 h-10 bg-blue-600 flex items-center justify-center rounded-bl-2xl text-white shadow-lg"><CheckCircle2 className="w-5 h-5" /></div>}
                           
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-                            <div className="space-y-4 flex-1">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-12">
+                            <div className="space-y-6 flex-1">
                               <div>
-                                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1.5", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
-                                <h4 className="text-lg font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
+                                <p className={cn("text-[11px] font-black uppercase tracking-widest mb-2", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <h4 className="text-xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
                               </div>
 
                               {!isSimpleCategory && (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-6 pt-5 border-t border-slate-100/50">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-8 pt-8 border-t border-slate-100/50">
                                   {product.category === "Laptops" ? (
                                     <>
                                       <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
@@ -266,8 +266,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                             </div>
 
                             <div className="md:text-right shrink-0">
-                               <p className="text-2xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                               <p className={cn("text-[10px] font-bold uppercase mt-2", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                               <p className="text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                               <p className={cn("text-[11px] font-bold uppercase mt-3", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
                                  {v.stock > 0 ? `${v.stock} Units In Stock` : 'Currently Sold Out'}
                                </p>
                             </div>

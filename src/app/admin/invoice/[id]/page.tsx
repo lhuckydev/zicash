@@ -81,7 +81,7 @@ export default function InvoicePrintPage() {
     </div>
   );
 
-  if (!order) return <div className="p-10 text-center font-black">ORDER DATA NOT FOUND IN INDEX.</div>;
+  if (!order) return <div className="p-10 text-center font-black">ORDER DATA NOT FOUND.</div>;
 
   const shippingAddress = order.shipping_region 
     ? `${order.shipping_community}, ${order.shipping_area}, ${order.shipping_region}`
@@ -152,7 +152,7 @@ export default function InvoicePrintPage() {
           <Table className="border-t-2 border-slate-900">
             <TableHeader>
               <TableRow className="border-b-2 border-slate-900 hover:bg-transparent">
-                <TableHead className="font-black text-[10px] uppercase text-slate-900 pl-0">Inventory Item</TableHead>
+                <TableHead className="font-black text-[10px] uppercase text-slate-900 pl-0">Product</TableHead>
                 <TableHead className="text-right font-black text-[10px] uppercase text-slate-900">Unit Price</TableHead>
                 <TableHead className="text-center font-black text-[10px] uppercase text-slate-900">Qty</TableHead>
                 <TableHead className="text-right font-black text-[10px] uppercase text-slate-900 pr-0">Line Total</TableHead>
@@ -163,7 +163,7 @@ export default function InvoicePrintPage() {
                 <TableRow key={idx} className="border-b border-slate-100 hover:bg-transparent">
                   <TableCell className="py-6 pl-0">
                     <p className="font-black text-sm text-slate-900 leading-tight">{item.name}</p>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">Verified Unit Node</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">Quality Item</p>
                   </TableCell>
                   <TableCell className="text-right font-medium text-slate-500">GHS {parseFloat(item.price).toLocaleString()}</TableCell>
                   <TableCell className="text-center font-bold text-slate-900">{item.quantity}</TableCell>
@@ -197,13 +197,13 @@ export default function InvoicePrintPage() {
           <div className="space-y-2">
             <p className="text-[10px] font-black uppercase text-slate-900 tracking-widest">Transaction Status: {order.status.toUpperCase()}</p>
             <p className="text-[10px] font-medium text-slate-400 max-w-sm mx-auto leading-relaxed italic">
-              Hardware units remain property of ZICASH GHANA LTD until full payment verification. 
+              Products remain property of ZICASH GHANA LTD until full payment check. 
               Warranty terms apply as per service agreement.
             </p>
           </div>
           <div className="p-8 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
              <h3 className="font-black text-lg text-slate-900 font-headline uppercase tracking-tighter italic">Thank you for your business.</h3>
-             <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">ZICASH GHANA LTD | 2024 PRECISION HARDWARE NODES</p>
+             <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">ZICASH GHANA LTD | 2024 PREMIUM HARDWARE</p>
           </div>
         </div>
 

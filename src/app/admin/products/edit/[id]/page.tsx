@@ -119,7 +119,7 @@ export default function EditProductPage() {
       setProduct(data);
       setExistingImages(data.image_urls || [data.image_url]);
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Fetch Error", description: err.message });
+      toast({ variant: "destructive", title: "Update Error", description: err.message });
       router.push("/admin");
     } finally {
       setIsLoading(false);
@@ -435,10 +435,10 @@ export default function EditProductPage() {
                       isFormValid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
                     )}
                    >
-                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Upload Product
+                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Save Changes
                    </Button>
                 </CardContent>
-             </div>
+             </Card>
           </div>
         </div>
       </div>

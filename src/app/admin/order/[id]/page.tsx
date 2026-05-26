@@ -210,7 +210,7 @@ export default function OrderDetailsPage() {
             </Button>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 hover:opacity-80">
-              <Eye className="w-4 h-4" /> View Store
+              <Eye className="w-4 h-4" /> Visit Store
             </Link>
           </div>
         </header>

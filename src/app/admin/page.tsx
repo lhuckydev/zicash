@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -232,7 +231,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
             disabled={isSaving}
             className="h-10 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 font-bold text-[9px] uppercase tracking-widest gap-2"
           >
-            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Sync
+            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Update
           </Button>
           {(variant.discount_price || variant.discount_ends_at) && (
             <Button 
@@ -353,7 +352,7 @@ export default function AdminPage() {
       toast({ title: "Pricing Updated", description: `Discount applied to ${variant.label}.` });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: err.message });
+      toast({ variant: "destructive", title: "Update Failed", description: err.message });
     } finally {
       setSavingDiscountId(null);
     }
@@ -583,7 +582,7 @@ export default function AdminPage() {
                     <Table>
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100">
-                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product / Variant</TableHead>
+                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product / Option</TableHead>
                           <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Standard Rate</TableHead>
                           <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Sale Price (GHS)</TableHead>
                           <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Offer Expiry</TableHead>

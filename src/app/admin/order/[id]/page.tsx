@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -59,6 +58,8 @@ interface Order {
   shipping_region?: string;
   shipping_area?: string;
   shipping_community?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface Profile {
@@ -132,12 +133,12 @@ export default function OrderDetailsPage() {
         // Notify Customer of Status Update
         if (profile?.contact) {
           const customerName = profile?.full_name || "Customer";
-          const mainItem = order.items[0]?.name || "Hardware";
+          const mainItem = order.items[0]?.name || "Product";
           const amountFormatted = `GHS ${Number(order.total_amount).toLocaleString()}`;
           
           await sendSms(
             profile.contact, 
-            `Hi ${customerName}, your ZiCash order for ${mainItem} (${amountFormatted}) is now ${status.toUpperCase()}. Thank you!`
+            `Hi ${customerName}, your order for ${mainItem} (${amountFormatted}) is now ${status.toUpperCase()}. Thank you!`
           );
         }
       }
@@ -155,7 +156,7 @@ export default function OrderDetailsPage() {
     try {
       const { error } = await supabase.from('orders').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Order Removed", description: "Order has been deleted from the database." });
+      toast({ title: "Order Removed", description: "Order has been deleted from the store database." });
       router.push("/admin");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Delete Failed", description: err.message });
@@ -171,7 +172,11 @@ export default function OrderDetailsPage() {
 
   if (!order) return null;
 
-  // Prefer order-specific shipping address over profile address
+  // Precise location link
+  const mapLink = (order.latitude && order.longitude) 
+    ? `https://www.google.com/maps?q=${order.latitude},${order.longitude}`
+    : null;
+
   const shippingAddress = order.shipping_region 
     ? `${order.shipping_community}, ${order.shipping_area}, ${order.shipping_region}`
     : profile?.location;
@@ -207,7 +212,7 @@ export default function OrderDetailsPage() {
             </Button>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 hover:opacity-80">
-              <Eye className="w-4 h-4" /> Visit Store
+              <Eye className="w-4 h-4" /> Visit Shop
             </Link>
           </div>
         </header>
@@ -215,7 +220,7 @@ export default function OrderDetailsPage() {
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER REFERENCE: #{order.id.slice(0, 8).toUpperCase()}</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER REF: #{order.id.slice(0, 8).toUpperCase()}</div>
               <h1 className="text-3xl font-black text-slate-900 font-headline">Order <span className="text-blue-600 italic">Information</span></h1>
             </div>
 
@@ -260,15 +265,15 @@ export default function OrderDetailsPage() {
               <div className="space-y-1">
                  <p className="text-[10px] font-black text-slate-300 uppercase">Order Value</p>
                  <p className="font-black text-slate-900 text-lg italic tracking-tighter">GHS {parseFloat(order.total_amount).toLocaleString()}</p>
-                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Express Delivery" : "Standard Region Delivery"}</p>
+                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Accra Region" : "Regional Delivery"}</p>
               </div>
             </Card>
 
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-6 space-y-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600"><CreditCard className="w-5 h-5" /></div>
               <div className="space-y-1">
-                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "POD (Cash/MoMo)" : "MoMo Prepayment"}</p>
-                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `Sender: ${order.momo_sender_name}` : "Pending Payment Check."}</p>
+                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "Cash on Delivery" : "Payment Before Delivery"}</p>
+                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `MoMo: ${order.momo_sender_name || 'N/A'}` : "Direct Payment Choice."}</p>
               </div>
             </Card>
 
@@ -276,8 +281,8 @@ export default function OrderDetailsPage() {
                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 blur-2xl -mr-12 -mt-12" />
                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 relative z-10"><MapPin className="w-5 h-5" /></div>
                <div className="space-y-1 relative z-10">
-                 <p className="text-[9px] font-black uppercase text-white/40">Delivery Destination</p>
-                 <p className="text-xs font-bold leading-relaxed line-clamp-2">{shippingAddress || 'No address found'}</p>
+                 <p className="text-[9px] font-black uppercase text-white/40">Address Details</p>
+                 <p className="text-xs font-bold leading-relaxed line-clamp-2">{shippingAddress || 'No address provided'}</p>
                </div>
             </Card>
           </div>
@@ -291,26 +296,26 @@ export default function OrderDetailsPage() {
               )}>
                 <div className="flex items-center gap-3">
                    <MessageSquareQuote className={cn("w-6 h-6", order.extra_notes ? "text-blue-200" : "text-slate-200")} />
-                   <h3 className="font-black uppercase tracking-widest text-sm">Customer Preferences / Notes</h3>
+                   <h3 className="font-black uppercase tracking-widest text-sm">Customer Instructions</h3>
                 </div>
                 <div className={cn(
                   "p-6 rounded-2xl font-bold leading-relaxed shadow-inner",
                   order.extra_notes ? "bg-white/10 border border-white/10 text-white" : "bg-slate-50 text-slate-300 italic"
                 )}>
-                  {order.extra_notes || "No extra preferences specified by customer."}
+                  {order.extra_notes || "No special instructions from customer."}
                 </div>
               </Card>
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
                 <CardHeader className="p-8 pb-4">
-                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Order <span className="text-blue-600 italic">Items</span></CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Purchased <span className="text-blue-600 italic">Items</span></CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
                     <TableHeader className="bg-slate-50/50">
                       <TableRow className="border-slate-50">
-                        <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Item Description</TableHead>
-                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Price</TableHead>
+                        <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Description</TableHead>
+                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Unit Price</TableHead>
                         <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Qty</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -322,7 +327,10 @@ export default function OrderDetailsPage() {
                               <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center p-2 relative overflow-hidden border border-slate-100 shadow-sm">
                                 <Image src={item.image_url} alt={item.name} fill className="object-contain p-1" />
                               </div>
-                              <p className="text-xs font-black text-slate-900">{item.name}</p>
+                              <div>
+                                <p className="text-xs font-black text-slate-900">{item.name}</p>
+                                {item.variant_label && <p className="text-[9px] font-bold text-blue-600 uppercase mt-0.5">{item.variant_label}</p>}
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-xs font-bold text-slate-500">GHS {parseFloat(item.price).toLocaleString()}</TableCell>
@@ -332,7 +340,7 @@ export default function OrderDetailsPage() {
                     </TableBody>
                   </Table>
                   <div className="p-8 bg-slate-50/50 flex justify-between items-center border-t border-slate-50">
-                     <span className="text-[10px] font-black uppercase text-slate-400">Total Valuation</span>
+                     <span className="text-[10px] font-black uppercase text-slate-400">Order Total</span>
                      <span className="text-2xl font-black text-blue-600 italic">GHS {parseFloat(order.total_amount).toLocaleString()}</span>
                   </div>
                 </CardContent>
@@ -340,15 +348,25 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-[#0F172A] text-white p-8 space-y-6">
                 <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Delivery Details</span></div>
+                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Precise Location Tool</span></div>
                    {order.shipping_region && <Badge className="bg-blue-600 border-none font-black text-[8px] uppercase">{order.shipping_region}</Badge>}
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase opacity-40">Delivery Destination</p>
+                      <p className="text-[10px] font-black uppercase opacity-40">Delivery Address</p>
                       <p className="text-sm font-bold leading-relaxed">{shippingAddress}</p>
                    </div>
-                   <div className="space-y-1"><p className="text-[10px] font-black uppercase opacity-40">Recipient</p><p className="text-sm font-bold">{order.customer_name}</p></div>
+                   
+                   {mapLink && (
+                     <div className="pt-4 border-t border-white/5">
+                        <Link href={mapLink} target="_blank" className="block">
+                          <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-lg">
+                             <Target className="w-4 h-4" /> Open Exact Location in Google Maps
+                          </Button>
+                        </Link>
+                        <p className="text-[9px] text-center text-white/30 uppercase mt-3 tracking-widest italic">User provided accurate GPS coordinates for delivery.</p>
+                     </div>
+                   )}
                 </div>
               </Card>
             </div>
@@ -367,6 +385,7 @@ export default function OrderDetailsPage() {
                     <div className="relative aspect-[4/5] rounded-[1.5rem] overflow-hidden shadow-inner border border-slate-100 bg-slate-50">
                        <Image src={order.payment_screenshot_url} alt="Payment Proof" fill className="object-cover transition-transform hover:scale-105 duration-700 cursor-zoom-in" />
                     </div>
+                    <p className="mt-4 text-[10px] font-bold text-slate-400 uppercase text-center">Sender: {order.momo_sender_name || 'Not Provided'}</p>
                   </CardContent>
                 </Card>
               )}

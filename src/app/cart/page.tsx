@@ -1,10 +1,10 @@
 "use client";
 
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore, getEffectivePrice, isDiscountActive } from "@/store/useCartStore";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ArrowLeft, ShoppingCart, Lock, ShieldCheck, AlertCircle, ArrowRight } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowLeft, ShoppingCart, Lock, ShieldCheck, AlertCircle, ArrowRight, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ export default function CartPage() {
           setProfile(data);
         }
       } catch (err) {
-        console.error("Cart: Auth initialization error", err);
+        console.error("Cart error", err);
       } finally {
         setIsAuthLoading(false);
       }
@@ -64,8 +64,8 @@ export default function CartPage() {
   const handleGoToCheckout = () => {
     if (!session || !session.user) {
       toast({
-        title: "Please Login",
-        description: "You need to sign in to buy items.",
+        title: "Sign In Required",
+        description: "Please login to buy items.",
         variant: "destructive"
       });
       router.push("/auth");
@@ -76,7 +76,7 @@ export default function CartPage() {
       toast({
         variant: "destructive",
         title: "Profile Incomplete",
-        description: "Please add your phone number and delivery address to continue."
+        description: "Please add your phone and delivery address to continue."
       });
       router.push("/profile");
       return;
@@ -94,12 +94,12 @@ export default function CartPage() {
             <ShoppingCart className="w-16 h-16 text-slate-300" />
           </div>
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-slate-900">Your cart is empty</h1>
-            <p className="text-slate-500 font-medium">Browse our products to find something you like.</p>
+            <h1 className="text-3xl font-bold text-slate-900">Your basket is empty</h1>
+            <p className="text-slate-500 font-medium">Browse our items to find what you need.</p>
           </div>
           <Link href="/">
             <Button size="lg" className="bg-primary px-8 font-bold rounded-xl shadow-lg shadow-primary/20">
-              Explore Products
+              Go to Store
             </Button>
           </Link>
         </main>
@@ -113,7 +113,7 @@ export default function CartPage() {
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-12 pb-24 md:pb-12 text-slate-900">
         <div className="flex items-center gap-4 mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 font-headline">Your <span className="text-primary italic">Cart</span></h1>
+          <h1 className="text-4xl font-bold text-slate-900 font-headline uppercase">Your <span className="text-primary italic">Basket</span></h1>
           <Badge className="bg-primary/10 text-primary border-none text-[10px] px-3 py-1 font-bold uppercase tracking-widest">
             {items.length} ITEMS
           </Badge>
@@ -124,61 +124,76 @@ export default function CartPage() {
             {isProfileIncomplete && !isAuthLoading && (
               <Alert className="rounded-[2rem] border-amber-200 bg-amber-50 p-8 shadow-xl shadow-amber-500/5">
                 <AlertCircle className="h-5 w-5 text-amber-600" />
-                <AlertTitle className="font-black uppercase tracking-tight text-amber-900 text-lg">Delivery Details Required</AlertTitle>
+                <AlertTitle className="font-black uppercase tracking-tight text-amber-900 text-lg">Delivery Details Needed</AlertTitle>
                 <AlertDescription className="flex flex-col md:flex-row md:items-center justify-between gap-6 mt-4">
                   <span className="text-sm font-medium text-amber-700 leading-relaxed">
-                    You cannot place an order until your phone number and delivery location are synced.
+                    You cannot place an order until your phone and address are updated in your profile.
                   </span>
                   <Link href="/profile">
                     <Button className="bg-amber-600 hover:bg-amber-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl gap-2 h-11 px-6 shrink-0 shadow-lg shadow-amber-600/20">
-                      Sync Profile Now <ArrowRight className="w-4 h-4" />
+                      Update Profile <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                 </AlertDescription>
               </Alert>
             )}
 
-            {items.map((item) => (
-              <div key={item.id} className="bg-white/60 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center hover:shadow-xl transition-all duration-300">
-                <div className="relative w-32 h-32 bg-white border border-slate-100 rounded-xl overflow-hidden shrink-0">
-                  <Image 
-                    src={item.image_url} 
-                    alt={item.name} 
-                    width={128}
-                    height={128}
-                    className="object-contain p-2" 
-                    sizes="128px"
-                  />
-                </div>
-                
-                <div className="flex-1 space-y-1 text-center sm:text-left min-w-0">
-                  <h3 className="text-xl font-bold text-slate-900 truncate">{item.name}</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.category}</p>
-                </div>
+            {items.map((item) => {
+              const activeDiscount = isDiscountActive(item);
+              const price = getEffectivePrice(item);
 
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                      <Minus className="w-4 h-4 text-slate-600" />
-                    </Button>
-                    <span className="w-10 text-center font-bold text-slate-900">{item.quantity}</span>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                      <Plus className="w-4 h-4 text-slate-600" />
+              return (
+                <div key={item.id} className="bg-white/60 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center hover:shadow-xl transition-all duration-300">
+                  <div className="relative w-32 h-32 bg-white border border-slate-100 rounded-xl overflow-hidden shrink-0">
+                    <Image 
+                      src={item.image_url} 
+                      alt={item.name} 
+                      width={128}
+                      height={128}
+                      className="object-contain p-2" 
+                      sizes="128px"
+                    />
+                  </div>
+                  
+                  <div className="flex-1 space-y-1 text-center sm:text-left min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                      <h3 className="text-xl font-bold text-slate-900 truncate">{item.name}</h3>
+                      {activeDiscount && (
+                        <Badge className="bg-blue-600 text-white border-none text-[8px] font-black uppercase px-2 py-0.5">Discount Applied</Badge>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.category}</p>
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                        <Minus className="w-4 h-4 text-slate-600" />
+                      </Button>
+                      <span className="w-10 text-center font-bold text-slate-900">{item.quantity}</span>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-slate-50" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                        <Plus className="w-4 h-4 text-slate-600" />
+                      </Button>
+                    </div>
+                    <div className="w-32 text-right">
+                      <div className="flex flex-col items-end">
+                        <p className="font-bold text-lg text-slate-900">GH₵{(price * item.quantity).toLocaleString()}</p>
+                        {activeDiscount && (
+                          <p className="text-[10px] text-slate-400 line-through">GH₵{(item.price * item.quantity).toLocaleString()}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 rounded-full h-10 w-10" onClick={() => removeItem(item.id)}>
+                      <Trash2 className="w-5 h-5" />
                     </Button>
                   </div>
-                  <div className="w-32 text-right">
-                    <p className="font-bold text-lg text-slate-900">GH₵{(item.price * item.quantity).toLocaleString()}</p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 rounded-full h-10 w-10" onClick={() => removeItem(item.id)}>
-                    <Trash2 className="w-5 h-5" />
-                  </Button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             <Link href="/">
               <Button variant="ghost" className="mt-4 text-slate-500 hover:text-slate-900 font-bold uppercase text-xs tracking-widest">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back to Shopping
+                <ArrowLeft className="w-4 h-4 mr-2" /> Back to Store
               </Button>
             </Link>
           </div>
@@ -218,12 +233,6 @@ export default function CartPage() {
                   {isProfileIncomplete ? "Complete Profile to Checkout" : "Proceed to Checkout"}
                 </Button>
               )}
-              
-              <div className="space-y-4 pt-4">
-                <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                  <ShieldCheck className="w-3 h-3" /> Secure Ordering
-                </p>
-              </div>
             </div>
           </div>
         </div>

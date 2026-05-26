@@ -5,8 +5,10 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  discount_price?: number;
+  discount_ends_at?: string;
   specs: string;
-  description?: string; // New field to preserve custom admin text
+  description?: string; 
   category: string;
   brand: string;
   image_url: string;
@@ -55,6 +57,16 @@ interface CartStore {
   total: number;
 }
 
+export const isDiscountActive = (product: Product) => {
+  if (!product.discount_price || product.discount_price <= 0) return false;
+  if (!product.discount_ends_at) return true;
+  return new Date(product.discount_ends_at) > new Date();
+};
+
+export const getEffectivePrice = (product: Product) => {
+  return isDiscountActive(product) ? product.discount_price! : product.price;
+};
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
@@ -94,5 +106,5 @@ export const useCartStore = create<CartStore>()(
 );
 
 function calculateTotal(items: CartItem[]) {
-  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  return items.reduce((sum, item) => sum + getEffectivePrice(item) * item.quantity, 0);
 }

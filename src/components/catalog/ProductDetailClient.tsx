@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Product, useCartStore } from "@/store/useCartStore";
+import { Product, useCartStore, getEffectivePrice, isDiscountActive } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -13,7 +13,7 @@ import {
   CircuitBoard, Monitor, Smartphone, 
   Zap, Timer, 
   Video, Layers, Info,  
-  ShoppingCart, Star, Loader2
+  ShoppingCart, Star, Loader2, Tag
 } from "lucide-react";
 import { 
   Carousel, 
@@ -56,6 +56,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
+  const activeDiscount = isDiscountActive(product);
+  const effectivePrice = getEffectivePrice(product);
+  const savings = product.price - effectivePrice;
+  const savingsPercent = Math.round((savings / product.price) * 100);
+
   useEffect(() => {
     if (!api) return;
     setCurrent(api.selectedScrollSnap());
@@ -83,7 +88,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900">
       <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
         <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
-          <ArrowLeft className="w-3 h-3" /> Back To Marketplace
+          <ArrowLeft className="w-3 h-3" /> Back To Shop
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
@@ -124,8 +129,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </Carousel>
               
               <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
+                 {activeDiscount && (
+                   <Badge className="bg-blue-600 text-white border-none font-black uppercase text-[10px] tracking-widest px-4 py-2 shadow-xl animate-pulse">Save {savingsPercent}% Now</Badge>
+                 )}
                  <Badge className="bg-white/90 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1 shadow-sm">Verified Unit</Badge>
-                 {product.stock <= 5 && product.stock > 0 && <Badge className="bg-orange-500 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1 shadow-sm">Limited Stock</Badge>}
               </div>
 
               <button 
@@ -148,33 +155,24 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </h1>
               <div className="flex items-center gap-3">
                  <div className="flex text-amber-400"><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /></div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Quality Node</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1 p-8 rounded-[2rem] bg-slate-50 border border-slate-100 space-y-4 shadow-inner">
-                 <div className="flex items-center gap-3">
-                   <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/20"><ShieldCheck className="w-5 h-5" /></div>
-                   <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">ZiCash Quality Node</h3>
-                 </div>
-                 <p className="text-slate-500 text-sm leading-relaxed font-medium">This unit has been tested and certified for peak performance.</p>
-              </div>
-              <div className="flex-1 p-8 rounded-[2rem] bg-emerald-50/50 border border-emerald-100 space-y-4 shadow-inner">
-                 <div className="flex items-center gap-3">
-                   <div className="p-2 bg-emerald-600 rounded-xl text-white shadow-lg shadow-emerald-600/20"><Truck className="w-5 h-5" /></div>
-                   <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">Delivery Network</h3>
-                 </div>
-                 <p className="text-emerald-700 text-sm leading-relaxed font-medium">Free express delivery within the Accra metropolis available.</p>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quality Information</span>
               </div>
             </div>
 
             <div className="flex items-end justify-between border-b border-slate-100 pb-8">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price in GHS</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-slate-900">GHS</span>
-                  <span className="text-5xl font-black text-slate-900 italic tracking-tighter">{product.price.toLocaleString()}</span>
+              <div className="space-y-2">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing</p>
+                <div className="flex flex-col">
+                  {activeDiscount && (
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className="text-sm font-bold text-slate-400 line-through">GH₵{product.price.toLocaleString()}</span>
+                      <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] uppercase">You save GH₵{savings.toLocaleString()}</Badge>
+                    </div>
+                  )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-black text-slate-900">GHS</span>
+                    <span className="text-5xl font-black text-slate-900 italic tracking-tighter">{effectivePrice.toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
@@ -192,20 +190,37 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  {isAdding ? <Loader2 className="w-6 h-6 animate-spin" /> : product.stock <= 0 ? "Out of Stock" : <><ShoppingCart className="w-6 h-6" /> Add to Order</>}
                </Button>
             </div>
+            
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-1 p-8 rounded-[2rem] bg-slate-50 border border-slate-100 space-y-4 shadow-inner">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/20"><ShieldCheck className="w-5 h-5" /></div>
+                   <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">Quality Node</h3>
+                 </div>
+                 <p className="text-slate-500 text-sm leading-relaxed font-medium">This unit has been tested and certified for peak performance.</p>
+              </div>
+              <div className="flex-1 p-8 rounded-[2rem] bg-emerald-50/50 border border-emerald-100 space-y-4 shadow-inner">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 bg-emerald-600 rounded-xl text-white shadow-lg shadow-emerald-600/20"><Truck className="w-5 h-5" /></div>
+                   <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">Delivery Network</h3>
+                 </div>
+                 <p className="text-emerald-700 text-sm leading-relaxed font-medium">Free express delivery within the Accra metropolis available.</p>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-20 border-t border-slate-100">
           <div className="lg:col-span-8 space-y-16">
             <div className="space-y-6">
-               <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic">Product Description</h2>
+               <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic">Description</h2>
                <p className="text-lg text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
-                 {product.description || product.specs.split('|')[0] || "No detailed description provided."}
+                 {product.description || product.specs.split('|')[0] || "No detailed information provided."}
                </p>
             </div>
 
             <div className="space-y-8">
-               <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic">Technical Specifications</h2>
+               <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic">Technical Information</h2>
                <div className="bg-slate-50/50 rounded-[3rem] border border-slate-100 p-8 md:p-14 shadow-inner">
                  <Table>
                    <TableBody>
@@ -229,13 +244,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                          <TechTableRow icon={Video} label="Camera Array" value={product.camera} />
                          <TechTableRow icon={ShieldCheck} label="Physical Condition" value={product.condition} />
                        </>
-                     )}
-                     {!["Laptops", "Phones"].includes(product.category) && product.specs && (
-                       <TableRow className="border-none">
-                         <TableCell className="py-2 pl-0">
-                           <p className="text-sm font-medium text-slate-600 leading-relaxed">{product.specs}</p>
-                         </TableCell>
-                       </TableRow>
                      )}
                    </TableBody>
                  </Table>

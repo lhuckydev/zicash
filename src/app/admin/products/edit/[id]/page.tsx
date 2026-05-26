@@ -83,6 +83,9 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
+  const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category || "");
+  const isConsult = product.category === "Educational Consult";
+
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session') === 'true';
     const lastActivity = parseInt(localStorage.getItem('admin_last_activity') || '0');
@@ -195,7 +198,7 @@ export default function EditProductPage() {
       } else if (product.category === "Closet") {
         finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
       } else {
-        finalSpecs = product.specs || "";
+        finalSpecs = product.specs || "Standard Unit";
       }
 
       const { error } = await supabase
@@ -212,7 +215,7 @@ export default function EditProductPage() {
 
       if (error) throw error;
 
-      toast({ title: "Update Success", description: "Catalog synchronized with description and spec segregation." });
+      toast({ title: "Update Success", description: "Product has been successfully synchronized." });
       router.push("/admin");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Sync Failure", description: err.message });
@@ -272,7 +275,6 @@ export default function EditProductPage() {
                         <SelectItem value="Laptops" className="font-black">Laptops</SelectItem>
                         <SelectItem value="Phones" className="font-black">Phones</SelectItem>
                         <SelectItem value="Accessories" className="font-black">Accessories</SelectItem>
-                        <SelectItem value="Closet" className="font-black">Closet</SelectItem>
                         <SelectItem value="Educational Consult" className="font-black">Educational Consult</SelectItem>
                       </SelectContent>
                     </Select>
@@ -348,7 +350,7 @@ export default function EditProductPage() {
                         <Input placeholder={getPlaceholder()} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
-                      {product.category !== "Educational Consult" && (
+                      {!isConsult && (
                         <div className="space-y-2">
                           <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand</label>
                           <Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
@@ -368,7 +370,7 @@ export default function EditProductPage() {
                       </div>
                    </div>
 
-                   {product.category === "Laptops" && (
+                   {!isSimpleCategory && product.category === "Laptops" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">CPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
@@ -379,7 +381,7 @@ export default function EditProductPage() {
                      </div>
                    )}
 
-                   {product.category === "Phones" && (
+                   {!isSimpleCategory && product.category === "Phones" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>

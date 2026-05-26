@@ -24,7 +24,8 @@ import {
   Settings2,
   Layers,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,9 @@ export default function NewProductWizard() {
   // Step 3: Advanced Optional Specs
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
+  const isSimpleCategory = ["Accessories", "Educational Consult"].includes(basicInfo.category);
+  const isConsult = basicInfo.category === "Educational Consult";
+
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session') === 'true';
     const lastActivity = parseInt(localStorage.getItem('admin_last_activity') || '0');
@@ -142,6 +146,7 @@ export default function NewProductWizard() {
   };
 
   const generateLabel = (v: ProductVariantForm) => {
+    if (isSimpleCategory) return "Standard Unit";
     if (basicInfo.category === "Laptops") {
       return `${v.cpu || 'Base'} / ${v.ram || '8GB'} / ${v.storage || '256GB'}${v.gpu ? ` / ${v.gpu}` : ''}`;
     } else if (basicInfo.category === "Phones") {
@@ -180,8 +185,8 @@ export default function NewProductWizard() {
           image_url: finalImageUrls[0] || "",
           image_urls: finalImageUrls,
           price: Math.min(...variants.map(v => v.price)), // "Starting at" price
-          advanced_specs: advancedSpecs,
-          specs: generateLabel(variants[0]) // Fallback for old filtering
+          advanced_specs: isSimpleCategory ? {} : advancedSpecs,
+          specs: isSimpleCategory ? "Standard Item" : generateLabel(variants[0])
         }])
         .select()
         .single();
@@ -189,10 +194,10 @@ export default function NewProductWizard() {
       if (productError) throw productError;
 
       // 2. Insert Variants
-      const variantsToInsert = variants.map((v, idx) => ({
+      const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
         ...v,
         product_id: productData.id,
-        label: generateLabel(v),
+        label: isSimpleCategory ? "Standard Unit" : generateLabel(v),
         is_default: idx === 0
       }));
 
@@ -202,7 +207,7 @@ export default function NewProductWizard() {
 
       if (variantError) throw variantError;
 
-      toast({ title: "Inventory Synchronized", description: "Product and all variants have been archived." });
+      toast({ title: "Inventory Synchronized", description: "Product has been successfully archived." });
       router.push("/admin");
     } catch (err: any) {
       console.error("Save Error:", err);
@@ -271,6 +276,7 @@ export default function NewProductWizard() {
                             <SelectItem value="Laptops" className="font-black">Laptops</SelectItem>
                             <SelectItem value="Phones" className="font-black">Phones</SelectItem>
                             <SelectItem value="Accessories" className="font-black">Accessories</SelectItem>
+                            <SelectItem value="Educational Consult" className="font-black">Educational Consult</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -305,27 +311,31 @@ export default function NewProductWizard() {
                         <h2 className="text-2xl font-black uppercase tracking-tight">Identity <span className="text-blue-500 italic">& Purpose</span></h2>
                         <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Foundational Unit Details</p>
                       </div>
-                      <Box className="w-10 h-10 text-blue-500 opacity-50" />
+                      {isConsult ? <GraduationCap className="w-10 h-10 text-blue-500 opacity-50" /> : <Box className="w-10 h-10 text-blue-500 opacity-50" />}
                    </div>
                    <CardContent className="p-10 space-y-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2 space-y-2">
-                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Product Title</label>
-                          <Input placeholder="e.g., MacBook Pro 14 (2024)" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Item Title</label>
+                          <Input placeholder="e.g., Undergraduate Admission Support" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
                         </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand</label>
-                          <Input placeholder="Apple" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
-                          <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={e => setBasicInfo({...basicInfo, warranty: e.target.value})} />
-                        </div>
+                        {!isConsult && (
+                          <>
+                            <div className="space-y-2">
+                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand</label>
+                              <Input placeholder="Apple / Logitech" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
+                              <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={e => setBasicInfo({...basicInfo, warranty: e.target.value})} />
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Promotional Description</label>
-                         <Textarea placeholder="Professional marketing copy for the product..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
+                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Description Payload</label>
+                         <Textarea placeholder="Professional marketing copy for the item..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
                       </div>
 
                       <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm">
@@ -340,7 +350,7 @@ export default function NewProductWizard() {
                       </div>
 
                       <Button onClick={() => setStep(2)} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
-                         Continue to Variants <ArrowRight className="w-6 h-6" />
+                         Continue to Pricing <ArrowRight className="w-6 h-6" />
                       </Button>
                    </CardContent>
                 </Card>
@@ -348,52 +358,56 @@ export default function NewProductWizard() {
           </div>
         )}
 
-        {/* STEP 2: VARIANTS */}
+        {/* STEP 2: PRICING & INVENTORY */}
         {step === 2 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
              <div className="flex items-center justify-between">
                 <div>
-                   <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 italic">Variant <span className="text-blue-600">Forge</span></h2>
-                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">Configure specific hardware nodes and pricing nodes</p>
+                   <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 italic">{isSimpleCategory ? "Inventory Node" : "Variant Forge"}</h2>
+                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">{isSimpleCategory ? "Set unit valuation and availability" : "Configure hardware nodes and pricing nodes"}</p>
                 </div>
-                <Button onClick={addVariant} className="h-14 rounded-2xl bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black uppercase tracking-widest text-[10px] px-8 shadow-sm gap-2">
-                   <Plus className="w-4 h-4" /> Add Configuration
-                </Button>
+                {!isSimpleCategory && (
+                  <Button onClick={addVariant} className="h-14 rounded-2xl bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black uppercase tracking-widest text-[10px] px-8 shadow-sm gap-2">
+                     <Plus className="w-4 h-4" /> Add Configuration
+                  </Button>
+                )}
              </div>
 
              <div className="grid grid-cols-1 gap-8">
-                {variants.map((v, idx) => (
+                {(isSimpleCategory ? [variants[0]] : variants).map((v, idx) => (
                   <Card key={idx} className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden group">
                      <div className="p-6 bg-slate-50 flex items-center justify-between border-b border-slate-100">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">#0{idx + 1}</div>
-                           <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{generateLabel(v)}</h3>
+                           <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{isSimpleCategory ? "Standard Item Pricing" : generateLabel(v)}</h3>
                         </div>
-                        {variants.length > 1 && (
+                        {!isSimpleCategory && variants.length > 1 && (
                           <Button variant="ghost" onClick={() => removeVariant(idx)} className="h-10 w-10 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"><Trash2 className="w-5 h-5" /></Button>
                         )}
                      </div>
                      <CardContent className="p-10">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                           {basicInfo.category === "Laptops" ? (
-                             <>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU Model</label><Input placeholder="Core i7 13th Gen" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM Size</label><Input placeholder="16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="512GB SSD" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">GPU</label><Input placeholder="RTX 4060 (Opt)" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
-                             </>
-                           ) : (
-                             <>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="8GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="128GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input placeholder="Titanium Blue" className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
-                               <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chipset</label><Input placeholder="A17 Bionic" className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} /></div>
-                             </>
-                           )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6 pt-6 border-t border-slate-50">
+                        {!isSimpleCategory && (
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                            {basicInfo.category === "Laptops" ? (
+                              <>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU Model</label><Input placeholder="Core i7 13th Gen" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM Size</label><Input placeholder="16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="512GB SSD" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">GPU</label><Input placeholder="RTX 4060 (Opt)" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="8GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="128GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input placeholder="Titanium Blue" className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chipset</label><Input placeholder="A17 Bionic" className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} /></div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
                            <div className="space-y-2 md:col-span-2">
-                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Configuration Price (GH₵)</label>
+                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Standard Price (GH₵)</label>
                              <div className="relative">
                                <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600">GH₵</div>
                                <Input type="number" className="pl-14 h-14 bg-blue-50 border-none font-black text-2xl text-blue-900" value={v.price} onChange={e => updateVariant(idx, 'price', parseFloat(e.target.value))} />
@@ -415,7 +429,9 @@ export default function NewProductWizard() {
 
              <div className="flex gap-4">
                 <Button variant="ghost" onClick={() => setStep(1)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back to Step 1</Button>
-                <Button onClick={() => setStep(3)} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">Continue to Advanced Details <ArrowRight className="w-6 h-6" /></Button>
+                <Button onClick={() => isSimpleCategory ? handleFinalSave() : setStep(3)} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
+                   {isSimpleCategory ? (isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : "Archive Unit Now") : "Continue to Advanced Details"} <ArrowRight className="w-6 h-6" />
+                </Button>
              </div>
           </div>
         )}

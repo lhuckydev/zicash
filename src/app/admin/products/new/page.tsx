@@ -248,7 +248,11 @@ export default function NewProductWizard() {
       router.push("/admin");
     } catch (err: any) {
       console.error("Save Error:", err);
-      toast({ variant: "destructive", title: "Upload Failed", description: err.message || "Permission error. Check database rules." });
+      toast({ 
+        variant: "destructive", 
+        title: "Upload Failed", 
+        description: err.message || "Permission error. Check database rules." 
+      });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
@@ -490,8 +494,8 @@ export default function NewProductWizard() {
                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
                    <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
                       <div>
-                        <h2 className="text-2xl font-black uppercase tracking-tight italic">Additional <span className="text-blue-500">Information</span></h2>
-                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Extra details (Optional)</p>
+                        <h2 className="text-2xl font-black uppercase tracking-tight italic">Additional <span className="text-blue-500">Details</span></h2>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Extra information (Optional)</p>
                       </div>
                       <Settings2 className="w-10 h-10 text-blue-500 opacity-50" />
                    </div>
@@ -560,7 +564,7 @@ export default function NewProductWizard() {
                    </div>
                    <div className="mt-8 pt-8 border-t border-slate-50 text-center">
                       <Layers className="w-12 h-12 text-slate-100 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Inventory Management System Active</p>
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Store Inventory System Active</p>
                    </div>
                 </Card>
              </div>

@@ -405,7 +405,7 @@ export default function EditProductPage() {
                       {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Save Changes
                    </Button>
                 </CardContent>
-             </Card>
+             </div>
           </div>
         </div>
       </div>

@@ -61,6 +61,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
+  const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category);
+
   useEffect(() => {
     async function fetchFullProduct() {
       const { data, error } = await (await import('@/lib/supabase')).supabase
@@ -100,7 +102,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     addItem(product, selectedVariant);
     toast({ 
       title: "Added to Cart", 
-      description: `${product.name} added to your order.` 
+      description: `${product.name} added to your selection.` 
     });
     setTimeout(() => setIsAdding(false), 500);
   };
@@ -195,8 +197,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             {product.variants && product.variants.length > 0 && (
               <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">Select Options</h3>
-                    <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Available</Badge>
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">Available Options</h3>
+                    <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Configurations</Badge>
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {product.variants.map((v) => {
@@ -218,7 +220,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           <div className="mt-3 flex items-center justify-between">
                              <p className="text-xs font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                              <p className={cn("text-[8px] font-bold uppercase", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                               {v.stock > 0 ? `${v.stock} In Stock` : 'Sold Out'}
+                               {v.stock > 0 ? `${v.stock} Available` : 'Sold Out'}
                              </p>
                           </div>
                         </button>
@@ -242,7 +244,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="flex flex-col items-start md:items-end gap-2">
                  <div className="flex items-center gap-2">
                     <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available' : 'Out of Stock'}</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'In Stock' : 'Out of Stock'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                    <ShieldCheck className="w-3 h-3" /> Warranty: {product.warranty}
@@ -272,10 +274,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <div className="space-y-6">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Description</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Item Description</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "No description provided for this item."}
+                 {product.description || "No detailed description provided."}
                </p>
             </div>
 
@@ -283,7 +285,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="space-y-8">
                  <div className="flex items-center gap-4">
                     <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Specifications</h2>
+                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Technical Specifications</h2>
                  </div>
                  <div className="bg-white rounded-[3.5rem] border border-slate-100 p-8 md:p-16 shadow-xl shadow-blue-600/5">
                    <Table>
@@ -330,15 +332,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                    <div className="flex gap-5">
                       <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
                       <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Genuine Items</p>
-                         <p className="text-sm font-medium leading-relaxed">Every item we sell is verified for quality and authenticity.</p>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
+                         <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
                       </div>
                    </div>
                    <div className="flex gap-5">
                       <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
                       <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Receipt Provided</p>
-                         <p className="text-sm font-medium leading-relaxed">A digital receipt is generated for every purchase you make.</p>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
+                         <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
                       </div>
                    </div>
                 </div>

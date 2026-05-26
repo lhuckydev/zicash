@@ -76,7 +76,6 @@ export default function NewProductWizard() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Step 1: Basic Info
   const [basicInfo, setBasicInfo] = useState({
     name: "",
     brand: "",
@@ -89,13 +88,9 @@ export default function NewProductWizard() {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-
-  // Step 2: Options
   const [variants, setVariants] = useState<ProductVariantForm[]>([
     { price: 0, stock: 10, condition: "New", touchscreen: false }
   ]);
-
-  // Step 3: Additional Details
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(basicInfo.category);
@@ -182,7 +177,7 @@ export default function NewProductWizard() {
         toast({ 
           variant: "destructive", 
           title: "Pricing Error", 
-          description: "All items must have a valid price (greater than 0)." 
+          description: "All configurations must have a price greater than 0." 
         });
         return;
       }
@@ -195,11 +190,6 @@ export default function NewProductWizard() {
   };
 
   const handleFinalSave = async () => {
-    if (!isStep1Valid() || !isStep2Valid()) {
-      toast({ variant: "destructive", title: "Wait", description: "Please fill in all required fields." });
-      return;
-    }
-
     setIsSaving(true);
     let finalImageUrls: string[] = [];
 
@@ -229,10 +219,7 @@ export default function NewProductWizard() {
         .select()
         .single();
 
-      if (productError) {
-        console.error("Product Table Error:", productError);
-        throw new Error(`Product Table Error: ${productError.message}`);
-      }
+      if (productError) throw productError;
 
       const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
         ...v,
@@ -245,10 +232,7 @@ export default function NewProductWizard() {
         .from('product_variants')
         .insert(variantsToInsert);
 
-      if (variantError) {
-        console.error("Variant Table Error:", variantError);
-        throw new Error(`Variant Table Error: ${variantError.message}`);
-      }
+      if (variantError) throw variantError;
 
       toast({ title: "Product Uploaded", description: "The item is now live in the store." });
       router.push("/admin");
@@ -257,7 +241,7 @@ export default function NewProductWizard() {
       toast({ 
         variant: "destructive", 
         title: "Upload Failed", 
-        description: err.message || "Database permission denied. Run the SQL script provided." 
+        description: err.message || "Database permission denied. Ensure RLS is disabled." 
       });
     } finally {
       setIsSaving(false);
@@ -274,7 +258,7 @@ export default function NewProductWizard() {
            </div>
            <CardContent className="p-10">
              <form onSubmit={handleAuth} className="space-y-6">
-               <Input type="password" placeholder="Admin Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
+               <Input type="password" placeholder="Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
                <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Sign In</Button>
              </form>
            </CardContent>
@@ -286,7 +270,6 @@ export default function NewProductWizard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12 font-body text-slate-900">
       <div className="max-w-5xl mx-auto space-y-12">
-        
         <div className="flex items-center justify-between">
           <Link href="/admin">
             <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600 uppercase text-[10px] tracking-widest">
@@ -312,7 +295,7 @@ export default function NewProductWizard() {
                 <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-blue-700 ml-1">Select Department</label>
+                        <label className="text-[11px] font-black uppercase text-blue-700 ml-1">Department</label>
                         <Select value={basicInfo.category} onValueChange={(val) => setBasicInfo({...basicInfo, category: val})}>
                           <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black shadow-inner">
                             <SelectValue />
@@ -333,7 +316,7 @@ export default function NewProductWizard() {
                           className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer group hover:border-blue-600 transition-all mb-4"
                         >
                           <Upload className="w-8 h-8 text-slate-300 mb-2 group-hover:text-blue-600 transition-colors" />
-                          <p className="text-[9px] font-black uppercase text-slate-400">Add Photos</p>
+                          <p className="text-[9px] font-black uppercase text-slate-400">Add Media</p>
                           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
                         </div>
                         <div className="grid grid-cols-3 gap-2">
@@ -362,12 +345,12 @@ export default function NewProductWizard() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2 space-y-2">
                           <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
-                          <Input placeholder="e.g., MacBook Pro 14 M3" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
+                          <Input placeholder="Full Product Name" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
                         </div>
                         
                         <div className="space-y-2">
                           <label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Brand (Optional)</label>
-                          <Input placeholder="Apple / Samsung / HP" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
+                          <Input placeholder="Brand Name" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
                         </div>
 
                         {!isSimpleCategory && (
@@ -380,7 +363,7 @@ export default function NewProductWizard() {
 
                       <div className="space-y-2">
                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Description <span className="text-red-500">*</span></label>
-                         <Textarea placeholder="Describe the item clearly for customers..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
+                         <Textarea placeholder="Describe the item clearly..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
                       </div>
 
                       <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm">
@@ -388,7 +371,7 @@ export default function NewProductWizard() {
                             <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600"><Zap className="w-6 h-6" /></div>
                             <div>
                                <p className="font-black text-slate-900 uppercase text-xs">Featured Item</p>
-                               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Show this item on the homepage</p>
+                               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Show on the homepage</p>
                             </div>
                          </div>
                          <Switch checked={basicInfo.featured} onCheckedChange={(val) => setBasicInfo({...basicInfo, featured: val})} className="data-[state=checked]:bg-blue-600" />
@@ -415,11 +398,11 @@ export default function NewProductWizard() {
              <div className="flex items-center justify-between">
                 <div>
                    <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 italic">{isSimpleCategory ? "Price & Stock" : "Product Options"}</h2>
-                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">{isSimpleCategory ? "Set the price and availability" : "Set prices for different configurations"}</p>
+                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">{isSimpleCategory ? "Set the primary price" : "Add different specifications"}</p>
                 </div>
                 {!isSimpleCategory && (
                   <Button onClick={addVariant} className="h-14 rounded-2xl bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black uppercase tracking-widest text-[10px] px-8 shadow-sm gap-2">
-                     <Plus className="w-4 h-4" /> Add Option
+                     <Plus className="w-4 h-4" /> Add Configuration
                   </Button>
                 )}
              </div>
@@ -430,10 +413,10 @@ export default function NewProductWizard() {
                      <div className="p-6 bg-slate-50 flex items-center justify-between border-b border-slate-100">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">#0{idx + 1}</div>
-                           <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{isSimpleCategory ? "Item Price" : generateLabel(v)}</h3>
+                           <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{isSimpleCategory ? "Pricing Detail" : generateLabel(v)}</h3>
                         </div>
                         {!isSimpleCategory && variants.length > 1 && (
-                          <Button variant="ghost" onClick={() => removeVariant(idx)} className="h-10 w-10 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"><Trash2 className="w-5 h-5" /></Button>
+                          <button onClick={() => removeVariant(idx)} className="h-10 w-10 p-0 text-red-400 hover:text-red-600 transition-colors"><Trash2 className="w-5 h-5" /></button>
                         )}
                      </div>
                      <CardContent className="p-10">
@@ -441,16 +424,16 @@ export default function NewProductWizard() {
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                             {basicInfo.category === "Laptops" ? (
                               <>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Processor (CPU)</label><Input placeholder="e.g. Core i7" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Memory (RAM)</label><Input placeholder="e.g. 16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 512GB SSD" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics (GPU)</label><Input placeholder="e.g. RTX 4060" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU</label><Input placeholder="e.g. Core i7" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="e.g. 16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 512GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics</label><Input placeholder="Optional" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
                               </>
                             ) : (
                               <>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="e.g. 8GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 128GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input placeholder="e.g. Blue" className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
+                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input placeholder="e.g. Silver" className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chipset</label><Input placeholder="e.g. A17" className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} /></div>
                               </>
                             )}
@@ -464,7 +447,7 @@ export default function NewProductWizard() {
                                <Input type="number" className="pl-14 h-14 bg-blue-50 border-none font-black text-2xl text-blue-900" value={v.price} onChange={e => updateVariant(idx, 'price', parseFloat(e.target.value))} />
                              </div>
                            </div>
-                           <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Stock Quantity <span className="text-red-500">*</span></label><Input type="number" className="h-14 bg-slate-50 border-none font-black text-lg" value={v.stock} onChange={e => updateVariant(idx, 'stock', parseInt(e.target.value))} /></div>
+                           <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quantity <span className="text-red-500">*</span></label><Input type="number" className="h-14 bg-slate-50 border-none font-black text-lg" value={v.stock} onChange={e => updateVariant(idx, 'stock', parseInt(e.target.value))} /></div>
                            <div className="space-y-2">
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</label>
                              <Select value={v.condition} onValueChange={val => updateVariant(idx, 'condition', val)}>
@@ -501,7 +484,7 @@ export default function NewProductWizard() {
                    <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
                       <div>
                         <h2 className="text-2xl font-black uppercase tracking-tight italic">Additional <span className="text-blue-500">Details</span></h2>
-                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Extra information (Optional)</p>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Optional specifications</p>
                       </div>
                       <Settings2 className="w-10 h-10 text-blue-500 opacity-50" />
                    </div>
@@ -515,7 +498,7 @@ export default function NewProductWizard() {
                                { id: 'battery', label: 'Battery Life', placeholder: 'e.g. 8 Hours' },
                                { id: 'os', label: 'Operating System', placeholder: 'e.g. Windows 11' },
                                { id: 'kb', label: 'Keyboard', placeholder: 'e.g. Backlit' },
-                               { id: 'audio', label: 'Speakers', placeholder: 'e.g. Dual Stereo' }
+                               { id: 'audio', label: 'Speakers', placeholder: 'e.g. Stereo' }
                              ].map(f => (
                                <div key={f.id} className="space-y-2">
                                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
@@ -527,10 +510,10 @@ export default function NewProductWizard() {
                            <>
                              {[
                                { id: 'camera', label: 'Camera Quality', placeholder: 'e.g. 50MP' },
-                               { id: 'refresh', label: 'Screen Refresh Rate', placeholder: 'e.g. 120Hz' },
+                               { id: 'refresh', label: 'Refresh Rate', placeholder: 'e.g. 120Hz' },
                                { id: 'charge', label: 'Charging Speed', placeholder: 'e.g. 67W' },
-                               { id: 'rating', label: 'Water Resistance', placeholder: 'e.g. IP68' },
-                               { id: 'biometrics', label: 'Security (Fingerprint/FaceID)', placeholder: 'e.g. FaceID' }
+                               { id: 'rating', label: 'Protection', placeholder: 'e.g. IP68' },
+                               { id: 'biometrics', label: 'Security', placeholder: 'e.g. FaceID' }
                              ].map(f => (
                                <div key={f.id} className="space-y-2">
                                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
@@ -557,20 +540,16 @@ export default function NewProductWizard() {
                    <div className="space-y-4">
                       <div className="flex items-center gap-3">
                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                         <span className="text-xs font-bold text-slate-600">{basicInfo.name}</span>
+                         <span className="text-xs font-bold text-slate-600 truncate">{basicInfo.name}</span>
                       </div>
                       <div className="flex items-center gap-3">
                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                         <span className="text-xs font-bold text-slate-600">{variants.length} Options Added</span>
+                         <span className="text-xs font-bold text-slate-600">{variants.length} Configurations</span>
                       </div>
                       <div className="flex items-center gap-3">
                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                         <span className="text-xs font-bold text-slate-600">Starting Price: GHS {Math.min(...variants.map(v => v.price)).toLocaleString()}</span>
+                         <span className="text-xs font-bold text-slate-600">Min Price: GHS {Math.min(...variants.map(v => v.price)).toLocaleString()}</span>
                       </div>
-                   </div>
-                   <div className="mt-8 pt-8 border-t border-slate-50 text-center">
-                      <Layers className="w-12 h-12 text-slate-100 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Inventory System Active</p>
                    </div>
                 </Card>
              </div>

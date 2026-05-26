@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -534,7 +533,7 @@ export default function AdminPage() {
                       <TableRow key={p.id} className="hover:bg-slate-50/30 transition-colors">
                         <TableCell className="pl-8 py-4"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-xl relative overflow-hidden border border-slate-100"><Image src={p.image_url} alt={p.name} fill className="object-contain p-1" /></div><span className="text-xs font-bold">{p.name}</span></div></TableCell>
                         <TableCell className="text-xs font-black">GH₵ {p.price.toLocaleString()}</TableCell>
-                        <TableCell><Badge className="bg-blue-50 text-blue-600 border-none font-bold">{p.stock} Units</Badge></TableCell>
+                        <TableCell><Badge className="bg-blue-50 text-blue-600 border-none font-bold">In Stock</Badge></TableCell>
                         <TableCell className="pr-8 text-right space-x-2"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="text-slate-300 hover:text-blue-600"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-600" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}

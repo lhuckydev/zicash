@@ -391,7 +391,7 @@ export default function EditProductPage() {
 
                    <div className="space-y-2">
                       <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Descriptive Payload (Marketing Text)</label>
-                      <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description} onChange={(e) => setProduct({...product, description: e.target.value})} />
+                      <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description || ""} onChange={(e) => setProduct({...product, description: e.target.value})} />
                    </div>
 
                    <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl shadow-blue-600/20 gap-3">

@@ -380,7 +380,7 @@ export default function NewProductPage() {
                       <Textarea 
                         placeholder="Comprehensive details for the customer..." 
                         className="rounded-2xl bg-slate-50 border-none min-h-[160px] font-black text-lg leading-relaxed" 
-                        value={product.description} 
+                        value={product.description || ""} 
                         onChange={(e) => setProduct({...product, description: e.target.value})} 
                       />
                    </div>

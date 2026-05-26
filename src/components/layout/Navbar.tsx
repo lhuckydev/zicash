@@ -83,28 +83,24 @@ export function Navbar() {
     router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
-  // Primary navigation links visible in horizontal desktop nav
   const mainNavLinks = [
     { name: "Shop", path: "/", icon: LayoutGrid },
     { name: "Categories", path: "/categories", icon: Zap },
-    { name: "AI Laptop Advisor", path: "/advisor", icon: BrainCircuit },
+    { name: "AI Advisor", path: "/advisor", icon: BrainCircuit },
   ];
 
-  // Secondary/Informational links for dropdown and mobile menu
   const secondaryLinks = [
-    { name: "About ZiCash", path: "/about", icon: Info },
+    { name: "About Us", path: "/about", icon: Info },
     { name: "Contact & Support", path: "/contact", icon: Phone },
     { name: "Terms & Conditions", path: "/terms", icon: Gavel },
   ];
 
-  // Combined for the mobile hamburger menu
   const allMobileLinks = [...mainNavLinks, ...secondaryLinks];
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500 overflow-hidden">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {/* Hamburger Menu - Mobile only */}
           {!isAdminPath && (
             <div className="lg:hidden">
               <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -132,7 +128,7 @@ export function Navbar() {
                     </div>
                   </SheetHeader>
                   <div className="flex flex-col p-6 space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Navigation Matrix</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Main Menu</p>
                     {allMobileLinks.map((link) => (
                       <Link 
                         key={link.path} 
@@ -237,7 +233,7 @@ export function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-2 border-blue-100 rounded-[1.5rem] p-2 shadow-2xl bg-white">
-                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">My Account Node</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
                 <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer">
@@ -277,7 +273,7 @@ export function Navbar() {
                 
                 <DropdownMenuItem onClick={handleLogout} className="rounded-xl px-3 py-2.5 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
                   <LogOut className="mr-3 h-4 w-4" />
-                  <span className="font-bold text-xs">Logout Transmission</span>
+                  <span className="font-bold text-xs">Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -96,7 +96,7 @@ export default function NewProductPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect key." });
+      toast({ variant: "destructive", title: "Denied", description: "Incorrect password." });
     }
   };
 
@@ -118,10 +118,10 @@ export default function NewProductPage() {
     switch (product.category) {
       case "Laptops": return "e.g., MacBook Pro 14 M3 Max";
       case "Phones": return "e.g., iPhone 15 Pro Max";
-      case "Closet": return "e.g., ZiCash Signature Tech Hoodie";
+      case "Closet": return "e.g., ZiCash Signature Hoodie";
       case "Accessories": return "e.g., Logitech MX Master 3S Mouse";
-      case "Educational Consult": return "e.g., Undergraduate Admission Support";
-      default: return "Full Product Title";
+      case "Educational Consult": return "e.g., Admission Support";
+      default: return "Product Name";
     }
   };
 
@@ -132,7 +132,7 @@ export default function NewProductPage() {
     }
 
     if (selectedFiles.length === 0) {
-      toast({ variant: "destructive", title: "Images Required", description: "Please select at least one product image." });
+      toast({ variant: "destructive", title: "Images Required", description: "Please pick at least one image." });
       return;
     }
 
@@ -185,18 +185,13 @@ export default function NewProductPage() {
           updated_at: new Date().toISOString()
         }]);
 
-      if (error) {
-        if (error.message.includes("row-level security policy")) {
-          throw new Error("RLS Security Error: Please check database permissions.");
-        }
-        throw error;
-      }
+      if (error) throw error;
 
-      toast({ title: "Product Sync Success", description: "Item added to inventory with description integrity." });
+      toast({ title: "Product Saved", description: "Item added to the store successfully." });
       router.push("/admin");
     } catch (err: any) {
-      console.error("Transmission Error:", err);
-      toast({ variant: "destructive", title: "Transmission Failed", description: err.message });
+      console.error("Save Error:", err);
+      toast({ variant: "destructive", title: "Save Failed", description: err.message });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
@@ -208,12 +203,12 @@ export default function NewProductPage() {
       <main className="flex min-h-screen items-center justify-center p-6 bg-[#0F172A] tech-grid">
         <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
            <div className="bg-slate-950 p-10 text-center">
-               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Access</span></h1>
+               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Login</span></h1>
            </div>
            <CardContent className="p-10">
              <form onSubmit={handleAuth} className="space-y-6">
-               <Input type="password" placeholder="Admin Key" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
-               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Verify</Button>
+               <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
+               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Login</Button>
              </form>
            </CardContent>
         </Card>
@@ -231,8 +226,8 @@ export default function NewProductPage() {
             </Button>
           </Link>
           <div className="text-right">
-            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest leading-none">New Entry</p>
-            <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Product <span className="text-blue-600">Sync</span></h1>
+            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest leading-none">Admin Panel</p>
+            <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Add <span className="text-blue-600">Product</span></h1>
           </div>
         </div>
 
@@ -241,7 +236,7 @@ export default function NewProductPage() {
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">1. Department Selection</label>
+                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">1. Category</label>
                     <Select value={product.category} onValueChange={(val) => setProduct({ ...product, category: val })}>
                       <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black shadow-sm focus:ring-2 focus:ring-blue-600/10">
                         <SelectValue />
@@ -257,14 +252,14 @@ export default function NewProductPage() {
                   </div>
 
                   <div className="space-y-2 pt-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Media Payload (Multi)</label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Product Images</label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
                       className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-blue-600 transition-all mb-4"
                     >
                       <div className="text-center">
                         <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[10px] font-black uppercase text-slate-400">Select Images</p>
+                        <p className="text-[10px] font-black uppercase text-slate-400">Pick Images</p>
                       </div>
                       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
                     </div>
@@ -285,14 +280,14 @@ export default function NewProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Retail Price (GH₵)</label>
+                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Price (GH₵)</label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
                       <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Availability Stock</label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Stock Amount</label>
                     <div className="relative">
                       <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input type="number" className="pl-10 h-12 rounded-xl bg-slate-50 border-none font-black text-lg" value={product.stock} onChange={(e) => setProduct({...product, stock: parseInt(e.target.value)})} />
@@ -306,8 +301,8 @@ export default function NewProductPage() {
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
                 <CardHeader className="p-10 bg-slate-950 text-white flex flex-row items-center justify-between">
                    <div>
-                     <CardTitle className="text-2xl uppercase tracking-tighter">Specifications <span className="text-blue-500 italic">Node</span></CardTitle>
-                     <CardDescription className="text-white/40 text-[11px] font-black uppercase tracking-widest mt-1">Configuring: {product.category}</CardDescription>
+                     <CardTitle className="text-2xl uppercase tracking-tighter">Product <span className="text-blue-500 italic">Details</span></CardTitle>
+                     <CardDescription className="text-white/40 text-[11px] font-black uppercase tracking-widest mt-1">Category: {product.category}</CardDescription>
                    </div>
                    <div className="p-3 bg-blue-600 rounded-2xl">
                      {product.category === "Laptops" && <Monitor className="w-6 h-6" />}
@@ -320,19 +315,19 @@ export default function NewProductPage() {
                 <CardContent className="p-10 space-y-8">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Full Product Title</label>
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Name</label>
                         <Input placeholder={getPlaceholder()} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
                       
                       {product.category !== "Educational Consult" && (
                         <div className="space-y-2">
-                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand / Manufacturer</label>
+                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand</label>
                           <Input placeholder="e.g., Apple" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
                         </div>
                       )}
 
                       <div className="space-y-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">General Condition</label>
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Condition</label>
                         <Select value={product.condition} onValueChange={(val) => setProduct({ ...product, condition: val })}>
                            <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg"><SelectValue /></SelectTrigger>
                            <SelectContent className="rounded-2xl">
@@ -351,7 +346,7 @@ export default function NewProductPage() {
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Hash className="w-3 h-3" /> Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Zap className="w-3 h-3" /> Clock Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Monitor className="w-3 h-3" /> Resolution</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Box className="w-3 h-3" /> GPU Model</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Box className="w-3 h-3" /> Graphics Card</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
                      </div>
                    )}
 
@@ -359,26 +354,26 @@ export default function NewProductPage() {
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Cpu className="w-3 h-3" /> Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Database className="w-3 h-3" /> RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Hash className="w-3 h-3" /> Internal Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Camera className="w-3 h-3" /> Camera System</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Zap className="w-3 h-3" /> Battery Tech</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Hash className="w-3 h-3" /> Internal Memory</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Camera className="w-3 h-3" /> Camera</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
+                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1 flex items-center gap-2"><Zap className="w-3 h-3" /> Battery</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
                      </div>
                    )}
 
                    {product.category === "Closet" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Available Size</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.size} onChange={(e) => setProduct({...product, size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Material Blend</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.material} onChange={(e) => setProduct({...product, material: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Color Palette</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.color} onChange={(e) => setProduct({...product, color: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Size</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.size} onChange={(e) => setProduct({...product, size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Material</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.material} onChange={(e) => setProduct({...product, material: e.target.value})} /></div>
+                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Color</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.color} onChange={(e) => setProduct({...product, color: e.target.value})} /></div>
                      </div>
                    )}
 
                    <div className="space-y-2">
                       <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2">
-                        <Info className="w-3 h-3" /> Descriptive Payload (Marketing Text)
+                        <Info className="w-3 h-3" /> Description
                       </label>
                       <Textarea 
-                        placeholder="Comprehensive details for the customer..." 
+                        placeholder="Write a clear description for the customer..." 
                         className="rounded-2xl bg-slate-50 border-none min-h-[160px] font-black text-lg leading-relaxed" 
                         value={product.description || ""} 
                         onChange={(e) => setProduct({...product, description: e.target.value})} 
@@ -386,7 +381,7 @@ export default function NewProductPage() {
                    </div>
 
                    <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl shadow-blue-600/20 gap-3">
-                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Push to Marketplace
+                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Add Product
                    </Button>
                 </CardContent>
              </Card>

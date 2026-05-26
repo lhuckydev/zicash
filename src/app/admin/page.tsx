@@ -90,7 +90,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "Dashboard" | "Orders" | "Products" | "Invoices" | "Customers" | "Analytics" | "Calendar" | "Tasks" | "Settings";
+type AdminTab = "Overview" | "Orders" | "Products" | "Invoices" | "Customers" | "Analytics" | "History" | "Tasks" | "Settings";
 
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 
@@ -134,8 +134,8 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<AdminTab>("Dashboard");
-  const [isEcommerceOpen, setIsEcommerceOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<AdminTab>("Overview");
+  const [isStoreOpen, setIsStoreOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [products, setProducts] = useState<Product[]>([]);
@@ -171,7 +171,7 @@ export default function AdminPage() {
         setMomoNumber(sRes.data.value.number || "0243708691");
       }
     } catch (err: any) {
-      console.error("Admin Sync Error:", err);
+      console.error("Admin Update Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +203,7 @@ export default function AdminPage() {
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || !session.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
-      toast({ variant: "destructive", title: "Access Denied", description: "Your account is not on the admin whitelist." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Your account is not on the admin list." });
       return;
     }
 
@@ -212,7 +212,7 @@ export default function AdminPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect clearance key." });
+      toast({ variant: "destructive", title: "Denied", description: "Incorrect password." });
     }
   };
 
@@ -220,7 +220,7 @@ export default function AdminPage() {
     setIsSavingSettings(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Session expired. Please re-login.");
+      if (!session) throw new Error("Session expired. Please log in again.");
 
       const { error } = await supabase
         .from('settings')
@@ -231,13 +231,13 @@ export default function AdminPage() {
         }, { onConflict: 'key' });
 
       if (error) throw error;
-      toast({ title: "Protocol Updated", description: "Payment settings synchronized across marketplace." });
+      toast({ title: "Settings Updated", description: "Payment details saved for the store." });
     } catch (err: any) {
       console.error("Settings Update Failed:", err);
       toast({ 
         variant: "destructive", 
         title: "Update Failed", 
-        description: err.message || "Check your database permissions (RLS policies)." 
+        description: err.message || "Please check your permissions." 
       });
     } finally {
       setIsSavingSettings(false);
@@ -250,15 +250,15 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     await supabase.auth.signOut();
     router.push('/');
-    toast({ title: "Session Terminated", description: "Admin terminal access revoked." });
+    toast({ title: "Logged Out", description: "Admin session ended." });
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Remove this item from catalog?")) return;
+    if (!confirm("Remove this item from store?")) return;
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Removed", description: "Item purged from inventory." });
+      toast({ title: "Removed", description: "Item removed from inventory." });
       fetchAllData();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error", description: err.message });
@@ -341,12 +341,12 @@ export default function AdminPage() {
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-8 scrollbar-hide">
         <nav className="space-y-1">
-          <SidebarItem tab="Dashboard" icon={LayoutDashboard} active={activeTab === "Dashboard"} onClick={() => { setActiveTab("Dashboard"); setIsMobileMenuOpen(false); }} />
+          <SidebarItem tab="Overview" icon={LayoutDashboard} active={activeTab === "Overview"} onClick={() => { setActiveTab("Overview"); setIsMobileMenuOpen(false); }} />
           <div className="space-y-1">
-            <SidebarItem tab="Store" icon={Package} active={["Orders", "Products", "Invoices"].includes(activeTab)} onClick={() => setIsEcommerceOpen(!isEcommerceOpen)}>
-              <ChevronDown className={cn("w-3 h-3 transition-transform", isEcommerceOpen ? "" : "-rotate-90")} />
+            <SidebarItem tab="Store" icon={Package} active={["Orders", "Products", "Invoices"].includes(activeTab)} onClick={() => setIsStoreOpen(!isStoreOpen)}>
+              <ChevronDown className={cn("w-3 h-3 transition-transform", isStoreOpen ? "" : "-rotate-90")} />
             </SidebarItem>
-            {isEcommerceOpen && (
+            {isStoreOpen && (
               <div className="space-y-1">
                 <SubItem tab="Orders" active={activeTab === "Orders"} onClick={() => { setActiveTab("Orders"); setIsMobileMenuOpen(false); }} />
                 <SubItem tab="Products" active={activeTab === "Products"} onClick={() => { setActiveTab("Products"); setIsMobileMenuOpen(false); }} />
@@ -356,7 +356,7 @@ export default function AdminPage() {
           </div>
           <SidebarItem tab="Customers" icon={Users} active={activeTab === "Customers"} onClick={() => { setActiveTab("Customers"); setIsMobileMenuOpen(false); }} />
           <SidebarItem tab="Analytics" icon={TrendingUp} active={activeTab === "Analytics"} onClick={() => { setActiveTab("Analytics"); setIsMobileMenuOpen(false); }} />
-          <SidebarItem tab="Calendar" icon={CalendarIcon} active={activeTab === "Calendar"} onClick={() => { setActiveTab("Calendar"); setIsMobileMenuOpen(false); }} />
+          <SidebarItem tab="History" icon={CalendarIcon} active={activeTab === "History"} onClick={() => { setActiveTab("History"); setIsMobileMenuOpen(false); }} />
           <SidebarItem tab="Tasks" icon={CheckSquare} active={activeTab === "Tasks"} onClick={() => { setActiveTab("Tasks"); setIsMobileMenuOpen(false); }} />
         </nav>
       </div>
@@ -392,25 +392,25 @@ export default function AdminPage() {
                 />
               </div>
               <h1 className="text-white font-black text-3xl font-headline tracking-tight uppercase leading-none">
-                ZiCash GH <span className="text-blue-500 italic block mt-1 text-sm font-bold tracking-[0.3em]">Admin Portal</span>
+                ZiCash GH <span className="text-blue-500 italic block mt-1 text-sm font-bold tracking-[0.3em]">Admin Panel</span>
               </h1>
             </div>
           </div>
           
           <CardContent className="p-10 space-y-8">
             <div className="space-y-2 text-center">
-               <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Authorized Personnel Only</p>
-               <h2 className="text-xl font-bold text-slate-900">Security Clearance</h2>
+               <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Restricted Area</p>
+               <h2 className="text-xl font-bold text-slate-900">Admin Login</h2>
             </div>
 
             <form onSubmit={handleAuth} className="space-y-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Admin Access Key</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input 
                     type={showPassword ? "text" : "password"} 
-                    placeholder="Enter your security key" 
+                    placeholder="Enter admin password" 
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} 
                     className="h-14 rounded-2xl bg-slate-50 border-none pl-12 pr-12 font-medium focus-visible:ring-blue-600/20" 
@@ -427,10 +427,10 @@ export default function AdminPage() {
 
               <div className="space-y-4">
                 <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 shadow-2xl shadow-blue-600/30 font-black rounded-2xl text-white uppercase tracking-[0.15em] text-xs transition-all hover:scale-[1.02] active:scale-95">
-                  Verify & Access
+                  Sign In
                 </Button>
                 <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                   <ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure Encryption Active
+                   <ShieldCheck className="w-3 h-3 text-emerald-500" /> Secure System Active
                 </div>
               </div>
             </form>
@@ -438,7 +438,7 @@ export default function AdminPage() {
           
           <div className="p-6 bg-slate-50 text-center border-t border-slate-100">
              <Link href="/" className="text-[10px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
-               <ArrowRight className="w-3 h-3 rotate-180" /> Back to Marketplace
+               <ArrowRight className="w-3 h-3 rotate-180" /> Back to Store
              </Link>
           </div>
         </Card>
@@ -467,7 +467,7 @@ export default function AdminPage() {
             </Sheet>
             <div className="relative w-full max-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input placeholder="Search catalog..." className="bg-slate-50 border-none rounded-xl h-10 pl-10 w-full text-xs" />
+              <Input placeholder="Search store..." className="bg-slate-50 border-none rounded-xl h-10 pl-10 w-full text-xs" />
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -484,17 +484,17 @@ export default function AdminPage() {
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               <span>Admin</span> <ChevronRight className="w-3 h-3" /> <span className="text-slate-900">{activeTab}</span>
             </div>
-            <h1 className="text-3xl font-black text-slate-900 font-headline">{activeTab === "Dashboard" ? "Overview" : activeTab}</h1>
+            <h1 className="text-3xl font-black text-slate-900 font-headline">{activeTab}</h1>
           </div>
 
-          {activeTab === "Dashboard" && (
+          {activeTab === "Overview" && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
                   { label: "Approved Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-blue-600", bg: "bg-blue-50" },
-                  { label: "Products in Stock", value: products.length, icon: Box, color: "text-indigo-600", bg: "bg-indigo-50" },
+                  { label: "Products in Store", value: products.length, icon: Box, color: "text-indigo-600", bg: "bg-indigo-50" },
                   { label: "Pending Orders", value: activeOrdersCount, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
-                  { label: "Registered Customers", value: customers.length, icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50" },
+                  { label: "Customers", value: customers.length, icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50" },
                 ].map((stat, i) => (
                   <Card key={i} className="border-none shadow-sm rounded-2xl p-6 flex items-center justify-between bg-white hover:shadow-xl transition-all">
                     <div>
@@ -507,8 +507,8 @@ export default function AdminPage() {
               </div>
               <Card className="border-none shadow-sm rounded-[2rem] p-8 bg-white">
                 <CardHeader className="p-0 mb-8">
-                  <CardTitle className="text-lg font-black uppercase tracking-tight">Sales <span className="text-blue-600">Statistics</span></CardTitle>
-                  <CardDescription className="text-xs">Based on approved orders</CardDescription>
+                  <CardTitle className="text-lg font-black uppercase tracking-tight">Sales <span className="text-blue-600">Report</span></CardTitle>
+                  <CardDescription className="text-xs">Based on completed orders</CardDescription>
                 </CardHeader>
                 <div className="h-[300px]">
                   <ChartContainer config={chartConfig}>
@@ -532,7 +532,7 @@ export default function AdminPage() {
                   <TableRow className="border-slate-50 hover:bg-transparent">
                     <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Order #</TableHead>
                     <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Customer</TableHead>
-                    <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Total Amount</TableHead>
+                    <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Amount</TableHead>
                     <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Status</TableHead>
                     <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Action</TableHead>
                   </TableRow>
@@ -566,7 +566,7 @@ export default function AdminPage() {
               <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="relative w-full max-md">
                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <Input placeholder="Search products..." className="max-w-md h-12 rounded-2xl pl-12 bg-white border-slate-100" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
+                   <Input placeholder="Search items..." className="max-w-md h-12 rounded-2xl pl-12 bg-white border-slate-100" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
                 </div>
                 <Link href="/admin/products/new">
                   <Button 
@@ -682,7 +682,7 @@ export default function AdminPage() {
                   <Card className="rounded-[2rem] border-none shadow-xl bg-white p-8">
                     <CardHeader className="p-0 mb-8">
                       <CardTitle className="text-lg font-black uppercase tracking-tight">Total <span className="text-blue-600 italic">Revenue</span></CardTitle>
-                      <CardDescription className="text-xs">Sales data from all completed orders</CardDescription>
+                      <CardDescription className="text-xs">Sales data from completed orders</CardDescription>
                     </CardHeader>
                     <div className="h-[300px]">
                       <ChartContainer config={chartConfig}>
@@ -699,7 +699,7 @@ export default function AdminPage() {
 
                   <Card className="rounded-[2rem] border-none shadow-xl bg-white p-8">
                     <CardHeader className="p-0 mb-8">
-                      <CardTitle className="text-lg font-black uppercase tracking-tight">Order <span className="text-blue-600 italic">Success Rate</span></CardTitle>
+                      <CardTitle className="text-lg font-black uppercase tracking-tight">Order <span className="text-blue-600 italic">Stats</span></CardTitle>
                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Status Mix</h4>
                     </CardHeader>
                     <div className="space-y-6">
@@ -756,7 +756,7 @@ export default function AdminPage() {
                   {orders.filter(o => o.status === "Delivered").length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest">
-                        No delivered orders yet.
+                        No invoices found.
                       </TableCell>
                     </TableRow>
                   )}
@@ -765,7 +765,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {activeTab === "Calendar" && (
+          {activeTab === "History" && (
             <Card className="border-none shadow-sm rounded-[2rem] p-8 bg-white overflow-hidden">
               <div className="space-y-12">
                 {orders.slice(0, 15).map((o, i) => (
@@ -779,7 +779,7 @@ export default function AdminPage() {
                             <Image src={o.items[0]?.image_url || ''} alt="item" width={32} height={32} className="object-contain" />
                          </div>
                          <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                           <span className="font-black text-slate-900">{o.customer_name}</span> purchased items worth <span className="font-black text-blue-600">GH₵{parseFloat(o.total_amount).toLocaleString()}</span>
+                           <span className="font-black text-slate-900">{o.customer_name}</span> bought items worth <span className="font-black text-blue-600">GH₵{parseFloat(o.total_amount).toLocaleString()}</span>
                          </p>
                       </div>
                     </div>
@@ -793,42 +793,42 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Card className="border-none shadow-xl rounded-[2.5rem] p-8 space-y-8 bg-white">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-black uppercase tracking-widest text-orange-600 flex items-center gap-3"><Clock className="w-4 h-4" /> Pending Tasks</CardTitle>
+                  <CardTitle className="text-sm font-black uppercase tracking-widest text-orange-600 flex items-center gap-3"><Clock className="w-4 h-4" /> Pending Orders</CardTitle>
                   <Badge className="bg-orange-50 text-orange-600 border-none text-[8px] font-black uppercase">{orders.filter(o => o.status === "Pending").length} Items</Badge>
                 </div>
                 <div className="space-y-4">
                   {orders.filter(o => o.status === "Pending").map(o => (
                     <div key={o.id} className="p-6 rounded-[2rem] bg-orange-50/50 border border-orange-100/50 space-y-3 hover:bg-orange-50 transition-colors cursor-pointer" onClick={() => router.push(`/admin/order/${o.id}`)}>
                        <div className="flex justify-between items-start">
-                         <span className="font-black text-xs text-orange-900">Verify Payment</span>
+                         <span className="font-black text-xs text-orange-900">Confirm Payment</span>
                          <Badge className="bg-orange-600 text-[8px] font-black uppercase tracking-widest shadow-lg shadow-orange-600/20">Action Needed</Badge>
                        </div>
-                       <p className="text-[11px] text-orange-800/60 font-medium leading-relaxed">Confirm payment for order #{o.id.slice(0, 6)} by {o.customer_name}</p>
+                       <p className="text-[11px] text-orange-800/60 font-medium leading-relaxed">Check payment for order #{o.id.slice(0, 6)} from {o.customer_name}</p>
                     </div>
                   ))}
                   {orders.filter(o => o.status === "Pending").length === 0 && (
-                    <div className="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest">No pending orders</div>
+                    <div className="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest">No pending tasks</div>
                   )}
                 </div>
               </Card>
 
               <Card className="border-none shadow-xl rounded-[2.5rem] p-8 space-y-8 bg-white">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-black uppercase tracking-widest text-blue-600 flex items-center gap-3"><Truck className="w-4 h-4" /> Shipping Queue</CardTitle>
+                  <CardTitle className="text-sm font-black uppercase tracking-widest text-blue-600 flex items-center gap-3"><Truck className="w-4 h-4" /> Ready to Ship</CardTitle>
                   <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] font-black uppercase">{orders.filter(o => o.status === "Processing").length} Active</Badge>
                 </div>
                 <div className="space-y-4">
                   {orders.filter(o => o.status === "Processing").map(o => (
                     <div key={o.id} className="p-6 rounded-[2rem] bg-orange-50/50 border border-blue-100/50 space-y-3 hover:bg-blue-50 transition-colors cursor-pointer" onClick={() => router.push(`/admin/order/${o.id}`)}>
                        <div className="flex justify-between items-start">
-                         <span className="font-black text-xs text-blue-900">Prepare Items</span>
+                         <span className="font-black text-xs text-blue-900">Prepare Delivery</span>
                          <Badge className="bg-blue-600 text-[8px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">Ready</Badge>
                        </div>
-                       <p className="text-[11px] text-orange-800/60 font-medium leading-relaxed">Shipping required for order #{o.id.slice(0, 6)} via {o.is_accra ? "Express" : "Standard Shipping"}</p>
+                       <p className="text-[11px] text-orange-800/60 font-medium leading-relaxed">Order #{o.id.slice(0, 6)} needs shipping to {o.is_accra ? "Accra" : "Regional Area"}</p>
                     </div>
                   ))}
                   {orders.filter(o => o.status === "Processing").length === 0 && (
-                    <div className="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest">Queue is clear</div>
+                    <div className="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest">Everything is shipped</div>
                   )}
                 </div>
               </Card>
@@ -840,8 +840,8 @@ export default function AdminPage() {
               <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <CardHeader className="p-10 bg-slate-950 text-white flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle className="text-2xl uppercase tracking-tighter">Marketplace <span className="text-blue-500 italic">Configuration</span></CardTitle>
-                    <CardDescription className="text-white/40 text-[11px] font-black uppercase tracking-widest mt-1">Manage global system nodes</CardDescription>
+                    <CardTitle className="text-2xl uppercase tracking-tighter">Store <span className="text-blue-500 italic">Settings</span></CardTitle>
+                    <CardDescription className="text-white/40 text-[11px] font-black uppercase tracking-widest mt-1">General marketplace options</CardDescription>
                   </div>
                   <div className="p-3 bg-blue-600 rounded-2xl">
                     <ShieldCheck className="w-6 h-6" />
@@ -851,12 +851,12 @@ export default function AdminPage() {
                    <div className="space-y-6">
                       <div className="flex items-center gap-3">
                          <Smartphone className="w-5 h-5 text-blue-600" />
-                         <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">MoMo Payment Protocol</h3>
+                         <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">MoMo Payment Details</h3>
                       </div>
                       
                       <div className="grid grid-cols-1 gap-6">
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Recipient Account Name</label>
+                           <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Account Name</label>
                            <Input 
                              value={momoName} 
                              onChange={(e) => setMomoName(e.target.value)} 
@@ -864,7 +864,7 @@ export default function AdminPage() {
                            />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Mobile Money Number</label>
+                           <label className="text-[10px] font-black uppercase text-slate-400 ml-1">MoMo Number</label>
                            <Input 
                              value={momoNumber} 
                              onChange={(e) => setMomoNumber(e.target.value)} 
@@ -879,13 +879,13 @@ export default function AdminPage() {
                         className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-2xl shadow-blue-600/20 text-lg uppercase tracking-[0.15em] transition-all gap-3"
                       >
                         {isSavingSettings ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
-                        {isSavingSettings ? "Syncing Logic..." : "Update Global Settings"}
+                        {isSavingSettings ? "Saving..." : "Save Store Settings"}
                       </Button>
                    </div>
 
                    <div className="pt-8 border-t border-slate-100 space-y-4">
                       <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                        <ShieldAlert className="w-3 h-3 text-emerald-500" /> System Credentials Verified
+                        <ShieldAlert className="w-3 h-3 text-emerald-500" /> Admin Settings Secured
                       </p>
                    </div>
                 </CardContent>

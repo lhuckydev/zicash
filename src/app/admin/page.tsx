@@ -496,7 +496,7 @@ export default function AdminPage() {
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide pb-24">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-black text-slate-900 font-headline uppercase">{activeTab}</h1>
+            <h1 className="text-3xl font-black text-slate-900 font-headline uppercase">{activeTab === "Overview" ? "Dashboard Summary" : activeTab}</h1>
             <Button 
               variant="outline" 
               onClick={fetchAllData} 
@@ -510,10 +510,10 @@ export default function AdminPage() {
           {activeTab === "Overview" && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                {[
-                { label: "Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, bg: "bg-blue-50", color: "text-blue-600" },
-                { label: "Products", value: products.length, icon: Box, bg: "bg-indigo-50", color: "text-indigo-600" },
-                { label: "Pending", value: activeOrdersCount, icon: Clock, bg: "bg-orange-50", color: "text-orange-600" },
-                { label: "Customers", value: customers.length, icon: UserCheck, bg: "bg-blue-50", color: "text-blue-600" },
+                { label: "Total Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, bg: "bg-blue-50", color: "text-blue-600" },
+                { label: "Products in Store", value: products.length, icon: Box, bg: "bg-indigo-50", color: "text-indigo-600" },
+                { label: "Pending Orders", value: activeOrdersCount, icon: Clock, bg: "bg-orange-50", color: "text-orange-600" },
+                { label: "Active Customers", value: customers.length, icon: UserCheck, bg: "bg-blue-50", color: "text-blue-600" },
               ].map((stat, i) => (
                 <Card key={i} className="border-none shadow-sm rounded-2xl p-6 flex items-center justify-between bg-white hover:shadow-md transition-shadow">
                   <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><h3 className="text-2xl font-black text-slate-900 mt-1 italic tracking-tighter">{stat.value}</h3></div>
@@ -528,7 +528,7 @@ export default function AdminPage() {
               <div className="flex justify-between items-center"><Input placeholder="Search items..." className="max-w-md h-12 rounded-2xl bg-white border-slate-100 shadow-sm" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} /><Link href="/admin/products/new"><Button className="bg-blue-600 px-8 rounded-2xl font-bold gap-3 shadow-lg shadow-blue-600/20"><Plus className="w-4 h-4" /> Add Product</Button></Link></div>
               <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
                 <Table>
-                  <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] uppercase font-black">Product</TableHead><TableHead className="text-[10px] uppercase font-black">Price</TableHead><TableHead className="text-[10px] uppercase font-black">Stock</TableHead><TableHead className="pr-8 text-right text-[10px] uppercase font-black">Edit</TableHead></TableRow></TableHeader>
+                  <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] uppercase font-black">Product</TableHead><TableHead className="text-[10px] uppercase font-black">Price</TableHead><TableHead className="text-[10px] uppercase font-black">Stock</TableHead><TableHead className="pr-8 text-right text-[10px] uppercase font-black">Actions</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {filteredProducts.map((p) => (
                       <TableRow key={p.id} className="hover:bg-slate-50/30 transition-colors">
@@ -550,7 +550,7 @@ export default function AdminPage() {
                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
                     <div>
                        <h2 className="text-xl font-black uppercase tracking-tight">Active Promotions</h2>
-                       <p className="text-xs text-slate-400 mt-1 font-medium">Set special pricing and duration for your inventory.</p>
+                       <p className="text-xs text-slate-400 mt-1 font-medium">Set special pricing and duration for your store items.</p>
                     </div>
                     <div className="flex items-center gap-4">
                        <div className="relative w-full max-w-sm">
@@ -571,9 +571,9 @@ export default function AdminPage() {
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100">
                           <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product Name</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Normal Price</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Discounted Price (GHS)</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Expiry Date</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Standard Price</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Discount Price (GHS)</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Ends On</TableHead>
                           <TableHead className="pr-8 text-right text-[9px] uppercase font-black tracking-[0.2em] py-5">Action</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -601,7 +601,7 @@ export default function AdminPage() {
           {activeTab === "Orders" && (
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
               <Table>
-                <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] font-black uppercase">Order #</TableHead><TableHead className="text-[10px] font-black uppercase">Customer</TableHead><TableHead className="text-[10px] font-black uppercase">Amount</TableHead><TableHead className="text-[10px] font-black uppercase">Status</TableHead><TableHead className="pr-8 text-right text-[10px] font-black uppercase">Action</TableHead></TableRow></TableHeader>
+                <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] font-black uppercase">Order ID</TableHead><TableHead className="text-[10px] font-black uppercase">Customer</TableHead><TableHead className="text-[10px] font-black uppercase">Amount</TableHead><TableHead className="text-[10px] font-black uppercase">Status</TableHead><TableHead className="pr-8 text-right text-[10px] font-black uppercase">View</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {orders.map((o) => (
                     <TableRow key={o.id} className="cursor-pointer hover:bg-slate-50/30 transition-colors" onClick={() => router.push(`/admin/order/${o.id}`)}>

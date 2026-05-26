@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -79,7 +80,7 @@ export default function CheckoutPage() {
         if (profileRes.data) {
           setProfile(profileRes.data);
           if (!profileRes.data.location || !profileRes.data.contact) {
-            toast({ variant: "destructive", title: "Information Needed", description: "Please add your phone and address first." });
+            toast({ variant: "destructive", title: "Incomplete Details", description: "Please add your phone number and address in your profile first." });
             router.push("/profile"); return;
           }
           const locationString = profileRes.data.location || "";
@@ -115,8 +116,8 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (isAddressIncomplete) { toast({ variant: "destructive", title: "Address Needed" }); return; }
-    if (paymentType === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { toast({ variant: "destructive", title: "Payment Details Needed" }); return; }
+    if (isAddressIncomplete) { toast({ variant: "destructive", title: "Address Required" }); return; }
+    if (paymentType === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { toast({ variant: "destructive", title: "Payment Details Required" }); return; }
     setIsSubmitting(true);
     let screenshotUrl = "";
     try {
@@ -141,13 +142,12 @@ export default function CheckoutPage() {
       const amountFormatted = `GHS ${Number(grandTotal).toLocaleString()}`;
       const customerName = profile?.full_name || "Customer";
 
-      // Explicit transmission to both Admin nodes
+      // Send notifications to administrators
       const admin1 = process.env.NEXT_PUBLIC_ADMIN_PHONE_1 || "0597204494";
       const admin2 = process.env.NEXT_PUBLIC_ADMIN_PHONE_2 || "0256985825";
       
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}. Check Admin Panel for details.`;
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: ${amountFormatted}. Check the Admin Panel for details.`;
       
-      // Perform parallel SMS transmissions
       await Promise.all([
         sendSms(admin1, adminMessage),
         sendSms(admin2, adminMessage)
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-sm font-black uppercase tracking-[0.15em] flex items-center gap-3">
-                        <MapPin className="w-5 h-5 text-primary" /> Delivery Destination
+                        <MapPin className="w-5 h-5 text-primary" /> Delivery Address
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-6">
@@ -205,7 +205,7 @@ export default function CheckoutPage() {
                              </Select>
                           </div>
                           <div className="space-y-2">
-                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Area / Town</label>
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Town / Area</label>
                              <Input placeholder="e.g., East Legon" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={area} onChange={(e) => setArea(e.target.value)} />
                           </div>
                           <div className="space-y-2 md:col-span-2">
@@ -219,7 +219,7 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in fade-in duration-500 delay-75">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-sm font-black uppercase tracking-[0.15em] flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-primary" /> Payment Method
+                        <CreditCard className="w-5 h-5 text-primary" /> How to Pay
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0">
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                           <div className="p-4 bg-emerald-100/50 rounded-2xl"><Banknote className="w-8 h-8" /></div>
                           <div>
                             <p className="font-black uppercase tracking-tight text-lg">Pay on Delivery</p>
-                            <p className="text-xs font-medium opacity-70 mt-1 uppercase tracking-widest">Standard for Greater Accra.</p>
+                            <p className="text-xs font-medium opacity-70 mt-1 uppercase tracking-widest">Available for the Greater Accra Region.</p>
                           </div>
                         </div>
                       ) : (
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                             <div>
                                <p className="font-black uppercase tracking-tight text-lg">MoMo Prepayment Required</p>
                                <p className="text-sm font-bold mt-1 text-blue-600">{momoName}: {momoNumber}</p>
-                               <p className="text-[10px] font-black uppercase opacity-40 mt-1">Required for regional shipments.</p>
+                               <p className="text-[10px] font-black uppercase opacity-40 mt-1">Required for regional deliveries.</p>
                             </div>
                           </div>
                           
@@ -246,7 +246,7 @@ export default function CheckoutPage() {
                              <div className="space-y-2">
                                <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">Momo Sender Name (Required)</label>
                                <Input 
-                                 placeholder="Exact name on account used" 
+                                 placeholder="Name on the account used" 
                                  className="h-14 rounded-2xl bg-white border-2 border-blue-600 font-black text-blue-900 shadow-xl shadow-blue-500/5 focus-visible:ring-blue-600/30 text-lg placeholder:text-slate-300" 
                                  value={momoSenderName} 
                                  onChange={(e) => setMomoSenderName(e.target.value)} 
@@ -264,7 +264,7 @@ export default function CheckoutPage() {
                                  ) : (
                                    <>
                                      <div className="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform"><ImageIcon className="w-8 h-8 text-slate-300" /></div>
-                                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Upload Transaction Confirmation</p>
+                                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Upload Payment Confirmation</p>
                                    </>
                                  )}
                                </div>
@@ -314,11 +314,11 @@ export default function CheckoutPage() {
                           <span className="text-slate-900 font-black italic">GH₵{total.toLocaleString()}</span>
                        </div>
                        <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-                          <span>Delivery Charge</span>
+                          <span>Delivery Fee</span>
                           <span className="text-emerald-600 font-black uppercase text-[10px]">Free Delivery</span>
                        </div>
                        <div className="pt-6 flex justify-between items-end">
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Payable Total</span>
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Total to Pay</span>
                           <span className="text-4xl font-black text-primary font-headline italic tracking-tighter">GHS {total.toLocaleString()}</span>
                        </div>
                     </div>
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
                     </Button>
 
                     <p className="text-[8px] text-center text-slate-400 font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-                      <ShieldCheck className="w-3 h-3" /> Secure Payment Information
+                      <ShieldCheck className="w-3 h-3" /> Secure Payment Process
                     </p>
                   </CardContent>
                </Card>

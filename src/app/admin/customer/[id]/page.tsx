@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -176,7 +177,7 @@ export default function CustomerDetailsPage() {
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8 flex items-center justify-between group hover:shadow-xl transition-all">
               <div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Orders</p>
-                <h3 className="text-3xl font-black text-slate-900 mt-2 italic tracking-tighter">{orders.length} Units</h3>
+                <h3 className="text-3xl font-black text-slate-900 mt-2 italic tracking-tighter">{orders.length} Orders</h3>
               </div>
               <div className="p-4 rounded-2xl bg-indigo-50 text-indigo-600"><ShoppingBag className="w-6 h-6" /></div>
             </Card>
@@ -191,10 +192,10 @@ export default function CustomerDetailsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-             {/* Contact Stack */}
+             {/* Contact Details */}
              <div className="space-y-6">
                <Card className="border-none shadow-sm rounded-[2rem] bg-white p-8 space-y-8">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Communication Node</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Contact Information</h4>
                   <div className="space-y-6">
                     <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><Mail className="w-5 h-5" /></div>
@@ -202,7 +203,7 @@ export default function CustomerDetailsPage() {
                     </div>
                     <div className="flex items-center gap-4">
                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400"><Phone className="w-5 h-5" /></div>
-                       <div><p className="text-[9px] font-black uppercase text-slate-300">Phone Network</p><p className="text-sm font-bold text-slate-900">{profile.contact || 'Not Provided'}</p></div>
+                       <div><p className="text-[9px] font-black uppercase text-slate-300">Phone Number</p><p className="text-sm font-bold text-slate-900">{profile.contact || 'Not Provided'}</p></div>
                     </div>
                   </div>
                </Card>
@@ -210,18 +211,18 @@ export default function CustomerDetailsPage() {
                <Card className="border-none shadow-sm rounded-[2rem] bg-[#0F172A] text-white p-8 space-y-8 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
                   <div className="flex items-center justify-between relative z-10">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Logistics Target</h4>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Delivery Location</h4>
                     <MapPin className="w-4 h-4 text-blue-500" />
                   </div>
                   <div className="space-y-4 relative z-10">
                     <div>
-                      <p className="text-[9px] font-black uppercase opacity-30">Default Location</p>
-                      <p className="text-sm font-medium leading-relaxed mt-1">{profile.location || 'No address synced'}</p>
+                      <p className="text-[9px] font-black uppercase opacity-30">Default Address</p>
+                      <p className="text-sm font-medium leading-relaxed mt-1">{profile.location || 'No address found'}</p>
                     </div>
                     {profile.google_maps_link && (
                       <Link href={profile.google_maps_link} target="_blank">
                         <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 font-black rounded-xl text-[9px] uppercase tracking-widest h-10 gap-2">
-                           <Target className="w-3 h-3" /> View Coordinate Node
+                           <Target className="w-3 h-3" /> View Map Location
                         </Button>
                       </Link>
                     )}
@@ -233,18 +234,18 @@ export default function CustomerDetailsPage() {
              <div className="lg:col-span-2">
                <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden h-full">
                   <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
-                    <CardTitle className="text-lg font-black uppercase tracking-tight">Order <span className="text-blue-600 italic">Timeline</span></CardTitle>
-                    <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[10px]">{orders.length} Transmissions</Badge>
+                    <CardTitle className="text-lg font-black uppercase tracking-tight">Order <span className="text-blue-600 italic">History</span></CardTitle>
+                    <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[10px]">{orders.length} Total Orders</Badge>
                   </CardHeader>
                   <CardContent className="p-0">
                     <Table>
                       <TableHeader className="bg-slate-50/50">
                         <TableRow className="border-slate-50 hover:bg-transparent">
                           <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Order ID</TableHead>
-                          <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Timestamp</TableHead>
+                          <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Date</TableHead>
                           <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Amount</TableHead>
                           <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Status</TableHead>
-                          <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Link</TableHead>
+                          <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Details</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -259,13 +260,13 @@ export default function CustomerDetailsPage() {
                                  o.status === "Delivered" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600"
                                )}>{o.status}</Badge>
                             </TableCell>
-                            <TableCell className="pr-8 text-right"><ArrowRight className="w-4 h-4 ml-auto text-slate-200 group-hover:text-blue-600 transition-all" /></TableCell>
+                            <TableCell className="pr-8 text-right"><ArrowRight className="w-4 h-4 ml-auto text-slate-200" /></TableCell>
                           </TableRow>
                         ))}
                         {orders.length === 0 && (
                           <TableRow>
                             <TableCell colSpan={5} className="py-20 text-center text-slate-300 font-black uppercase text-[10px] tracking-widest">
-                               No historical transactions detected.
+                               No historical transactions found.
                             </TableCell>
                           </TableRow>
                         )}

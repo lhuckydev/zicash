@@ -108,7 +108,7 @@ export default function OrderDetailsPage() {
       }
     } catch (err: any) {
       console.error("Fetch error:", err);
-      toast({ variant: "destructive", title: "Sync Error", description: err.message });
+      toast({ variant: "destructive", title: "Error", description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -149,16 +149,16 @@ export default function OrderDetailsPage() {
   };
 
   const handleDeleteOrder = async () => {
-    if (!window.confirm("Permanently delete this order from records?")) return;
+    if (!window.confirm("Permanently delete this order record?")) return;
     
     setIsDeleting(true);
     try {
       const { error } = await supabase.from('orders').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Order Purged", description: "Removed from data index." });
+      toast({ title: "Order Removed", description: "Order has been deleted from the database." });
       router.push("/admin");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Purge Failed", description: err.message });
+      toast({ variant: "destructive", title: "Delete Failed", description: err.message });
       setIsDeleting(false);
     }
   };
@@ -191,7 +191,7 @@ export default function OrderDetailsPage() {
                <LayoutDashboard className="w-4 h-4" /> Dashboard
              </Link>
              <div className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between shadow-lg shadow-blue-600/10">
-                <div className="flex items-center gap-3"><Package className="w-4 h-4" /> Order Node</div>
+                <div className="flex items-center gap-3"><Package className="w-4 h-4" /> Order Details</div>
              </div>
              <Link href="/admin" className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-white/50 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
                <Users className="w-4 h-4" /> Customers
@@ -203,7 +203,7 @@ export default function OrderDetailsPage() {
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40">
            <Button variant="ghost" onClick={() => router.push('/admin')} className="gap-2 font-bold uppercase text-[10px] tracking-widest text-slate-400 hover:text-blue-600">
-               <ArrowLeft className="w-4 h-4" /> Exit Details
+               <ArrowLeft className="w-4 h-4" /> Back to Dashboard
             </Button>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 hover:opacity-80">
@@ -215,13 +215,13 @@ export default function OrderDetailsPage() {
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">TRANSMISSION NODE: #{order.id.slice(0, 8).toUpperCase()}</div>
-              <h1 className="text-3xl font-black text-slate-900 font-headline">Order <span className="text-blue-600 italic">Lifecycle</span></h1>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER REFERENCE: #{order.id.slice(0, 8).toUpperCase()}</div>
+              <h1 className="text-3xl font-black text-slate-900 font-headline">Order <span className="text-blue-600 italic">Information</span></h1>
             </div>
 
             <div className="flex items-center gap-3">
                <Button variant="outline" className="rounded-xl border-slate-200 font-bold text-[10px] uppercase tracking-widest h-11 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleDeleteOrder} disabled={isDeleting}>
-                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Purge Node
+                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Delete Order
                </Button>
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -252,15 +252,15 @@ export default function OrderDetailsPage() {
                   <p className="text-[10px] text-slate-400 truncate">{order.customer_email}</p>
                 </div>
               </div>
-              <div className="pt-2 flex items-center gap-2"><Phone className="w-3 h-3 text-blue-500" /><span className="text-xs font-bold text-slate-600">{profile?.contact || "No contact synced"}</span></div>
+              <div className="pt-2 flex items-center gap-2"><Phone className="w-3 h-3 text-blue-500" /><span className="text-xs font-bold text-slate-600">{profile?.contact || "No contact found"}</span></div>
             </Card>
 
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-6 space-y-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><ShoppingBag className="w-5 h-5" /></div>
               <div className="space-y-1">
-                 <p className="text-[10px] font-black text-slate-300 uppercase">Valuation</p>
+                 <p className="text-[10px] font-black text-slate-300 uppercase">Order Value</p>
                  <p className="font-black text-slate-900 text-lg italic tracking-tighter">GHS {parseFloat(order.total_amount).toLocaleString()}</p>
-                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Express Delivery" : "Standard Region Shipping"}</p>
+                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Express Delivery" : "Standard Region Delivery"}</p>
               </div>
             </Card>
 
@@ -268,7 +268,7 @@ export default function OrderDetailsPage() {
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600"><CreditCard className="w-5 h-5" /></div>
               <div className="space-y-1">
                  <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "POD (Cash/MoMo)" : "MoMo Prepayment"}</p>
-                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `Sender: ${order.momo_sender_name}` : "Pending Verification."}</p>
+                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `Sender: ${order.momo_sender_name}` : "Pending Payment Check."}</p>
               </div>
             </Card>
 
@@ -276,8 +276,8 @@ export default function OrderDetailsPage() {
                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 blur-2xl -mr-12 -mt-12" />
                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 relative z-10"><MapPin className="w-5 h-5" /></div>
                <div className="space-y-1 relative z-10">
-                 <p className="text-[9px] font-black uppercase text-white/40">Target Destination</p>
-                 <p className="text-xs font-bold leading-relaxed line-clamp-2">{shippingAddress || 'Address Sync Error'}</p>
+                 <p className="text-[9px] font-black uppercase text-white/40">Delivery Destination</p>
+                 <p className="text-xs font-bold leading-relaxed line-clamp-2">{shippingAddress || 'No address found'}</p>
                </div>
             </Card>
           </div>
@@ -303,14 +303,14 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
                 <CardHeader className="p-8 pb-4">
-                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Manifest <span className="text-blue-600 italic">Payload</span></CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Order <span className="text-blue-600 italic">Items</span></CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
                     <TableHeader className="bg-slate-50/50">
                       <TableRow className="border-slate-50">
-                        <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Unit Description</TableHead>
-                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Rate</TableHead>
+                        <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Item Description</TableHead>
+                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Price</TableHead>
                         <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Qty</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -340,15 +340,15 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-[#0F172A] text-white p-8 space-y-6">
                 <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Shipping Matrix</span></div>
+                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Delivery Details</span></div>
                    {order.shipping_region && <Badge className="bg-blue-600 border-none font-black text-[8px] uppercase">{order.shipping_region}</Badge>}
                 </div>
                 <div className="space-y-4">
                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase opacity-40">Delivery Endpoint</p>
+                      <p className="text-[10px] font-black uppercase opacity-40">Delivery Destination</p>
                       <p className="text-sm font-bold leading-relaxed">{shippingAddress}</p>
                    </div>
-                   <div className="space-y-1"><p className="text-[10px] font-black uppercase opacity-40">Recipient Node</p><p className="text-sm font-bold">{order.customer_name}</p></div>
+                   <div className="space-y-1"><p className="text-[10px] font-black uppercase opacity-40">Recipient</p><p className="text-sm font-bold">{order.customer_name}</p></div>
                 </div>
               </Card>
             </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -34,7 +35,7 @@ interface AiLaptopAdvisorProps {
   onUsageUpdate: (newCount: number) => void;
 }
 
-function MatchedProductNode({ productId }: { productId: string }) {
+function RecommendedProduct({ productId }: { productId: string }) {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,7 +73,7 @@ function MatchedProductNode({ productId }: { productId: string }) {
             <p className="text-[10px] font-black text-blue-600 italic mt-1">GHS {product.price.toLocaleString()}</p>
             <div className="flex items-center gap-1.5 mt-2">
                <span className="text-[8px] font-black uppercase text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">In Stock</span>
-               <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Verified Unit</span>
+               <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Verified Item</span>
             </div>
           </div>
           <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
@@ -128,7 +129,7 @@ const WelcomeScreen = () => {
               transition={{ delay: 0.4 }}
               className="text-slate-500 text-sm md:text-base font-medium leading-relaxed px-4"
             >
-              Describe your requirements, budget, or specific use cases. I will provide sectional recommendations with technical depth from our live inventory.
+              Tell me what you need, your budget, or how you plan to use your laptop. I will give you personalized recommendations from our current stock.
             </motion.p>
           </div>
        </div>
@@ -196,12 +197,12 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
       const newCount = Math.max(0, usageCount - 1);
       onUsageUpdate(newCount);
       setInput("");
-      toast({ title: "Override Protocol Active", description: "Transmission credit restored." });
+      toast({ title: "Access Restored", description: "Your chat credit has been reset." });
       return;
     }
 
     if (usageCount >= 2) {
-      toast({ variant: "destructive", title: "Limit Reached", description: "Daily research credits exhausted." });
+      toast({ variant: "destructive", title: "Limit Reached", description: "Daily chat credits exhausted." });
       return;
     }
 
@@ -220,19 +221,19 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
       await simulateStreaming(result.content);
     } catch (error) {
       setIsLoading(false);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Neural Link Timed Out. Please check your connection." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "System connection timed out. Please check your internet." }]);
     }
   };
 
   const clearChat = () => {
-    if (confirm("Permanently erase this conversation history?")) {
+    if (confirm("Permanently delete this chat history?")) {
       setMessages([]);
       localStorage.removeItem('zicash_chat_history');
-      toast({ title: "History Purged", description: "Local nodes wiped." });
+      toast({ title: "History Deleted", description: "Chat history has been cleared." });
     }
   };
 
-  const renderSectionalMessage = (content: string) => {
+  const renderMessageContent = (content: string) => {
     const parts = content.split(/(\[MATCH_ID:.*?\])/g);
     
     return (
@@ -240,7 +241,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
         {parts.map((part, index) => {
           const match = part.match(/\[MATCH_ID:(.*?)\]/);
           if (match) {
-            return <MatchedProductNode key={index} productId={match[1]} />;
+            return <RecommendedProduct key={index} productId={match[1]} />;
           }
           if (part.trim() === "") return null;
           return (
@@ -274,7 +275,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
                     onClick={clearChat}
                     className="flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 hover:bg-red-50 transition-all border border-slate-100 shadow-sm"
                   >
-                    <Trash2 className="w-3 h-3" /> Clear conversation history
+                    <Trash2 className="w-3 h-3" /> Clear chat history
                   </button>
                 </div>
 
@@ -307,7 +308,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
                               ? "bg-white text-slate-700 border border-slate-100" 
                               : "bg-blue-600 text-white shadow-lg shadow-blue-600/10"
                           )}>
-                            {isAi ? renderSectionalMessage(msg.content) : msg.content}
+                            {isAi ? renderMessageContent(msg.content) : msg.content}
                           </div>
                         </div>
                       </div>
@@ -326,7 +327,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
                           <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={28} height={28} className="rounded-sm object-cover" />
                         </div>
                         <div className="px-6 py-5 rounded-[2rem] bg-white text-slate-700 border border-slate-100 shadow-sm font-medium relative flex-1">
-                          {renderSectionalMessage(streamingText)}
+                          {renderMessageContent(streamingText)}
                           <motion.span 
                             animate={{ opacity: [1, 0, 1] }} 
                             transition={{ repeat: Infinity, duration: 0.8 }}
@@ -376,7 +377,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
                     handleSend();
                   }
                 }}
-                placeholder={isQuotaReached && !isOverrideInput ? "Daily research transmissions exhausted..." : "Describe your hardware requirements..."}
+                placeholder={isQuotaReached && !isOverrideInput ? "Daily limits reached..." : "How can I help you find the right laptop?"}
                 className="flex-1 bg-transparent border-none focus:ring-0 font-bold text-slate-800 text-sm placeholder:text-slate-300 py-3 resize-none scrollbar-hide"
                 disabled={isLoading || !!streamingText}
               />
@@ -395,9 +396,9 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
           </form>
           
           <div className="flex items-center justify-center gap-6 mt-4 text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 pb-2 md:pb-0">
-             <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure AI Node</span>
-             <span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-blue-400" /> Sectional Parsing Active</span>
-             <span className="flex items-center gap-1.5"><Info className="w-3 h-3" /> Local Link Persistent</span>
+             <span className="flex items-center gap-1.5"><ShieldCheck className="w-3 h-3" /> Secure Connection</span>
+             <span className="flex items-center gap-1.5"><Zap className="w-3 h-3 text-blue-400" /> Smart Analysis Active</span>
+             <span className="flex items-center gap-1.5"><Info className="w-3 h-3" /> Information Saved Locally</span>
           </div>
         </div>
       </div>

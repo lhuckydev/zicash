@@ -117,8 +117,8 @@ export function Navbar() {
 
   const mainNavLinks = [
     { name: "Shop", path: "/", icon: LayoutGrid },
-    { name: "Departments", path: "/categories", icon: Zap },
-    { name: "Expert Helper", path: "/advisor", icon: BrainCircuit },
+    { name: "Categories", path: "/categories", icon: Zap },
+    { name: "AI Helper", path: "/advisor", icon: BrainCircuit },
   ];
 
   const secondaryLinks = [

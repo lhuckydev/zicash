@@ -51,9 +51,9 @@ export function Footer() {
             <h4 className="font-black text-xs uppercase tracking-widest text-slate-900">Marketplace</h4>
             <ul className="space-y-4 text-sm text-slate-500 font-semibold">
               <li><Link href="/" className="hover:text-primary">Home</Link></li>
-              <li><Link href="/categories" className="hover:text-primary">Departments</Link></li>
+              <li><Link href="/categories" className="hover:text-primary">Categories</Link></li>
               <li><Link href="/suggested" className="hover:text-primary">Best Deals</Link></li>
-              <li><Link href="/advisor" className="hover:text-primary">Expert Helper</Link></li>
+              <li><Link href="/advisor" className="hover:text-primary">AI Helper</Link></li>
             </ul>
           </div>
 

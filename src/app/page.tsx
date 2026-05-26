@@ -83,7 +83,7 @@ export default function CatalogPage() {
         setError(supabaseError.message);
       } else {
         setProducts(data || []);
-        // Update seed to trigger re-shuffle
+        // Trigger randomization by updating the seed
         setSeed(Math.random());
       }
     } catch (err: any) {
@@ -117,10 +117,10 @@ export default function CatalogPage() {
   const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
-  // Reinforced randomization logic for Suggested Picks
+  // Reinforced randomization for Suggested Picks
   const suggestedPicks = useMemo(() => {
     if (products.length === 0) return [];
-    // Shuffle the array robustly using the seed as a trigger
+    // Shuffle the array using the seed as a trigger
     return [...products].sort(() => Math.random() - 0.5).slice(0, 10);
   }, [products, seed]);
 

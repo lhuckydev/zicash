@@ -41,8 +41,8 @@ function ProductSkeleton() {
 
 function SuggestedProductTile({ product }: { product: Product }) {
   return (
-    <motion.div whileHover={{ y: -5 }} className="h-full">
-      <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300">
+    <motion.div whileHover={{ y: -5 }} className="h-full px-1">
+      <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300 h-full">
         <div className="relative aspect-square w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white mb-3 shadow-md border border-slate-100 group-hover:shadow-xl transition-all">
           <Image 
             src={product.image_url || "https://picsum.photos/seed/zicash/400/400"} 
@@ -54,10 +54,10 @@ function SuggestedProductTile({ product }: { product: Product }) {
           <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
         <div className="space-y-1 text-center w-full px-1">
-          <h4 className="text-[9px] md:text-[10px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
+          <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
             {product.name}
           </h4>
-          <p className="text-[10px] font-black text-blue-600 italic">GH₵{product.price.toLocaleString()}</p>
+          <p className="text-[11px] font-black text-blue-600 italic">GH₵{product.price.toLocaleString()}</p>
         </div>
       </Link>
     </motion.div>
@@ -121,7 +121,7 @@ export default function CatalogPage() {
   
   const suggestedPicks = useMemo(() => {
     if (products.length === 0) return [];
-    return [...products].sort(() => 0.5 - Math.random()).slice(0, 10);
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 12);
   }, [products, seed]);
 
   return (
@@ -150,7 +150,7 @@ export default function CatalogPage() {
               >
                 <CarouselContent className="-ml-4 flex items-center h-[350px] md:h-[480px]">
                   {featuredProducts.map((product, index) => (
-                    <CarouselItem key={product.id} className="pl-4 basis-[85%] md:basis-[60%] lg:basis-[45%] transition-all duration-500 ease-out">
+                    <CarouselItem key={product.id} className="pl-4 basis-[90%] md:basis-[60%] lg:basis-[45%] transition-all duration-500 ease-out">
                       <Link href={`/product/${product.id}`} className="block">
                         <div className={cn(
                           "relative h-[280px] md:h-[400px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden transition-all duration-700 shadow-xl group/item",
@@ -159,7 +159,7 @@ export default function CatalogPage() {
                           <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/40 shadow-inner flex items-center justify-center">
                              <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 md:p-14 transition-transform duration-1000 group-hover/item:scale-105 z-10" priority />
                           </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent z-20" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent z-20" />
                           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 z-30">
                              <div className="space-y-0.5">
                                 <h2 className="text-xl md:text-2xl font-bold text-white font-headline tracking-tight line-clamp-1 drop-shadow-md">{product.name}</h2>
@@ -180,7 +180,7 @@ export default function CatalogPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white/40 backdrop-blur-md rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5"
+              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5 overflow-hidden"
             >
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-3">
@@ -191,9 +191,9 @@ export default function CatalogPage() {
                 </div>
               </div>
               <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                <CarouselContent className="-ml-4">
+                <CarouselContent className="-ml-2 md:-ml-4">
                   {suggestedPicks.map((product) => (
-                    <CarouselItem key={`suggested-${product.id}`} className="pl-4 basis-[45%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
+                    <CarouselItem key={`suggested-${product.id}`} className="pl-2 md:pl-4 basis-[50%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
                       <SuggestedProductTile product={product} />
                     </CarouselItem>
                   ))}

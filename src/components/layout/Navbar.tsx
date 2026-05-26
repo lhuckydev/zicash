@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, Product } from "@/store/useCartStore";
-import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight } from "lucide-react";
+import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
@@ -30,8 +30,6 @@ export function Navbar() {
   const [isSearching, setIsSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<Product[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const isAdminPath = pathname?.startsWith('/admin');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -101,6 +99,7 @@ export function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({ title: "Logged out", description: "You have been logged out successfully." });
+    setIsMenuOpen(false);
     router.push("/");
   };
 
@@ -129,31 +128,29 @@ export function Navbar() {
     { name: "Market Policy", path: "/terms", icon: Gavel },
   ];
 
-  const allMobileLinks = [...mainNavLinks, ...secondaryLinks];
-
   return (
     <>
       <motion.nav 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className={cn(
-          "sticky top-0 w-full bg-white/90 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500",
-          isSearchOpen ? "z-[100]" : "z-50"
+          "sticky top-0 w-full bg-white/95 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500",
+          isSearchOpen ? "z-[1000]" : "z-50"
         )}
       >
-        <div className="container mx-auto px-4 py-3 flex flex-col gap-4">
+        <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
-          {/* Mobile centered branding row */}
-          <div className="flex lg:hidden justify-center items-center">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-9 h-9 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm">
-                <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={36} height={36} className="object-cover" />
+          {/* Mobile Centered Branding */}
+          <div className="flex lg:hidden justify-center items-center py-1">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm shrink-0">
+                <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={32} height={32} className="object-cover" />
               </div>
-              <span className="font-bold text-xl text-slate-900 font-headline uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
+              <span className="font-bold text-lg text-slate-900 font-headline uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
             </Link>
           </div>
 
-          {/* Desktop row 1: Branding and Desktop Nav */}
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -203,11 +200,11 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Mobile toolbar row: Unified lane with Menu, Search, Cart, Profile */}
+          {/* Unified Mobile Toolbar Lane */}
           <div className="flex lg:hidden items-center gap-2 w-full">
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0"
+              className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0 hover:bg-slate-100 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -245,8 +242,8 @@ export function Navbar() {
         <AnimatePresence>
           {isMenuOpen && (
             <>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000]" />
-              <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed left-0 top-0 bottom-0 w-[300px] bg-white z-[1100] shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2500]" />
+              <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed left-0 top-0 bottom-0 w-[85%] max-w-[300px] bg-white z-[2600] shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col">
                 <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shadow-sm">
@@ -256,12 +253,32 @@ export function Navbar() {
                   </div>
                   <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X className="w-6 h-6" /></button>
                 </div>
+                
                 <div className="flex-1 overflow-y-auto p-6 space-y-2">
-                  {allMobileLinks.map((link) => (
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">Main Navigation</p>
+                  
+                  {mainNavLinks.map((link) => (
                     <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
                       <link.icon className="w-5 h-5" /> {link.name}
                     </Link>
                   ))}
+
+                  {/* Orders Field for Authenticated Users */}
+                  {session && (
+                    <Link href="/orders" onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === "/orders" ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
+                      <ShoppingBag className="w-5 h-5" /> My Orders
+                    </Link>
+                  )}
+
+                  <div className="pt-8 mt-4 border-t border-slate-50">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 mb-4">More Info</p>
+                    {secondaryLinks.map((link) => (
+                      <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
+                        <link.icon className="w-5 h-5" /> {link.name}
+                      </Link>
+                    ))}
+                  </div>
+
                   {session && (
                     <button onClick={handleLogout} className="flex items-center gap-4 p-4 rounded-2xl font-bold text-sm text-red-500 w-full hover:bg-red-50 transition-colors mt-8">
                       <LogOut className="w-5 h-5" /> Logout
@@ -276,9 +293,9 @@ export function Navbar() {
         {/* Full-Screen Search Overhaul Overlay */}
         <AnimatePresence>
           {isSearchOpen && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] flex flex-col">
-              <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-              <motion.div initial={{ y: -50 }} animate={{ y: 0 }} exit={{ y: -50 }} className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[2100]" onClick={(e) => e.stopPropagation()}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[3000] flex flex-col">
+              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+              <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[3100]" onClick={(e) => e.stopPropagation()}>
                 <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-blue-50">
                   <div className="p-3 border-b border-slate-100 flex items-center gap-2">
                     <div className="relative flex-1 flex items-center">
@@ -292,7 +309,7 @@ export function Navbar() {
                       </div>
                     </div>
                   </div>
-                  <div className="max-h-[70vh] overflow-y-auto scrollbar-hide">
+                  <div className="max-h-[70vh] overflow-y-auto scrollbar-hide bg-white">
                     {isSearching ? (
                       <div className="py-20 flex flex-col items-center gap-3">
                         <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
@@ -303,8 +320,10 @@ export function Navbar() {
                         {suggestions.map((p) => (
                           <button key={p.id} onClick={() => { setIsSearchOpen(false); router.push(`/product/${p.id}`); }} className="flex items-center justify-between px-8 py-5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group">
                             <div className="flex items-center gap-4">
-                              <Search className="w-4 h-4 text-blue-300" />
-                              <span className="text-sm font-black text-slate-700 group-hover:text-blue-600">{p.name}</span>
+                              <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center p-1 border border-slate-100 shrink-0">
+                                <Image src={p.image_url} alt={p.name} width={24} height={24} className="object-contain" />
+                              </div>
+                              <span className="text-sm font-black text-slate-700 group-hover:text-blue-600 text-left">{p.name}</span>
                             </div>
                             <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600" />
                           </button>
@@ -312,6 +331,7 @@ export function Navbar() {
                       </div>
                     ) : (
                       <div className="p-8 space-y-6">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Browse Sections</p>
                         <div className="grid grid-cols-2 gap-3">
                           {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
                             <button key={cat} onClick={() => { setIsSearchOpen(false); router.push('/categories'); }} className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group shadow-sm">

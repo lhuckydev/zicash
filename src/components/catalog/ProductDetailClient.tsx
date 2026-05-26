@@ -40,12 +40,12 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
   const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
 
   return (
-    <div className="flex items-center gap-3 py-1">
-      <Icon className={cn("w-4 h-4 shrink-0", active ? "text-blue-600" : "text-slate-300")} />
+    <div className="flex items-start gap-2.5 py-1">
+      <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", active ? "text-blue-600" : "text-slate-300")} />
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">{label}</span>
         <span className={cn(
-          "text-[11px] font-black italic truncate leading-none",
+          "text-[10px] md:text-[11px] font-black italic leading-tight break-words",
           active ? "text-slate-900" : "text-slate-600"
         )}>{displayValue}</span>
       </div>
@@ -129,7 +129,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          <div className="lg:col-span-5 flex flex-col md:flex-row gap-6">
+          {/* Image Section */}
+          <div className="lg:col-span-5 flex flex-col md:flex-row gap-6 h-fit">
             <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
               {productImages.map((url, idx) => (
                 <div 
@@ -145,7 +146,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               ))}
             </div>
 
-            <div className="flex-1 order-1 md:order-2 relative aspect-square bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
+            <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[500px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
               <Carousel setApi={setApi} className="w-full h-full [&>div]:h-full">
                 <CarouselContent className="h-full ml-0">
                   {productImages.map((url, idx) => (
@@ -165,17 +166,17 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 </CarouselContent>
               </Carousel>
               
-              <div className="absolute top-8 left-8 flex flex-col gap-2 z-20">
+              <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
                  {product.featured && (
-                   <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[9px] tracking-widest px-4 py-2 shadow-xl">Top Selection</Badge>
+                   <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Selection</Badge>
                  )}
-                 <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1 shadow-sm">Verified</Badge>
+                 <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-sm">Verified</Badge>
               </div>
 
               <button 
                 onClick={() => toggleItem(product)} 
                 className={cn(
-                  "absolute top-8 right-8 p-3 rounded-full border shadow-xl transition-all z-20 hover:scale-110 active:scale-95",
+                  "absolute top-6 right-6 p-3 rounded-full border shadow-xl transition-all z-20 hover:scale-110 active:scale-95",
                   isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-300 bg-white/90 border-slate-100"
                 )}
               >
@@ -184,6 +185,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
           </div>
 
+          {/* Details Section */}
           <div className="lg:col-span-7 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -198,17 +200,17 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </h1>
               <div className="flex items-center gap-4">
                  <div className="flex text-amber-400"><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /></div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Quality</span>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Quality Verified</span>
               </div>
             </div>
 
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-8 bg-white p-6 md:p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+              <div className="space-y-8 bg-white p-6 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                     <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">Available Specifications</h3>
                     <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg">{product.variants.length} Options</Badge>
                  </div>
-                 <div className="grid grid-cols-1 gap-8">
+                 <div className="grid grid-cols-1 gap-6">
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
                       return (
@@ -216,7 +218,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
                           className={cn(
-                            "text-left p-10 rounded-[3rem] border-2 transition-all group relative overflow-hidden",
+                            "text-left p-6 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden",
                             isActive 
                               ? "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl" 
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
@@ -224,15 +226,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                         >
                           {isActive && <div className="absolute top-0 right-0 w-10 h-10 bg-blue-600 flex items-center justify-center rounded-bl-2xl text-white shadow-lg"><CheckCircle2 className="w-5 h-5" /></div>}
                           
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-12">
-                            <div className="space-y-6 flex-1">
+                          <div className="flex flex-col md:flex-row gap-8 md:gap-10">
+                            <div className="space-y-6 flex-1 min-w-0">
                               <div>
-                                <p className={cn("text-[11px] font-black uppercase tracking-widest mb-2", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
-                                <h4 className="text-xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
+                                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1.5", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <h4 className="text-lg md:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
                               </div>
 
                               {!isSimpleCategory && (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-8 pt-8 border-t border-slate-100/50">
+                                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-5 pt-8 border-t border-slate-100/50">
                                   {product.category === "Laptops" ? (
                                     <>
                                       <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
@@ -265,10 +267,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               )}
                             </div>
 
-                            <div className="md:text-right shrink-0">
-                               <p className="text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                               <p className={cn("text-[11px] font-bold uppercase mt-3", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                                 {v.stock > 0 ? `${v.stock} Units In Stock` : 'Currently Sold Out'}
+                            <div className="md:text-right shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-10">
+                               <p className="text-2xl md:text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                               <p className={cn("text-[10px] font-black uppercase mt-3 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                                 {v.stock > 0 ? `${v.stock} Units Available` : 'Sold Out'}
                                </p>
                             </div>
                           </div>
@@ -281,10 +283,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Rate</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate for selected spec</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-black text-slate-900">GHS</span>
-                  <span className="text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
+                  <span className="text-5xl md:text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
                     {displayPrice.toLocaleString()}
                   </span>
                 </div>
@@ -296,7 +298,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available for Dispatch' : 'Out of Stock'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Warranty: {product.warranty}
+                   <ShieldCheck className="w-3 h-3" /> Warranty Node: {product.warranty}
                  </p>
               </div>
             </div>
@@ -307,7 +309,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  className="w-full h-20 bg-blue-600 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-600/30 text-xl uppercase tracking-[0.2em] hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-95 gap-4"
                  disabled={!inStock || isAdding}
                >
-                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add selection to Cart</>}
+                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add to Shopping Cart</>}
                </Button>
                
                <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
@@ -329,8 +331,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  {product.description || "No detailed description provided."}
                </p>
             </div>
-
-            <div className="min-h-[200px]" />
+            <div className="min-h-[100px]" />
           </div>
 
           <div className="lg:col-span-4">

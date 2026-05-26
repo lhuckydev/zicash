@@ -16,7 +16,7 @@ import {
   Video, Layers, Info,  
   ShoppingCart, Star, Loader2, Tag, ChevronRight, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
-  Keyboard, Power, Terminal
+  Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield
 } from "lucide-react";
 import { 
   Carousel, 
@@ -41,11 +41,11 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <Icon className={cn("w-3 h-3", active ? "text-blue-600" : "text-slate-300")} />
-      <div className="flex flex-col">
+      <Icon className={cn("w-3 h-3 shrink-0", active ? "text-blue-600" : "text-slate-300")} />
+      <div className="flex flex-col min-w-0">
         <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 leading-none mb-0.5">{label}</span>
         <span className={cn(
-          "text-[10px] font-black italic truncate max-w-[80px] leading-none",
+          "text-[10px] font-black italic truncate leading-none",
           active ? "text-slate-900" : "text-slate-600"
         )}>{displayValue}</span>
       </div>
@@ -72,7 +72,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   useEffect(() => {
     async function fetchFullProduct() {
-      const { data, error } = await (await import('@/lib/supabase')).supabase
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
         .from('products')
         .select(`
           *,
@@ -89,7 +90,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       }
     }
     fetchFullProduct();
-  }, [initialProduct.id]);
+  }, [initialProduct.id, selectedVariant]);
 
   useEffect(() => {
     if (!api) return;
@@ -231,16 +232,20 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
 
                               {!isSimpleCategory && (
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 pt-3 border-t border-slate-100/50">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 pt-3 border-t border-slate-100/50">
                                   {product.category === "Laptops" ? (
                                     <>
                                       <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
                                       <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
                                       <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                       <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
-                                      <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
+                                      <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
                                       <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
                                       <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
+                                      <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
+                                      <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
+                                      <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
+                                      <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
                                     </>
                                   ) : (
                                     <>
@@ -248,6 +253,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                       <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
                                       <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                       <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
+                                      <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
+                                      <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
+                                      <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
+                                      <MiniSpec icon={Fingerprint} label="Security" value={product.advanced_specs?.biometrics} active={isActive} />
+                                      <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
                                     </>
                                   )}
                                 </div>
@@ -319,7 +329,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                </p>
             </div>
 
-            {/* This section reserved for future modules */}
             <div className="min-h-[200px]" />
           </div>
 

@@ -186,7 +186,7 @@ export default function OrderDetailsPage() {
           <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/20 bg-white">
             <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash Admin" fill className="object-cover" />
           </div>
-          <span className="font-bold text-lg tracking-tight">Zi<span className="text-blue-500">Cash GH</span> Admin</span>
+          <span className="font-bold text-lg tracking-tight">Zi<span className="text-blue-500">Cash GH</span> Manager</span>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
           <nav className="space-y-1">
@@ -194,7 +194,7 @@ export default function OrderDetailsPage() {
                <LayoutDashboard className="w-4 h-4" /> Dashboard
              </Link>
              <div className="bg-blue-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between shadow-lg shadow-blue-600/10">
-                <div className="flex items-center gap-3"><Package className="w-4 h-4" /> Order Details</div>
+                <div className="flex items-center gap-3"><Package className="w-4 h-4" /> Order Info</div>
              </div>
              <Link href="/admin" className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-white/50 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
                <Users className="w-4 h-4" /> Customers
@@ -206,11 +206,11 @@ export default function OrderDetailsPage() {
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-40">
            <Button variant="ghost" onClick={() => router.push('/admin')} className="gap-2 font-bold uppercase text-[10px] tracking-widest text-slate-400 hover:text-blue-600">
-               <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+               <ArrowLeft className="w-4 h-4" /> Back to Summary
             </Button>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2 hover:opacity-80">
-              <Eye className="w-4 h-4" /> Visit Shop
+              <Eye className="w-4 h-4" /> View Store
             </Link>
           </div>
         </header>
@@ -218,13 +218,13 @@ export default function OrderDetailsPage() {
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER REF: #{order.id.slice(0, 8).toUpperCase()}</div>
-              <h1 className="text-3xl font-black text-slate-900 font-headline italic">Order <span className="text-blue-600">Information</span></h1>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER NUMBER: #{order.id.slice(0, 8).toUpperCase()}</div>
+              <h1 className="text-3xl font-black text-slate-900 font-headline italic">Customer <span className="text-blue-600">Purchase</span></h1>
             </div>
 
             <div className="flex items-center gap-3">
                <Button variant="outline" className="rounded-xl border-slate-200 font-bold text-[10px] uppercase tracking-widest h-11 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleDeleteOrder} disabled={isDeleting}>
-                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Delete Order
+                 {isDeleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Remove Order
                </Button>
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -263,15 +263,15 @@ export default function OrderDetailsPage() {
               <div className="space-y-1">
                  <p className="text-[10px] font-black text-slate-300 uppercase">Order Total</p>
                  <p className="font-black text-slate-900 text-lg italic tracking-tighter">GHS {parseFloat(order.total_amount).toLocaleString()}</p>
-                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Accra Region" : "Regional Delivery"}</p>
+                 <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Accra Area" : "Other Region"}</p>
               </div>
             </Card>
 
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-6 space-y-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600"><CreditCard className="w-5 h-5" /></div>
               <div className="space-y-1">
-                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "Pay on Delivery" : "Paid Before Delivery"}</p>
-                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `MoMo: ${order.momo_sender_name || 'N/A'}` : "Cash Choice."}</p>
+                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "Pay at Door" : "Paid Beforehand"}</p>
+                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `Account: ${order.momo_sender_name || 'N/A'}` : "Cash Choice."}</p>
               </div>
             </Card>
 
@@ -293,7 +293,7 @@ export default function OrderDetailsPage() {
               )}>
                 <div className="flex items-center gap-3">
                    <MessageSquareQuote className={cn("w-6 h-6", order.extra_notes ? "text-blue-200" : "text-slate-200")} />
-                   <h3 className="font-black uppercase tracking-widest text-sm">Customer Instructions</h3>
+                   <h3 className="font-black uppercase tracking-widest text-sm">Special Instructions</h3>
                 </div>
                 <div className={cn(
                   "p-6 rounded-2xl font-bold leading-relaxed shadow-inner",
@@ -305,7 +305,7 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
                 <CardHeader className="p-8 pb-4">
-                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight italic">Purchased <span className="text-blue-600">Products</span></CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight italic">Items <span className="text-blue-600">Bought</span></CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
@@ -337,7 +337,7 @@ export default function OrderDetailsPage() {
                     </TableBody>
                   </Table>
                   <div className="p-8 bg-slate-50/50 flex justify-between items-center border-t border-slate-50">
-                     <span className="text-[10px] font-black uppercase text-slate-400">Order Total</span>
+                     <span className="text-[10px] font-black uppercase text-slate-400">Final Total</span>
                      <span className="text-2xl font-black text-blue-600 italic">GHS {parseFloat(order.total_amount).toLocaleString()}</span>
                   </div>
                 </CardContent>
@@ -345,7 +345,7 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-[#0F172A] text-white p-8 space-y-6">
                 <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Delivery Location Tool</span></div>
+                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Delivery Finder</span></div>
                    {order.shipping_region && <Badge className="bg-blue-600 border-none font-black text-[8px] uppercase">{order.shipping_region}</Badge>}
                 </div>
                 <div className="space-y-6">
@@ -358,10 +358,10 @@ export default function OrderDetailsPage() {
                      <div className="pt-4 border-t border-white/5">
                         <Link href={mapLink} target="_blank" className="block">
                           <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-lg">
-                             <Target className="w-4 h-4" /> Open Exact Location in Google Maps
+                             <Target className="w-4 h-4" /> Show Location on Map
                           </Button>
                         </Link>
-                        <p className="text-[9px] text-center text-white/30 uppercase mt-3 tracking-widest italic">The customer provided exact GPS coordinates for this delivery.</p>
+                        <p className="text-[9px] text-center text-white/30 uppercase mt-3 tracking-widest italic">Accurate map coordinates provided.</p>
                      </div>
                    )}
                 </div>
@@ -374,7 +374,7 @@ export default function OrderDetailsPage() {
                   <div className="p-6 bg-slate-950 text-white flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center border border-blue-600/30"><ImageIcon className="w-4 h-4 text-blue-400" /></div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">MoMo Receipt</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Payment Photo</span>
                     </div>
                     <Link href={order.payment_screenshot_url} target="_blank"><Button variant="ghost" size="icon" className="h-8 w-8 text-white/50 hover:text-white"><ExternalLink className="w-4 h-4" /></Button></Link>
                   </div>

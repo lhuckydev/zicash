@@ -153,7 +153,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!region || !area || !community) { toast({ variant: "destructive", title: "Address Required" }); return; }
     if (paymentChoice === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { 
-      toast({ variant: "destructive", title: "Payment Proof Required", description: "Please upload your receipt photo and enter your account name." }); 
+      toast({ variant: "destructive", title: "Payment Proof Required", description: "Please upload your payment photo and enter your account name." }); 
       return; 
     }
     
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
       const mainItem = items[0]?.name || "Product";
       const customerName = profile?.full_name || "Customer";
       const admin1 = "0597204494";
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Admin Panel.`;
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Shop Manager.`;
       
       await sendSms(admin1, adminMessage);
       if (profile?.contact) {
@@ -231,7 +231,7 @@ export default function CheckoutPage() {
         <div className="max-w-6xl mx-auto space-y-10">
           <div className="flex items-center gap-4">
              <Link href="/cart"><Button variant="ghost" size="icon" className="rounded-full text-slate-400 hover:text-blue-600"><ArrowLeft /></Button></Link>
-             <h1 className="text-3xl md:text-5xl font-black font-headline uppercase italic">Checkout <span className="text-blue-600">Details</span></h1>
+             <h1 className="text-3xl md:text-5xl font-black font-headline uppercase italic">Order <span className="text-blue-600">Details</span></h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
                           </div>
                           <div className="space-y-4 md:col-span-2">
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">House Number / Street Name / Landmark</label>
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">House Number / Landmark</label>
                                <Input placeholder="e.g. Blue building near the station" className="h-12 rounded-xl bg-slate-50 border-none font-bold" value={community} onChange={(e) => setCommunity(e.target.value)} />
                              </div>
                              
@@ -285,7 +285,7 @@ export default function CheckoutPage() {
                               )}
                              >
                                {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : (coords ? <CheckCircle2 className="w-4 h-4" /> : <Navigation className="w-4 h-4" />)}
-                               {isLocating ? "Fetching..." : (coords ? "Exact Location Saved" : "Get My Precise Location for Delivery")}
+                               {isLocating ? "Locating..." : (coords ? "Exact Location Saved" : "Get My Precise Location for Delivery")}
                              </Button>
                           </div>
                        </div>
@@ -295,7 +295,7 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
-                        <CreditCard className="w-4 h-4" /> Payment Method
+                        <CreditCard className="w-4 h-4" /> Payment Choice
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-8">
@@ -312,7 +312,7 @@ export default function CheckoutPage() {
                                 <RadioGroupItem value="POD" id="pod" className="sr-only" />
                                 <Banknote className="mb-3 h-6 w-6 text-blue-600" />
                                 <span className="text-sm font-black uppercase italic tracking-tight">Pay on Delivery</span>
-                                <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase">Cash or MoMo at your door</span>
+                                <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase">Pay at your door</span>
                               </Label>
                               <Label
                                 htmlFor="pre"
@@ -333,7 +333,7 @@ export default function CheckoutPage() {
                           <div className="p-4 bg-white rounded-2xl shadow-sm"><Smartphone className="w-8 h-8 text-blue-600" /></div>
                           <div>
                              <p className="font-black uppercase tracking-tight text-lg italic">Payment Before Delivery</p>
-                             <p className="text-xs font-bold text-slate-500 mt-1 uppercase">This is required for orders outside Accra.</p>
+                             <p className="text-xs font-bold text-slate-500 mt-1 uppercase">Required for orders outside Accra.</p>
                           </div>
                         </div>
                       )}
@@ -346,20 +346,21 @@ export default function CheckoutPage() {
                                 <p className="text-lg font-black text-blue-600 mt-1">{momoName}</p>
                                 <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{momoNumber}</p>
                              </div>
-                             <div className="p-4 bg-white rounded-2xl border border-slate-200 self-start">
-                                <p className="text-[10px] font-black text-slate-400 uppercase text-center">Reference</p>
-                                <p className="text-xs font-bold text-slate-900 text-center uppercase mt-1">ORDER-{total}</p>
+                             <div className="p-4 bg-white rounded-2xl border border-slate-200 self-start max-w-[150px]">
+                                <p className="text-[9px] font-bold text-slate-500 text-center leading-tight">
+                                  Transactions will be verified as soon as they are received.
+                                </p>
                              </div>
                           </div>
                           
                           <div className="grid grid-cols-1 gap-6">
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Your MoMo Name</label>
-                               <Input placeholder="Enter the name on your account" className="h-12 rounded-xl bg-white border-slate-200 font-bold" value={momoSenderName} onChange={(e) => setMomoSenderName(e.target.value)} />
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Your Mobile Money Name</label>
+                               <Input placeholder="Name on your account" className="h-12 rounded-xl bg-white border-slate-200 font-bold" value={momoSenderName} onChange={(e) => setMomoSenderName(e.target.value)} />
                              </div>
                              
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Receipt (Photo)</label>
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Photo (Receipt)</label>
                                <div onClick={() => document.getElementById('receipt-upload')?.click()} className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-white hover:bg-slate-50 transition-all group">
                                  <input type="file" id="receipt-upload" className="hidden" accept="image/*" onChange={handleFileSelect} />
                                  {previewUrl ? (
@@ -367,7 +368,7 @@ export default function CheckoutPage() {
                                  ) : (
                                    <>
                                      <ImageIcon className="w-8 h-8 text-slate-300 mb-2 group-hover:text-blue-600 transition-colors" />
-                                     <p className="text-[10px] font-black uppercase text-slate-400">Click to Upload Photo</p>
+                                     <p className="text-[10px] font-black uppercase text-slate-400">Add Photo</p>
                                    </>
                                  )}
                                </div>
@@ -381,12 +382,12 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
-                        <MessageSquareQuote className="w-4 h-4" /> Special Instructions
+                        <MessageSquareQuote className="w-4 h-4" /> Extra Notes
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0">
                        <Textarea 
-                        placeholder="Any extra details we should know? (e.g. gate color, preferred delivery time...)" 
+                        placeholder="Any extra details? (e.g. gate color, preferred time...)" 
                         className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-bold p-6 shadow-inner"
                         value={extraNotes}
                         onChange={(e) => setExtraNotes(e.target.value)}
@@ -400,7 +401,7 @@ export default function CheckoutPage() {
             <div className="lg:col-span-5 space-y-8">
                <Card className="rounded-[2.5rem] border-none shadow-2xl bg-slate-900 text-white overflow-hidden sticky top-24">
                   <div className="p-10 space-y-8">
-                    <h3 className="text-xl font-black uppercase italic text-blue-500">Order Summary</h3>
+                    <h3 className="text-xl font-black uppercase italic text-blue-500">Your Basket</h3>
                     
                     <div className="space-y-6 max-h-[300px] overflow-y-auto scrollbar-hide pr-2">
                       {items.map((item, idx) => {
@@ -424,11 +425,11 @@ export default function CheckoutPage() {
 
                     <div className="pt-8 border-t border-white/10 space-y-4">
                        <div className="flex justify-between items-center text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                          <span>Delivery Fee</span>
+                          <span>Delivery</span>
                           <span className="text-emerald-500 italic">FREE</span>
                        </div>
                        <div className="pt-4 flex justify-between items-end">
-                          <span className="text-xs font-black uppercase text-slate-400">Grand Total</span>
+                          <span className="text-xs font-black uppercase text-slate-400">Total to Pay</span>
                           <span className="text-4xl font-black text-blue-500 italic tracking-tighter">GHS {total.toLocaleString()}</span>
                        </div>
                     </div>
@@ -438,12 +439,12 @@ export default function CheckoutPage() {
                       onClick={handlePlaceOrder}
                       disabled={isSubmitting || isLoading}
                     >
-                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-6 h-6" /> : <Target className="mr-3 w-6 h-6" />} Place Order
+                      {isSubmitting ? <Loader2 className="animate-spin mr-3 w-6 h-6" /> : <Target className="mr-3 w-6 h-6" />} Finish Order
                     </Button>
 
                     <div className="flex items-center justify-center gap-2 text-slate-500">
                        <ShieldCheck className="w-4 h-4" />
-                       <span className="text-[9px] font-black uppercase tracking-[0.2em]">Secure Checkout Active</span>
+                       <span className="text-[9px] font-black uppercase tracking-[0.2em]">Secure Checkout</span>
                     </div>
                   </div>
                </Card>

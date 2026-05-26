@@ -11,6 +11,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { 
   Sheet, 
   SheetContent, 
@@ -101,7 +102,7 @@ export default function CategoriesPage() {
       
       // Calculate dynamic max price for initial range
       const prices = data.map((p: any) => p.price);
-      const max = Math.max(...prices, 1000);
+      const max = prices.length > 0 ? Math.max(...prices, 1000) : 20000;
       setMaxPriceLimit(max);
       setPriceRange([0, max]);
     }
@@ -151,6 +152,16 @@ export default function CategoriesPage() {
     setShowHotDeals(false);
     setSortBy("newest");
     setSelectedBrands([]);
+  };
+
+  const handleMinPriceChange = (val: string) => {
+    const num = parseInt(val) || 0;
+    setPriceRange([Math.min(num, priceRange[1]), priceRange[1]]);
+  };
+
+  const handleMaxPriceChange = (val: string) => {
+    const num = parseInt(val) || 0;
+    setPriceRange([priceRange[0], Math.max(num, priceRange[0])]);
   };
 
   const activeFilterCount = (selectedBrands.length > 0 ? 1 : 0) + 
@@ -235,7 +246,7 @@ export default function CategoriesPage() {
                                 <ArrowDownWideNarrow className="w-3 h-3" /> Sorting Preference
                              </label>
                              <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="h-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner">
+                                <SelectTrigger className="h-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner text-xs">
                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl border-none shadow-2xl">
@@ -253,6 +264,34 @@ export default function CategoriesPage() {
                                 <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Price Boundary</label>
                                 <span className="text-[10px] font-black text-blue-600 italic">GHS {priceRange[0]} — {priceRange[1]}</span>
                              </div>
+                             
+                             <div className="flex gap-4 items-center">
+                               <div className="flex-1 space-y-1">
+                                 <label className="text-[9px] font-black uppercase text-slate-300 ml-1">Min Price</label>
+                                 <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GHS</span>
+                                    <Input 
+                                      type="number" 
+                                      className="h-11 pl-11 rounded-xl bg-slate-50 border-none font-bold text-xs shadow-inner" 
+                                      value={priceRange[0]} 
+                                      onChange={(e) => handleMinPriceChange(e.target.value)}
+                                    />
+                                 </div>
+                               </div>
+                               <div className="flex-1 space-y-1">
+                                 <label className="text-[9px] font-black uppercase text-slate-300 ml-1">Max Price</label>
+                                 <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GHS</span>
+                                    <Input 
+                                      type="number" 
+                                      className="h-11 pl-11 rounded-xl bg-slate-50 border-none font-bold text-xs shadow-inner" 
+                                      value={priceRange[1]} 
+                                      onChange={(e) => handleMaxPriceChange(e.target.value)}
+                                    />
+                                 </div>
+                               </div>
+                             </div>
+
                              <Slider 
                                 defaultValue={[0, maxPriceLimit]} 
                                 max={maxPriceLimit} 

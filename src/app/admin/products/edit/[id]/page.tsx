@@ -22,7 +22,8 @@ import {
   Zap,
   Info,
   Trash2,
-  X
+  X,
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -85,7 +86,6 @@ export default function EditProductPage() {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category || "");
-  const isConsult = product.category === "Educational Consult";
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session') === 'true';
@@ -149,25 +149,13 @@ export default function EditProductPage() {
     setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const getPlaceholder = () => {
-    switch (product.category) {
-      case "Laptops": return "e.g., MacBook Pro 14 M3 Max";
-      case "Phones": return "e.g., iPhone 15 Pro Max";
-      case "Closet": return "e.g., ZiCash Signature Tech Hoodie";
-      case "Accessories": return "e.g., Logitech MX Master 3S Mouse";
-      case "Educational Consult": return "e.g., Undergraduate Admission Support";
-      default: return "Full Product Title";
-    }
-  };
-
-  // VALIDATION
   const isFormValid = () => {
     const hasName = product.name?.trim().length > 0;
     const hasPrice = (product.price || 0) > 0;
     const hasDesc = product.description?.trim().length > 0;
-    const hasBrand = isConsult || product.brand?.trim().length > 0;
     const hasImages = existingImages.length > 0 || selectedFiles.length > 0;
-    return hasName && hasPrice && hasDesc && hasBrand && hasImages;
+    // Brand is now optional
+    return hasName && hasPrice && hasDesc && hasImages;
   };
 
   const handleSave = async () => {
@@ -175,7 +163,7 @@ export default function EditProductPage() {
       toast({ 
         variant: "destructive", 
         title: "Validation Error", 
-        description: "Please ensure Name, Brand, Price, Description and Images are present before saving." 
+        description: "Please ensure Name, Price, Description and Images are present before saving." 
       });
       return;
     }
@@ -276,7 +264,6 @@ export default function EditProductPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Controls Stack */}
           <div className="lg:col-span-1 space-y-8">
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                 <div className="space-y-4">
@@ -346,7 +333,6 @@ export default function EditProductPage() {
              </Card>
           </div>
 
-          {/* Configuration Stack */}
           <div className="lg:col-span-2 space-y-8">
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
                 <CardHeader className="p-10 bg-slate-950 text-white flex justify-between items-center">
@@ -362,15 +348,13 @@ export default function EditProductPage() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
-                        <Input placeholder={getPlaceholder()} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
+                        <Input placeholder="Full Product Name" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
-                      {!isConsult && (
-                        <div className="space-y-2">
-                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand <span className="text-red-500">*</span></label>
-                          <Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Brand (Optional)</label>
+                        <Input placeholder="e.g., Apple, HP, Custom" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
+                      </div>
 
                       <div className="space-y-2">
                         <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Condition</label>

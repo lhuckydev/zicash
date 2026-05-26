@@ -25,7 +25,8 @@ import {
   Layers,
   ChevronRight,
   ShieldCheck,
-  GraduationCap
+  GraduationCap,
+  Tag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +99,6 @@ export default function NewProductWizard() {
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(basicInfo.category);
-  const isConsult = basicInfo.category === "Educational Consult";
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_session') === 'true';
@@ -155,13 +155,12 @@ export default function NewProductWizard() {
     return "Standard Configuration";
   };
 
-  // VALIDATION LOGIC
   const isStep1Valid = () => {
     const hasName = basicInfo.name.trim().length > 0;
     const hasDesc = basicInfo.description.trim().length > 0;
-    const hasBrand = isConsult || basicInfo.brand.trim().length > 0;
     const hasImages = selectedFiles.length > 0;
-    return hasName && hasDesc && hasBrand && hasImages;
+    // Brand is now optional
+    return hasName && hasDesc && hasImages;
   };
 
   const isStep2Valid = () => {
@@ -174,7 +173,7 @@ export default function NewProductWizard() {
         toast({ 
           variant: "destructive", 
           title: "Incomplete Identity", 
-          description: "Please ensure Name, Brand, Description and at least one image are provided." 
+          description: "Please ensure Name, Description and at least one image are provided." 
         });
         return;
       }
@@ -218,14 +217,13 @@ export default function NewProductWizard() {
       }
       setIsUploading(false);
 
-      // 1. Insert Product
       const { data: productData, error: productError } = await supabase
         .from('products')
         .insert([{
           ...basicInfo,
           image_url: finalImageUrls[0] || "",
           image_urls: finalImageUrls,
-          price: Math.min(...variants.map(v => v.price)), // "Starting at" price
+          price: Math.min(...variants.map(v => v.price)),
           advanced_specs: isSimpleCategory ? {} : advancedSpecs,
           specs: isSimpleCategory ? "Standard Item" : generateLabel(variants[0])
         }])
@@ -234,7 +232,6 @@ export default function NewProductWizard() {
 
       if (productError) throw productError;
 
-      // 2. Insert Variants
       const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
         ...v,
         product_id: productData.id,
@@ -281,7 +278,6 @@ export default function NewProductWizard() {
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12 font-body">
       <div className="max-w-5xl mx-auto space-y-12">
         
-        {/* Header Navigation */}
         <div className="flex items-center justify-between">
           <Link href="/admin">
             <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600 uppercase text-[10px] tracking-widest">
@@ -301,7 +297,6 @@ export default function NewProductWizard() {
           </div>
         </div>
 
-        {/* STEP 1: BASIC INFO */}
         {step === 1 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
              <div className="lg:col-span-4 space-y-8">
@@ -352,25 +347,25 @@ export default function NewProductWizard() {
                         <h2 className="text-2xl font-black uppercase tracking-tight">Identity <span className="text-blue-500 italic">& Purpose</span></h2>
                         <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Foundational Unit Details</p>
                       </div>
-                      {isConsult ? <GraduationCap className="w-10 h-10 text-blue-500 opacity-50" /> : <Box className="w-10 h-10 text-blue-500 opacity-50" />}
+                      {basicInfo.category === "Educational Consult" ? <GraduationCap className="w-10 h-10 text-blue-500 opacity-50" /> : <Box className="w-10 h-10 text-blue-500 opacity-50" />}
                    </div>
                    <CardContent className="p-10 space-y-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2 space-y-2">
                           <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Item Title <span className="text-red-500">*</span></label>
-                          <Input placeholder="e.g., Undergraduate Admission Support" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
+                          <Input placeholder="e.g., MacBook Pro 14 M3" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
                         </div>
-                        {!isConsult && (
-                          <>
-                            <div className="space-y-2">
-                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand <span className="text-red-500">*</span></label>
-                              <Input placeholder="Apple / Logitech" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
-                              <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={e => setBasicInfo({...basicInfo, warranty: e.target.value})} />
-                            </div>
-                          </>
+                        
+                        <div className="space-y-2">
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Brand (Optional)</label>
+                          <Input placeholder="Apple / Samsung / Custom" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
+                        </div>
+
+                        {!isSimpleCategory && (
+                          <div className="space-y-2">
+                            <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
+                            <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={e => setBasicInfo({...basicInfo, warranty: e.target.value})} />
+                          </div>
                         )}
                       </div>
 
@@ -406,7 +401,6 @@ export default function NewProductWizard() {
           </div>
         )}
 
-        {/* STEP 2: PRICING & INVENTORY */}
         {step === 2 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
              <div className="flex items-center justify-between">
@@ -491,7 +485,6 @@ export default function NewProductWizard() {
           </div>
         )}
 
-        {/* STEP 3: ADVANCED SPECS */}
         {step === 3 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in slide-in-from-left-4 duration-500">
              <div className="lg:col-span-8 space-y-8">

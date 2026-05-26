@@ -31,7 +31,6 @@ export function ProductCard({
 
   const isFavorite = hasItem(product.id);
   
-  // Logic to show "Starting at" if multiple variants exist
   const displayPrice = product.variants && product.variants.length > 0 
     ? Math.min(...product.variants.map(v => v.price))
     : product.price;
@@ -89,6 +88,9 @@ export function ProductCard({
 
       <div className="flex flex-col flex-1 space-y-4 px-1">
         <div className="space-y-1.5">
+          {product.brand && (
+            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{product.brand}</p>
+          )}
           <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">{product.name}</h3>
           <div className="flex flex-col">
              {hasVariants && (

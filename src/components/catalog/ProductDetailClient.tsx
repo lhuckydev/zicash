@@ -61,7 +61,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
-  // Fetch full product with variants from client side to ensure latest data
   useEffect(() => {
     async function fetchFullProduct() {
       const { data, error } = await (await import('@/lib/supabase')).supabase
@@ -120,7 +119,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* MEDIA RAIL & MAIN IMAGE */}
           <div className="lg:col-span-5 flex flex-col md:flex-row gap-6">
             <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
               {productImages.map((url, idx) => (
@@ -176,12 +174,13 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
           </div>
 
-          {/* CONFIGURATION & SPECS */}
           <div className="lg:col-span-7 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                 <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">{product.brand}</Badge>
-                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">/</span>
+                 {product.brand && (
+                   <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">{product.brand}</Badge>
+                 )}
+                 {product.brand && <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">/</span>}
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.category} Section</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-headline tracking-tighter leading-none uppercase italic">
@@ -193,7 +192,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
             </div>
 
-            {/* VARIANT SELECTOR */}
             {product.variants && product.variants.length > 0 && (
               <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
@@ -269,7 +267,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           </div>
         </div>
 
-        {/* DETAILED TECHNICAL PAYLOAD */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-20 border-t border-slate-100">
           <div className="lg:col-span-8 space-y-16">
             <div className="space-y-6">
@@ -278,49 +275,50 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Descriptive Metadata</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "The high-performance hardware node is currently undergoing final data verification."}
+                 {product.description || "The high-performance hardware unit is currently undergoing final data verification."}
                </p>
             </div>
 
-            <div className="space-y-8">
-               <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Hardware Schematics</h2>
-               </div>
-               <div className="bg-white rounded-[3.5rem] border border-slate-100 p-8 md:p-16 shadow-xl shadow-blue-600/5">
-                 <Table>
-                   <TableBody>
-                     {product.category === "Laptops" && (
-                       <>
-                         <TechTableRow icon={Cpu} label="System Processor" value={selectedVariant?.cpu || product.advanced_specs?.cpu} />
-                         <TechTableRow icon={CircuitBoard} label="Memory (RAM)" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                         <TechTableRow icon={Database} label="Archive Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                         <TechTableRow icon={Layers} label="Graphics Node" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
-                         <TechTableRow icon={Maximize} label="Display Real-estate" value={selectedVariant?.screen || product.advanced_specs?.res} />
-                         <TechTableRow icon={Zap} label="Touch Interface" value={selectedVariant?.touchscreen ? "Capacitive Multi-touch Enabled" : "Standard Interface"} />
-                         <TechTableRow icon={Monitor} label="Physical Condition" value={selectedVariant?.condition || "Verified Tier 1"} />
-                         {/* Advanced Specs Step 3 */}
-                         <TechTableRow icon={Info} label="I/O Matrix" value={product.advanced_specs?.ports} />
-                         <TechTableRow icon={Zap} label="Operating System" value={product.advanced_specs?.os} />
-                         <TechTableRow icon={Box} label="Audio System" value={product.advanced_specs?.audio} />
-                       </>
-                     )}
-                     {product.category === "Phones" && (
-                       <>
-                         <TechTableRow icon={SmartphoneIcon} label="Processing Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
-                         <TechTableRow icon={CircuitBoard} label="System Memory" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                         <TechTableRow icon={Database} label="Storage Capacity" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                         <TechTableRow icon={Smartphone} label="Battery Node" value={selectedVariant?.battery || product.advanced_specs?.charge} />
-                         <TechTableRow icon={Video} label="Primary Optics" value={product.advanced_specs?.camera} />
-                         <TechTableRow icon={Zap} label="Refresh Dynamics" value={product.advanced_specs?.refresh} />
-                         <TechTableRow icon={Monitor} label="Structural Integrity" value={selectedVariant?.condition || "Verified Tier 1"} />
-                         <TechTableRow icon={ShieldCheck} label="IP Resilience" value={product.advanced_specs?.rating} />
-                       </>
-                     )}
-                   </TableBody>
-                 </Table>
-               </div>
-            </div>
+            {!isSimpleCategory && (
+              <div className="space-y-8">
+                 <div className="flex items-center gap-4">
+                    <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
+                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Hardware Schematics</h2>
+                 </div>
+                 <div className="bg-white rounded-[3.5rem] border border-slate-100 p-8 md:p-16 shadow-xl shadow-blue-600/5">
+                   <Table>
+                     <TableBody>
+                       {product.category === "Laptops" && (
+                         <>
+                           <TechTableRow icon={Cpu} label="System Processor" value={selectedVariant?.cpu || product.advanced_specs?.cpu} />
+                           <TechTableRow icon={CircuitBoard} label="Memory (RAM)" value={selectedVariant?.ram || product.advanced_specs?.ram} />
+                           <TechTableRow icon={Database} label="Archive Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
+                           <TechTableRow icon={Layers} label="Graphics Node" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
+                           <TechTableRow icon={Maximize} label="Display Real-estate" value={selectedVariant?.screen || product.advanced_specs?.res} />
+                           <TechTableRow icon={Zap} label="Touch Interface" value={selectedVariant?.touchscreen ? "Capacitive Multi-touch Enabled" : "Standard Interface"} />
+                           <TechTableRow icon={Monitor} label="Physical Condition" value={selectedVariant?.condition || "Verified Tier 1"} />
+                           <TechTableRow icon={Info} label="I/O Matrix" value={product.advanced_specs?.ports} />
+                           <TechTableRow icon={Zap} label="Operating System" value={product.advanced_specs?.os} />
+                           <TechTableRow icon={Box} label="Audio System" value={product.advanced_specs?.audio} />
+                         </>
+                       )}
+                       {product.category === "Phones" && (
+                         <>
+                           <TechTableRow icon={SmartphoneIcon} label="Processing Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
+                           <TechTableRow icon={CircuitBoard} label="System Memory" value={selectedVariant?.ram || product.advanced_specs?.ram} />
+                           <TechTableRow icon={Database} label="Storage Capacity" value={selectedVariant?.storage || product.advanced_specs?.storage} />
+                           <TechTableRow icon={Smartphone} label="Battery Node" value={selectedVariant?.battery || product.advanced_specs?.charge} />
+                           <TechTableRow icon={Video} label="Primary Optics" value={product.advanced_specs?.camera} />
+                           <TechTableRow icon={Zap} label="Refresh Dynamics" value={product.advanced_specs?.refresh} />
+                           <TechTableRow icon={Monitor} label="Structural Integrity" value={selectedVariant?.condition || "Verified Tier 1"} />
+                           <TechTableRow icon={ShieldCheck} label="IP Resilience" value={product.advanced_specs?.rating} />
+                         </>
+                       )}
+                     </TableBody>
+                   </Table>
+                 </div>
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-4">

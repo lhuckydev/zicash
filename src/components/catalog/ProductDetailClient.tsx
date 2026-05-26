@@ -45,12 +45,17 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
   const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
 
   return (
-    <div className="flex items-start gap-3 py-1">
-      <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", active ? "text-blue-600" : "text-slate-300")} />
-      <div className="flex flex-col min-w-0">
-        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1.5">{label}</span>
+    <div className="flex items-start gap-4 py-2">
+      <div className={cn(
+        "p-2.5 rounded-xl shrink-0 transition-colors duration-500",
+        active ? "bg-blue-100/50 text-blue-600" : "bg-slate-50 text-slate-300"
+      )}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex flex-col min-w-0 pt-0.5">
+        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-2">{label}</span>
         <span className={cn(
-          "text-[10px] md:text-[11px] font-black italic leading-tight break-words",
+          "text-xs font-black italic leading-normal break-words whitespace-pre-wrap",
           active ? "text-slate-900" : "text-slate-600"
         )}>{displayValue}</span>
       </div>
@@ -263,7 +268,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               {!isSimpleCategory && (
                                 <div className="space-y-6">
                                   {/* Always Visible Summary Specs */}
-                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-8 border-t border-slate-100/50">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 pt-8 border-t border-slate-100/50">
                                     {product.category === "Laptops" ? (
                                       <>
                                         <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
@@ -282,7 +287,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                   {/* Collapsible Detailed Specs */}
                                   <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                     <CollapsibleContent className="space-y-6">
-                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
                                         {product.category === "Laptops" ? (
                                           <>
                                             <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
@@ -326,7 +331,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                             <div className="md:text-right shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-10">
                                <p className="text-2xl md:text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                <p className={cn("text-[10px] font-black uppercase mt-3 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                                 {v.stock > 0 ? `${v.stock} Units Available` : 'Sold Out'}
+                                 {v.stock > 0 ? 'In Stock' : 'Sold Out'}
                                </p>
                             </div>
                           </div>
@@ -374,7 +379,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                </div>
             </div>
 
-            {/* Safe Shopping Card - Moved to sidebar */}
             <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
                <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>

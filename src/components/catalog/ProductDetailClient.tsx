@@ -213,9 +213,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
                  {product.description || "No detailed description provided."}
                </p>
-
-               {/* Integrated Reviews Component */}
-               <ProductReviews productId={product.id} />
             </div>
           </div>
 
@@ -406,6 +403,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
                </div>
             </Card>
+
+            {/* Ratings and Reviews - Positioned under the last spec card on mobile */}
+            <div className="pt-10">
+               <ProductReviews productId={product.id} />
+            </div>
           </div>
         </div>
       </div>

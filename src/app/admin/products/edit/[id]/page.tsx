@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/store/useCartStore";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const SESSION_TIMEOUT = 7200000;
 
@@ -159,9 +160,23 @@ export default function EditProductPage() {
     }
   };
 
+  // VALIDATION
+  const isFormValid = () => {
+    const hasName = product.name?.trim().length > 0;
+    const hasPrice = (product.price || 0) > 0;
+    const hasDesc = product.description?.trim().length > 0;
+    const hasBrand = isConsult || product.brand?.trim().length > 0;
+    const hasImages = existingImages.length > 0 || selectedFiles.length > 0;
+    return hasName && hasPrice && hasDesc && hasBrand && hasImages;
+  };
+
   const handleSave = async () => {
-    if (!product.name || !product.price) {
-      toast({ variant: "destructive", title: "Wait", description: "Name and Price are required." });
+    if (!isFormValid()) {
+      toast({ 
+        variant: "destructive", 
+        title: "Validation Error", 
+        description: "Please ensure Name, Brand, Price, Description and Images are present before saving." 
+      });
       return;
     }
 
@@ -281,7 +296,7 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2 pt-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Media Payload (Multi)</label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Media Payload (Multi) <span className="text-red-500">*</span></label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
                       className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-blue-600 transition-all mb-6"
@@ -317,14 +332,14 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Price (GH₵)</label>
+                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Price (GH₵) <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
                       <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Stock Count</label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Stock Count <span className="text-red-500">*</span></label>
                     <Input type="number" className="h-12 rounded-xl bg-slate-50 border-none font-black text-lg" value={product.stock} onChange={(e) => setProduct({...product, stock: parseInt(e.target.value)})} />
                   </div>
                 </div>
@@ -346,13 +361,13 @@ export default function EditProductPage() {
                 <CardContent className="p-10 space-y-8">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title</label>
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
                         <Input placeholder={getPlaceholder()} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
                       {!isConsult && (
                         <div className="space-y-2">
-                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand</label>
+                          <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Brand <span className="text-red-500">*</span></label>
                           <Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
                         </div>
                       )}
@@ -392,11 +407,18 @@ export default function EditProductPage() {
                    )}
 
                    <div className="space-y-2">
-                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Descriptive Payload (Marketing Text)</label>
+                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Descriptive Payload <span className="text-red-500">*</span></label>
                       <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description || ""} onChange={(e) => setProduct({...product, description: e.target.value})} />
                    </div>
 
-                   <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl shadow-blue-600/20 gap-3">
+                   <Button 
+                    onClick={handleSave} 
+                    disabled={isSaving || !isFormValid()} 
+                    className={cn(
+                      "w-full h-16 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl gap-3 transition-all",
+                      isFormValid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
+                    )}
+                   >
                       {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Save Changes
                    </Button>
                 </CardContent>

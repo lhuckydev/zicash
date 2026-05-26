@@ -155,9 +155,50 @@ export default function NewProductWizard() {
     return "Standard Configuration";
   };
 
+  // VALIDATION LOGIC
+  const isStep1Valid = () => {
+    const hasName = basicInfo.name.trim().length > 0;
+    const hasDesc = basicInfo.description.trim().length > 0;
+    const hasBrand = isConsult || basicInfo.brand.trim().length > 0;
+    const hasImages = selectedFiles.length > 0;
+    return hasName && hasDesc && hasBrand && hasImages;
+  };
+
+  const isStep2Valid = () => {
+    return variants.every(v => v.price > 0 && v.stock >= 0);
+  };
+
+  const handleNextStep = () => {
+    if (step === 1) {
+      if (!isStep1Valid()) {
+        toast({ 
+          variant: "destructive", 
+          title: "Incomplete Identity", 
+          description: "Please ensure Name, Brand, Description and at least one image are provided." 
+        });
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      if (!isStep2Valid()) {
+        toast({ 
+          variant: "destructive", 
+          title: "Pricing Error", 
+          description: "All configurations must have a valid price (greater than 0)." 
+        });
+        return;
+      }
+      if (isSimpleCategory) {
+        handleFinalSave();
+      } else {
+        setStep(3);
+      }
+    }
+  };
+
   const handleFinalSave = async () => {
-    if (!basicInfo.name || variants.some(v => !v.price)) {
-      toast({ variant: "destructive", title: "Wait", description: "Product Name and all Variant Prices are required." });
+    if (!isStep1Valid() || !isStep2Valid()) {
+      toast({ variant: "destructive", title: "Validation Failed", description: "Please review all steps for missing data." });
       return;
     }
 
@@ -282,7 +323,7 @@ export default function NewProductWizard() {
                       </div>
 
                       <div className="pt-4 space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Inventory Media</label>
+                        <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Inventory Media <span className="text-red-500">*</span></label>
                         <div 
                           onClick={() => fileInputRef.current?.click()}
                           className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer group hover:border-blue-600 transition-all mb-4"
@@ -316,13 +357,13 @@ export default function NewProductWizard() {
                    <CardContent className="p-10 space-y-8">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-2 space-y-2">
-                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Item Title</label>
+                          <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Item Title <span className="text-red-500">*</span></label>
                           <Input placeholder="e.g., Undergraduate Admission Support" className="h-16 rounded-2xl bg-slate-50 border-none font-black text-xl shadow-inner" value={basicInfo.name} onChange={e => setBasicInfo({...basicInfo, name: e.target.value})} />
                         </div>
                         {!isConsult && (
                           <>
                             <div className="space-y-2">
-                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand</label>
+                              <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Brand <span className="text-red-500">*</span></label>
                               <Input placeholder="Apple / Logitech" className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={e => setBasicInfo({...basicInfo, brand: e.target.value})} />
                             </div>
                             <div className="space-y-2">
@@ -334,7 +375,7 @@ export default function NewProductWizard() {
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Description Payload</label>
+                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Description Payload <span className="text-red-500">*</span></label>
                          <Textarea placeholder="Professional marketing copy for the item..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
                       </div>
 
@@ -349,7 +390,14 @@ export default function NewProductWizard() {
                          <Switch checked={basicInfo.featured} onCheckedChange={(val) => setBasicInfo({...basicInfo, featured: val})} className="data-[state=checked]:bg-blue-600" />
                       </div>
 
-                      <Button onClick={() => setStep(2)} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
+                      <Button 
+                        onClick={handleNextStep} 
+                        disabled={!isStep1Valid()}
+                        className={cn(
+                          "w-full h-16 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl gap-3 transition-all",
+                          isStep1Valid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
+                        )}
+                      >
                          Continue to Pricing <ArrowRight className="w-6 h-6" />
                       </Button>
                    </CardContent>
@@ -407,13 +455,13 @@ export default function NewProductWizard() {
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
                            <div className="space-y-2 md:col-span-2">
-                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Standard Price (GH₵)</label>
+                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Standard Price (GH₵) <span className="text-red-500">*</span></label>
                              <div className="relative">
                                <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600">GH₵</div>
                                <Input type="number" className="pl-14 h-14 bg-blue-50 border-none font-black text-2xl text-blue-900" value={v.price} onChange={e => updateVariant(idx, 'price', parseFloat(e.target.value))} />
                              </div>
                            </div>
-                           <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Units Available</label><Input type="number" className="h-14 bg-slate-50 border-none font-black text-lg" value={v.stock} onChange={e => updateVariant(idx, 'stock', parseInt(e.target.value))} /></div>
+                           <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Units Available <span className="text-red-500">*</span></label><Input type="number" className="h-14 bg-slate-50 border-none font-black text-lg" value={v.stock} onChange={e => updateVariant(idx, 'stock', parseInt(e.target.value))} /></div>
                            <div className="space-y-2">
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</label>
                              <Select value={v.condition} onValueChange={val => updateVariant(idx, 'condition', val)}>
@@ -429,8 +477,15 @@ export default function NewProductWizard() {
 
              <div className="flex gap-4">
                 <Button variant="ghost" onClick={() => setStep(1)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back to Step 1</Button>
-                <Button onClick={() => isSimpleCategory ? handleFinalSave() : setStep(3)} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
-                   {isSimpleCategory ? (isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : "Archive Unit Now") : "Continue to Advanced Details"} <ArrowRight className="w-6 h-6" />
+                <Button 
+                  onClick={handleNextStep} 
+                  disabled={!isStep2Valid() || isSaving}
+                  className={cn(
+                    "flex-1 h-16 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl gap-3 transition-all",
+                    isStep2Valid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
+                  )}
+                >
+                   {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : isSimpleCategory ? "Archive Unit Now" : "Continue to Advanced Details"} <ArrowRight className="w-6 h-6" />
                 </Button>
              </div>
           </div>

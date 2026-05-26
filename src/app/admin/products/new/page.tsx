@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -61,6 +60,7 @@ export default function NewProductPage() {
     stock: 10,
     image_url: "",
     image_urls: [],
+    description: "",
     specs: "",
     condition: "New",
     clock_speed: "",
@@ -162,13 +162,15 @@ export default function NewProductPage() {
       
       setIsUploading(false);
 
-      let finalSpecs = product.specs || "";
+      let finalSpecs = "";
       if (product.category === "Laptops") {
         finalSpecs = `CPU: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | GPU: ${product.gpu || "Standard"} | Screen: ${product.screen_resolution || "Standard"} | Speed: ${product.clock_speed || "Standard"}`;
       } else if (product.category === "Phones") {
         finalSpecs = `Chipset: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | Camera: ${product.camera || "Standard"} | Battery: ${product.battery || "Standard"}`;
       } else if (product.category === "Closet") {
         finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
+      } else {
+        finalSpecs = product.specs || "";
       }
 
       const { error } = await supabase
@@ -178,18 +180,19 @@ export default function NewProductPage() {
           image_url: finalImageUrls[0], 
           image_urls: finalImageUrls,
           specs: finalSpecs,
+          description: product.description || "",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }]);
 
       if (error) {
         if (error.message.includes("row-level security policy")) {
-          throw new Error("RLS Security Error: Please run the fix SQL in your Supabase Editor to allow product uploads.");
+          throw new Error("RLS Security Error: Please check database permissions.");
         }
         throw error;
       }
 
-      toast({ title: "Product Sync Success", description: "Item added to inventory with multi-image support." });
+      toast({ title: "Product Sync Success", description: "Item added to inventory with description integrity." });
       router.push("/admin");
     } catch (err: any) {
       console.error("Transmission Error:", err);
@@ -372,13 +375,13 @@ export default function NewProductPage() {
 
                    <div className="space-y-2">
                       <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2">
-                        <Info className="w-3 h-3" /> Descriptive Payload
+                        <Info className="w-3 h-3" /> Descriptive Payload (Marketing Text)
                       </label>
                       <Textarea 
                         placeholder="Comprehensive details for the customer..." 
                         className="rounded-2xl bg-slate-50 border-none min-h-[160px] font-black text-lg leading-relaxed" 
-                        value={product.specs} 
-                        onChange={(e) => setProduct({...product, specs: e.target.value})} 
+                        value={product.description} 
+                        onChange={(e) => setProduct({...product, description: e.target.value})} 
                       />
                    </div>
 

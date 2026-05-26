@@ -199,7 +199,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           <div className="lg:col-span-8 space-y-16">
             <div className="space-y-6">
                <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic">Product Description</h2>
-               <p className="text-lg text-slate-600 leading-relaxed font-medium">{product.specs.split('|')[0]}</p>
+               <p className="text-lg text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
+                 {product.description || product.specs.split('|')[0] || "No detailed description provided."}
+               </p>
             </div>
 
             <div className="space-y-8">
@@ -227,6 +229,13 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                          <TechTableRow icon={Video} label="Camera Array" value={product.camera} />
                          <TechTableRow icon={ShieldCheck} label="Physical Condition" value={product.condition} />
                        </>
+                     )}
+                     {!["Laptops", "Phones"].includes(product.category) && product.specs && (
+                       <TableRow className="border-none">
+                         <TableCell className="py-2 pl-0">
+                           <p className="text-sm font-medium text-slate-600 leading-relaxed">{product.specs}</p>
+                         </TableCell>
+                       </TableRow>
                      )}
                    </TableBody>
                  </Table>

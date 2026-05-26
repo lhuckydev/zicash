@@ -6,10 +6,11 @@ export interface Product {
   name: string;
   price: number;
   specs: string;
+  description?: string; // New field to preserve custom admin text
   category: string;
   brand: string;
   image_url: string;
-  image_urls?: string[]; // Added for multi-image support
+  image_urls?: string[]; 
   stock: number;
   // Electronics Fields (Laptops / Phones)
   ram_size?: string;
@@ -20,7 +21,7 @@ export interface Product {
   gpu?: string;
   vram?: string;
   battery?: string;
-  camera?: string; // New: Specific for Phones
+  camera?: string; 
   screen_size?: string;
   clock_speed?: string;
   screen_resolution?: string;

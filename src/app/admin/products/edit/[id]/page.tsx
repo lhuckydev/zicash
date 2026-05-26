@@ -63,6 +63,7 @@ export default function EditProductPage() {
     stock: 10,
     image_url: "",
     image_urls: [],
+    description: "",
     specs: "",
     condition: "New",
     clock_speed: "",
@@ -186,13 +187,15 @@ export default function EditProductPage() {
         }
       }
 
-      let finalSpecs = product.specs || "";
+      let finalSpecs = "";
       if (product.category === "Laptops") {
         finalSpecs = `CPU: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | GPU: ${product.gpu || "Standard"} | Screen: ${product.screen_resolution || "Standard"} | Speed: ${product.clock_speed || "Standard"}`;
       } else if (product.category === "Phones") {
         finalSpecs = `Chipset: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | Camera: ${product.camera || "Standard"} | Battery: ${product.battery || "Standard"}`;
       } else if (product.category === "Closet") {
         finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
+      } else {
+        finalSpecs = product.specs || "";
       }
 
       const { error } = await supabase
@@ -202,13 +205,14 @@ export default function EditProductPage() {
           image_url: finalImageUrls[0] || "",
           image_urls: finalImageUrls,
           specs: finalSpecs,
+          description: product.description || "",
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
 
       if (error) throw error;
 
-      toast({ title: "Update Success", description: "Catalog synchronized with multi-image data." });
+      toast({ title: "Update Success", description: "Catalog synchronized with description and spec segregation." });
       router.push("/admin");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Sync Failure", description: err.message });
@@ -385,17 +389,9 @@ export default function EditProductPage() {
                      </div>
                    )}
 
-                   {product.category === "Closet" && (
-                     <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Size</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.size} onChange={(e) => setProduct({...product, size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Material</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.material} onChange={(e) => setProduct({...product, material: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Color</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.color} onChange={(e) => setProduct({...product, color: e.target.value})} /></div>
-                     </div>
-                   )}
-
                    <div className="space-y-2">
-                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Description</label>
-                      <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.specs} onChange={(e) => setProduct({...product, specs: e.target.value})} />
+                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Descriptive Payload (Marketing Text)</label>
+                      <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description} onChange={(e) => setProduct({...product, description: e.target.value})} />
                    </div>
 
                    <Button onClick={handleSave} disabled={isSaving} className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-xl shadow-2xl shadow-blue-600/20 gap-3">

@@ -140,8 +140,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* Image Section */}
-          <div className="lg:col-span-5 flex flex-col md:flex-row gap-6 h-fit">
+          {/* Image Section - Expanded for Desktop and Offset to align with first spec card */}
+          <div className="lg:col-span-6 flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
             <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
               {productImages.map((url, idx) => (
                 <div 
@@ -157,7 +157,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               ))}
             </div>
 
-            <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[500px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
+            <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[600px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
               <Carousel setApi={setApi} className="w-full h-full [&>div]:h-full">
                 <CarouselContent className="h-full ml-0">
                   {productImages.map((url, idx) => (
@@ -197,7 +197,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           </div>
 
           {/* Details Section */}
-          <div className="lg:col-span-7 space-y-10">
+          <div className="lg:col-span-6 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                  {product.brand && (

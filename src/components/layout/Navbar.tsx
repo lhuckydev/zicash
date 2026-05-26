@@ -357,21 +357,21 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4"
           >
-            {/* Backdrop Layer (Free Area) - Reliable click capture */}
+            {/* The Backdrop: Clicking anywhere here closes the overlay */}
             <div 
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-md cursor-pointer" 
               onClick={() => setIsSearchOpen(false)}
             />
             
-            {/* Modal Content - e.stopPropagation prevents closing when clicking inside */}
+            {/* The Search Field Area: Stop propagation to prevent accidental closing */}
             <motion.div 
-              initial={{ scale: 0.9, y: -20 }}
+              initial={{ scale: 0.95, y: -20 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: -20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+              exit={{ scale: 0.95, y: -20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-white">
                 <div className="relative flex-1 group">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   <form onSubmit={handleSearchSubmit}>
@@ -394,7 +394,7 @@ export function Navbar() {
                     )}
                     <Button 
                       onClick={handleSearchSubmit}
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest px-4 h-10"
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest px-4 h-10 shadow-lg shadow-blue-600/20"
                     >
                       Search
                     </Button>
@@ -402,7 +402,7 @@ export function Navbar() {
                 </div>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2">
+              <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2 bg-white">
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-10 space-y-3">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />

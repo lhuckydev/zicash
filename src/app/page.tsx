@@ -83,12 +83,12 @@ export default function CatalogPage() {
         setError(supabaseError.message);
       } else {
         setProducts(data || []);
-        // Trigger a re-shuffle of suggestions on initial load
+        // Trigger a re-shuffle of suggestions on initial load by providing a random offset
         setSeed(Math.random());
       }
     } catch (err: any) {
       console.error("Fetch Error:", err);
-      setError(err.message || "Failed to connect to the database.");
+      setError(err.message || "Failed to connect to the store database.");
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +119,7 @@ export default function CatalogPage() {
   
   const suggestedPicks = useMemo(() => {
     if (!products || products.length === 0) return [];
-    // Ensure randomization actually happens using the seed
+    // Efficiently randomize available items using the seed
     return [...products].sort(() => 0.5 - seed).slice(0, 10);
   }, [products, seed]);
 
@@ -180,7 +180,7 @@ export default function CatalogPage() {
                 <AlertCircle className="h-5 w-5" />
                 <AlertTitle className="text-lg font-bold uppercase tracking-tight">System Message</AlertTitle>
                 <AlertDescription className="mt-4 space-y-4">
-                  <p className="text-sm font-medium">System Response: {error}</p>
+                  <p className="text-sm font-medium">Information: {error}</p>
                   <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Update</Button>
                 </AlertDescription>
               </Alert>

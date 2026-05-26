@@ -41,23 +41,27 @@ function ProductSkeleton() {
 
 function SuggestedProductTile({ product }: { product: Product }) {
   return (
-    <motion.div whileHover={{ y: -5 }} className="h-full px-2 py-4">
-      <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300 h-full">
-        <div className="relative aspect-square w-full rounded-[2rem] overflow-hidden bg-white mb-4 shadow-xl border border-slate-50 group-hover:shadow-2xl transition-all">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -5 }} 
+      className="h-full px-1 py-3"
+    >
+      <Link href={`/product/${product.id}`} className="flex flex-col items-center group h-full">
+        <div className="relative aspect-square w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white mb-3 shadow-lg border border-slate-50 group-hover:shadow-xl transition-all">
           <Image 
-            src={product.image_url || "https://picsum.photos/seed/zicash/400/400"} 
+            src={product.image_url} 
             alt={product.name} 
             fill 
-            className="object-contain p-4 md:p-6 transition-transform duration-500 group-hover:scale-110" 
-            sizes="(max-width: 768px) 45vw, 20vw"
+            className="object-contain p-3 md:p-5 transition-transform duration-500 group-hover:scale-105" 
+            sizes="(max-width: 768px) 40vw, 20vw"
           />
-          <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <div className="space-y-1.5 text-center w-full px-2">
-          <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
+        <div className="space-y-1 text-center w-full px-1">
+          <h4 className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
             {product.name}
           </h4>
-          <p className="text-xs font-black text-blue-600 italic">GH₵ {product.price.toLocaleString()}</p>
+          <p className="text-[11px] md:text-xs font-black text-blue-600 italic">GH₵ {product.price.toLocaleString()}</p>
         </div>
       </Link>
     </motion.div>
@@ -177,9 +181,8 @@ export default function CatalogPage() {
 
           {!isLoading && category === "All" && suggestedPicks.length > 0 && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.98 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
             >
               <div className="flex items-center justify-between mb-8 px-2">
@@ -191,9 +194,9 @@ export default function CatalogPage() {
                 </div>
               </div>
               <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                <CarouselContent className="-ml-2">
+                <CarouselContent className="-ml-1">
                   {suggestedPicks.map((product) => (
-                    <CarouselItem key={`suggested-${product.id}`} className="pl-2 basis-[48%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
+                    <CarouselItem key={`suggested-${product.id}`} className="pl-1 basis-[48%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
                       <SuggestedProductTile product={product} />
                     </CarouselItem>
                   ))}

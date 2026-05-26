@@ -135,8 +135,8 @@ export function Navbar() {
       )}>
         <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
-          {/* Mobile Centered Branding */}
-          <div className="flex lg:hidden justify-center items-center py-1">
+          {/* Mobile Centered Branding (Row 1) */}
+          <div className="flex lg:hidden justify-center items-center pt-1 pb-2">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm shrink-0">
                 <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={32} height={32} className="object-cover" />
@@ -195,7 +195,7 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Unified Mobile Toolbar Lane */}
+          {/* Unified Mobile Toolbar Lane (Row 2) */}
           <div className="flex lg:hidden items-center gap-2 w-full">
             <button 
               onClick={() => setIsMenuOpen(true)}
@@ -249,7 +249,7 @@ export function Navbar() {
               initial={{ x: "-100%" }} 
               animate={{ x: 0 }} 
               exit={{ x: "-100%" }} 
-              transition={{ type: "spring", damping: 25, stiffness: 200 }} 
+              transition={{ type: "spring", stiffness: 400, damping: 35 }} 
               className="relative h-full w-[85%] max-w-[300px] bg-white shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col"
             >
               <div className="p-8 border-b border-slate-50 flex items-center justify-between">
@@ -297,7 +297,7 @@ export function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Full-Screen Search Overhaul Overlay */}
+      {/* Full-Screen Search Overlay */}
       <AnimatePresence>
         {isSearchOpen && (
           <div className="fixed inset-0 z-[3000] flex flex-col">
@@ -305,6 +305,7 @@ export function Navbar() {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
+              transition={{ duration: 0.2 }}
               className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
               onClick={() => setIsSearchOpen(false)} 
             />
@@ -312,6 +313,7 @@ export function Navbar() {
               initial={{ y: -50, opacity: 0 }} 
               animate={{ y: 0, opacity: 1 }} 
               exit={{ y: -50, opacity: 0 }} 
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[3100]" 
               onClick={(e) => e.stopPropagation()}
             >

@@ -64,7 +64,6 @@ export function ProductReviews({ productId }: { productId: string }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        // Silently handle if table isn't ready or permissions are syncing
         if (error.code === 'PGRST116' || error.message.includes('relation "reviews" does not exist')) {
           setReviews([]);
           return;
@@ -219,15 +218,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                 <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6">Syncing Client Logs...</p>
              </div>
-           ) : reviews.length === 0 ? (
-             <div className="text-center py-32 bg-white/50 rounded-[3rem] border-2 border-dashed border-slate-100">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                   <MessageSquare className="w-8 h-8 text-slate-200" />
-                </div>
-                <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No client feedback detected for this unit</p>
-                <p className="text-[10px] font-bold text-slate-300 uppercase mt-2 tracking-widest">Be the first to record a review</p>
-             </div>
-           ) : (
+           ) : reviews.length > 0 && (
              <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
                    {reviews.map((r, idx) => (

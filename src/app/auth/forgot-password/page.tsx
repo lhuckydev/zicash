@@ -21,20 +21,29 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     
     try {
+      // Directs the user to the reset-password page after they click the email link
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
       if (error) {
-        toast({ variant: "destructive", title: "Request Failed", description: error.message });
+        toast({ 
+          variant: "destructive", 
+          title: "Request Failed", 
+          description: error.message 
+        });
       } else {
         toast({ 
-          title: "Recovery Sent", 
-          description: "If an account exists for this email, you will receive a reset link shortly." 
+          title: "Reset Link Sent", 
+          description: "Please check your email. If an account exists, you will receive a link to choose a new password." 
         });
       }
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: "System connection failure." });
+      toast({ 
+        variant: "destructive", 
+        title: "Error", 
+        description: "A connection error occurred. Please try again." 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -44,36 +53,36 @@ export default function ForgotPasswordPage() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-6 tech-grid pb-24 md:pb-12">
-        <Card className="w-full max-w-md glass-panel border-white/40 shadow-2xl rounded-[2.5rem] overflow-hidden">
+        <Card className="w-full max-w-md bg-white border-white/40 shadow-2xl rounded-[2.5rem] overflow-hidden">
           <CardHeader className="text-center pt-10 pb-6">
             <div className="mx-auto w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-blue-600/20">
               <KeyRound className="w-6 h-6 text-white" />
             </div>
-            <CardTitle className="text-3xl font-headline font-bold text-slate-900">
-              Access <span className="text-blue-600 italic">Recovery</span>
+            <CardTitle className="text-3xl font-headline font-bold text-slate-900 uppercase italic">
+              Forgot <span className="text-blue-600">Password?</span>
             </CardTitle>
             <CardDescription className="text-slate-500 font-medium mt-2 px-6">
-              Enter your registered email to receive a secure recovery node.
+              Enter your email address and we will send you a secure link to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 px-10 pb-10">
             <form onSubmit={handleResetRequest} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Account Email</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input 
                     type="email" 
-                    placeholder="nexus@zicash.com" 
+                    placeholder="your@email.com" 
                     required 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-white/50 border-slate-100 rounded-2xl h-12 pl-12 focus-visible:ring-blue-600/20"
+                    className="bg-slate-50 border-none rounded-2xl h-14 pl-12 focus-visible:ring-blue-600/20 font-bold"
                   />
                 </div>
               </div>
-              <Button className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest shadow-xl shadow-blue-600/20 text-white transition-all" disabled={isLoading}>
-                {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Transmit Reset Node"}
+              <Button className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 text-white transition-all" disabled={isLoading}>
+                {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Send Reset Link"}
               </Button>
             </form>
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
@@ -7,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { Product } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabase";
-import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, ArrowDownWideNarrow, Zap } from "lucide-react";
+import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, ArrowDownWideNarrow, Zap, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,11 +30,14 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { useSearchParams } from "next/navigation";
 
-function CategoryProductSkeleton() {
+/**
+ * @fileOverview Marketplace Categories Page
+ * Displays products by department with advanced filtering.
+ */
+
+function ItemLoadingView() {
   return (
     <div className="bg-white rounded-3xl p-4 space-y-4 border border-slate-50">
       <Skeleton className="aspect-square w-full rounded-2xl" />
@@ -111,7 +113,6 @@ function CategoriesContent() {
     if (!error && data) {
       setProducts(data || []);
       
-      // Calculate dynamic max price for initial range
       const prices = data.map((p: any) => p.price);
       const max = prices.length > 0 ? Math.max(...prices, 1000) : 20000;
       setMaxPriceLimit(max);
@@ -124,7 +125,6 @@ function CategoriesContent() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Derived Filter Data
   const availableBrands = useMemo(() => {
     const brands = new Set<string>();
     products
@@ -136,7 +136,6 @@ function CategoriesContent() {
   const activeProducts = useMemo(() => {
     let filtered = products.filter((p) => p.category === activeCategory);
 
-    // 1. Hot Deals
     if (showHotDeals) {
       filtered = filtered.filter(p => 
         p.variants?.some(v => v.discount_price && v.discount_price > 0) || 
@@ -144,20 +143,17 @@ function CategoriesContent() {
       );
     }
 
-    // 2. Price Range
     filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
-    // 3. Brands
     if (selectedBrands.length > 0) {
       filtered = filtered.filter(p => p.brand && selectedBrands.includes(p.brand));
     }
 
-    // 4. Sorting
     return [...filtered].sort((a, b) => {
       if (sortBy === "price_asc") return a.price - b.price;
       if (sortBy === "price_desc") return b.price - a.price;
       if (sortBy === "oldest") return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime(); // newest
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [products, activeCategory, showHotDeals, priceRange, selectedBrands, sortBy]);
 
@@ -184,7 +180,6 @@ function CategoriesContent() {
 
   return (
     <main className="flex-1 flex overflow-hidden bg-slate-50">
-      {/* Left Side Navigation Rail */}
       <aside className="w-24 md:w-32 bg-white border-r border-slate-100 flex flex-col overflow-y-auto scrollbar-hide shrink-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         {categories.map((cat) => {
           const isActive = activeCategory === cat.name;
@@ -219,14 +214,11 @@ function CategoriesContent() {
         })}
       </aside>
 
-      {/* Right Side Content Area */}
       <section className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-12">
         <div className="p-4 md:p-8 space-y-6">
-          
-          {/* Header Toolbar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">{activeCategory}</h2>
+                <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">{activeCategory}</h1>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{activeProducts.length} Items Available</p>
              </div>
              
@@ -251,10 +243,9 @@ function CategoriesContent() {
                      </SheetHeader>
                      
                      <div className="flex-1 overflow-y-auto p-8 space-y-10 scrollbar-hide">
-                        {/* Sort By */}
                         <div className="space-y-4">
                            <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
-                              <ArrowDownWideNarrow className="w-3 h-3" /> Sorting Preference
+                              <ArrowDownWideNarrow className="w-3 h-3" /> Sort Items By
                            </label>
                            <Select value={sortBy} onValueChange={setSortBy}>
                               <SelectTrigger className="h-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner text-xs">
@@ -264,15 +255,14 @@ function CategoriesContent() {
                                  <SelectItem value="newest" className="font-bold">Newest Arrivals</SelectItem>
                                  <SelectItem value="price_asc" className="font-bold">Price: Low to High</SelectItem>
                                  <SelectItem value="price_desc" className="font-bold">Price: High to Low</SelectItem>
-                                 <SelectItem value="oldest" className="font-bold">Oldest Listing</SelectItem>
+                                 <SelectItem value="oldest" className="font-bold">Oldest Items</SelectItem>
                               </SelectContent>
                            </Select>
                         </div>
 
-                        {/* Price Range */}
                         <div className="space-y-6">
                            <div className="flex justify-between items-center">
-                              <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Price Boundary</label>
+                              <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Price Limit</label>
                               <span className="text-[10px] font-black text-blue-600 italic">GHS {priceRange[0]} — {priceRange[1]}</span>
                            </div>
                            
@@ -313,19 +303,17 @@ function CategoriesContent() {
                            />
                         </div>
 
-                        {/* Hot Deals */}
                         <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm group">
                            <div className="flex items-center gap-4">
                               <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform"><Zap className="w-5 h-5 fill-current" /></div>
                               <div>
                                  <p className="font-black text-slate-900 uppercase text-xs">Hot Deals Only</p>
-                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Show discounted items</p>
+                                 <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Show discounted products</p>
                               </div>
                            </div>
                            <Checkbox checked={showHotDeals} onCheckedChange={(val) => setShowHotDeals(val as boolean)} className="w-6 h-6 rounded-lg data-[state=checked]:bg-blue-600" />
                         </div>
 
-                        {/* Brands */}
                         {availableBrands.length > 0 && (
                           <div className="space-y-4">
                              <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em]">Available Brands</label>
@@ -373,7 +361,6 @@ function CategoriesContent() {
              </div>
           </div>
 
-          {/* Active Filter Badges */}
           {activeFilterCount > 0 && (
             <div className="flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2">
                {showHotDeals && (
@@ -395,11 +382,10 @@ function CategoriesContent() {
             </div>
           )}
 
-          {/* Product Grid */}
           {isLoading && products.length === 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
               {Array.from({ length: 8 }).map((_, i) => (
-                <CategoryProductSkeleton key={i} />
+                <ItemLoadingView key={i} />
               ))}
             </div>
           ) : activeProducts.length > 0 ? (
@@ -417,8 +403,8 @@ function CategoriesContent() {
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
                 <Package className="w-10 h-10 text-slate-200" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 uppercase italic">No Units Found</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2 text-center max-w-xs px-6">Try adjusting your filters or checking another department.</p>
+              <h2 className="text-xl font-black text-slate-900 uppercase italic">No Products Found</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2 text-center max-w-xs px-6">Try adjusting your filters or checking another section.</p>
               <Button onClick={resetFilters} className="mt-8 bg-blue-600 text-white font-black rounded-2xl h-12 px-8 uppercase text-[10px] tracking-widest shadow-xl shadow-blue-600/20">Clear All Filters</Button>
             </div>
           )}

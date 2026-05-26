@@ -13,22 +13,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { buttonTap } from "@/lib/animations";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 export function Navbar() {
   const router = useRouter();
@@ -157,11 +141,21 @@ export function Navbar() {
           isSearchOpen ? "z-[100]" : "z-50"
         )}
       >
-        <div className="container mx-auto px-4 py-2 flex flex-col gap-2">
+        <div className="container mx-auto px-4 py-3 flex flex-col gap-4">
           
-          {/* Top Row: Center Logo (Mobile) / Logo + Desktop Nav (Desktop) */}
-          <div className="flex items-center justify-between w-full">
-            <div className="hidden lg:flex items-center gap-3">
+          {/* Mobile centered branding row */}
+          <div className="flex lg:hidden justify-center items-center">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative w-9 h-9 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm">
+                <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={36} height={36} className="object-cover" />
+              </div>
+              <span className="font-bold text-xl text-slate-900 font-headline uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
+            </Link>
+          </div>
+
+          {/* Desktop row 1: Branding and Desktop Nav */}
+          <div className="hidden lg:flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2 shrink-0">
                 <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
                   <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} className="object-cover" />
@@ -173,18 +167,7 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* Mobile Centered Logo */}
-            <div className="flex lg:hidden flex-1 justify-center items-center">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-100 bg-white">
-                  <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={32} height={32} className="object-cover" />
-                </div>
-                <span className="font-bold text-lg text-slate-900 font-headline uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
-              </Link>
-            </div>
-
-            {/* Desktop Nav Links */}
-            <div className="hidden lg:flex items-center gap-8 mx-12">
+            <div className="flex items-center gap-8 mx-12">
               {mainNavLinks.map((link) => (
                 <Link key={link.path} href={link.path} className="relative py-2">
                   <span className={cn("text-[10px] font-bold uppercase tracking-[0.15em] transition-colors", pathname === link.path ? "text-blue-600" : "text-slate-400 hover:text-slate-900")}>
@@ -197,49 +180,37 @@ export function Navbar() {
               ))}
             </div>
 
-            {/* Desktop Right Actions (Hidden on Mobile row 1) */}
-            <div className="hidden lg:flex items-center gap-6">
+            <div className="flex items-center gap-6">
+              <div 
+                onClick={() => setIsSearchOpen(true)}
+                className="w-48 h-10 px-4 rounded-full border border-slate-200 bg-slate-50 flex items-center gap-3 cursor-pointer text-slate-400 hover:border-blue-300 transition-all"
+              >
+                <Search className="w-4 h-4" />
+                <span className="text-xs font-bold truncate">{searchQuery || "Search items..."}</span>
+              </div>
               <Link href="/cart" className="relative p-2 text-slate-400 hover:text-blue-600">
                 <ShoppingCart className="w-6 h-6" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[9px] font-black h-4 min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1">{cartCount}</span>}
               </Link>
               {session ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm cursor-pointer"><AvatarImage src={profile?.avatar_url} /><AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold">{session.user.email[0].toUpperCase()}</AvatarFallback></Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 rounded-[1.5rem] p-2 shadow-2xl"><DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Account</DropdownMenuLabel><DropdownMenuSeparator />{/* ... menu items ... */}<DropdownMenuItem onClick={handleLogout} className="text-red-600"><LogOut className="mr-3 h-4 w-4" />Logout</DropdownMenuItem></DropdownMenuContent>
-                </DropdownMenu>
+                <Avatar className="h-9 w-9 border-2 border-white shadow-sm cursor-pointer" onClick={() => router.push('/profile')}>
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold">{session.user.email[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
               ) : (
                 <Link href="/auth"><Button className="rounded-full bg-blue-600 text-white font-bold h-10 px-5 text-xs">Login</Button></Link>
               )}
             </div>
           </div>
 
-          {/* Bottom Row: Mobile Toolbar (Menu + Search + Icons) */}
-          <div className="flex lg:hidden items-center gap-2 w-full px-0.5 pb-1">
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-slate-500 h-10 w-10 shrink-0">
-                  <Menu className="w-6 h-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] p-0 border-none rounded-r-[2rem] shadow-2xl">
-                <SheetHeader className="p-8 border-b border-slate-50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full border bg-white overflow-hidden"><Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} /></div>
-                    <span className="text-xl font-black text-slate-900 font-headline uppercase">ZiCash <span className="text-blue-600">GH</span></span>
-                  </div>
-                </SheetHeader>
-                <div className="flex flex-col p-6 space-y-2">
-                  {allMobileLinks.map((link) => (
-                    <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-50")}>
-                      <link.icon className="w-5 h-5" /> {link.name}
-                    </Link>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
+          {/* Mobile toolbar row: Unified lane with Menu, Search, Cart, Profile */}
+          <div className="flex lg:hidden items-center gap-2 w-full">
+            <button 
+              onClick={() => setIsMenuOpen(true)}
+              className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
             <div 
               onClick={() => setIsSearchOpen(true)}
@@ -268,91 +239,97 @@ export function Navbar() {
               )}
             </div>
           </div>
-
         </div>
-      </motion.nav>
 
-      {/* Full-Screen Search Overhaul Overlay */}
-      <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[1000] flex flex-col"
-          >
-            {/* Clickable Area to Close */}
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-            
-            {/* Search Box & Content */}
-            <motion.div 
-              initial={{ y: -50 }}
-              animate={{ y: 0 }}
-              exit={{ y: -50 }}
-              className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[1100]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-blue-50">
-                <div className="p-3 border-b border-slate-100 flex items-center gap-2">
-                  <div className="relative flex-1 flex items-center">
-                    <Search className="absolute left-5 w-4 h-4 text-blue-600" />
-                    <form onSubmit={handleSearchSubmit} className="flex-1">
-                      <Input 
-                        ref={inputRef}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search for hardware..." 
-                        className="pl-12 pr-12 h-14 bg-blue-50/30 border-none rounded-full text-lg font-bold focus-visible:ring-0"
-                      />
-                    </form>
-                    <div className="absolute right-2 flex items-center gap-1">
-                      {searchQuery && (
-                        <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-blue-600"><X className="w-5 h-5" /></button>
-                      )}
-                      <Button onClick={handleSearchSubmit} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest px-6 h-10">Search</Button>
+        {/* Mobile Side Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1000]" />
+              <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="fixed left-0 top-0 bottom-0 w-[300px] bg-white z-[1100] shadow-2xl rounded-r-[2.5rem] overflow-hidden flex flex-col">
+                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shadow-sm">
+                      <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} />
+                    </div>
+                    <span className="text-xl font-black text-slate-900 font-headline uppercase">ZiCash <span className="text-blue-600">GH</span></span>
+                  </div>
+                  <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X className="w-6 h-6" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 space-y-2">
+                  {allMobileLinks.map((link) => (
+                    <Link key={link.path} href={link.path} onClick={() => setIsMenuOpen(false)} className={cn("flex items-center gap-4 p-4 rounded-2xl font-bold text-sm", pathname === link.path ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50")}>
+                      <link.icon className="w-5 h-5" /> {link.name}
+                    </Link>
+                  ))}
+                  {session && (
+                    <button onClick={handleLogout} className="flex items-center gap-4 p-4 rounded-2xl font-bold text-sm text-red-500 w-full hover:bg-red-50 transition-colors mt-8">
+                      <LogOut className="w-5 h-5" /> Logout
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Full-Screen Search Overhaul Overlay */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] flex flex-col">
+              <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+              <motion.div initial={{ y: -50 }} animate={{ y: 0 }} exit={{ y: -50 }} className="relative w-full max-w-2xl mx-auto mt-4 md:mt-10 px-4 z-[2100]" onClick={(e) => e.stopPropagation()}>
+                <div className="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-blue-50">
+                  <div className="p-3 border-b border-slate-100 flex items-center gap-2">
+                    <div className="relative flex-1 flex items-center">
+                      <Search className="absolute left-5 w-4 h-4 text-blue-600" />
+                      <form onSubmit={handleSearchSubmit} className="flex-1">
+                        <Input ref={inputRef} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for hardware..." className="pl-12 pr-12 h-14 bg-blue-50/30 border-none rounded-full text-lg font-bold focus-visible:ring-0" />
+                      </form>
+                      <div className="absolute right-2 flex items-center gap-1">
+                        {searchQuery && <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-blue-600"><X className="w-5 h-5" /></button>}
+                        <Button onClick={handleSearchSubmit} className="bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest px-6 h-10 shadow-lg shadow-blue-600/20">Search</Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="max-h-[70vh] overflow-y-auto scrollbar-hide">
-                  {isSearching ? (
-                    <div className="py-20 flex flex-col items-center gap-3">
-                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Catalog...</p>
-                    </div>
-                  ) : suggestions.length > 0 ? (
-                    <div className="flex flex-col">
-                      {suggestions.map((p) => (
-                        <button key={p.id} onClick={() => { setIsSearchOpen(false); router.push(`/product/${p.id}`); }} className="flex items-center justify-between px-8 py-5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group">
-                          <div className="flex items-center gap-4">
-                            <Search className="w-4 h-4 text-blue-300" />
-                            <span className="text-sm font-black text-slate-700 group-hover:text-blue-600">{p.name}</span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-8 space-y-6">
-                      <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2">Quick Sections</p>
+                  <div className="max-h-[70vh] overflow-y-auto scrollbar-hide">
+                    {isSearching ? (
+                      <div className="py-20 flex flex-col items-center gap-3">
+                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Catalog...</p>
+                      </div>
+                    ) : suggestions.length > 0 ? (
+                      <div className="flex flex-col">
+                        {suggestions.map((p) => (
+                          <button key={p.id} onClick={() => { setIsSearchOpen(false); router.push(`/product/${p.id}`); }} className="flex items-center justify-between px-8 py-5 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0 group">
+                            <div className="flex items-center gap-4">
+                              <Search className="w-4 h-4 text-blue-300" />
+                              <span className="text-sm font-black text-slate-700 group-hover:text-blue-600">{p.name}</span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 space-y-6">
                         <div className="grid grid-cols-2 gap-3">
                           {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
-                            <button key={cat} onClick={() => { setIsSearchOpen(false); router.push('/categories'); }} className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group">
+                            <button key={cat} onClick={() => { setIsSearchOpen(false); router.push('/categories'); }} className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group shadow-sm">
                               <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
                               <ChevronRight className="w-3 h-3 opacity-30 group-hover:opacity-100" />
                             </button>
                           ))}
                         </div>
+                        <button onClick={() => setIsSearchOpen(false)} className="w-full h-12 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2">Close Tool <X className="w-4 h-4" /></button>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </motion.nav>
     </>
   );
 }

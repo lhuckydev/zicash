@@ -41,21 +41,24 @@ function ProductSkeleton() {
 
 function SuggestedProductTile({ product }: { product: Product }) {
   return (
-    <motion.div variants={fadeIn} whileHover={{ scale: 1.05 }} className="h-full">
+    <motion.div whileHover={{ y: -5 }} className="h-full">
       <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300">
-        <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-slate-200/40 mb-3 shadow-sm border border-slate-100/50">
+        <div className="relative aspect-square w-full rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white mb-3 shadow-md border border-slate-100 group-hover:shadow-xl transition-all">
           <Image 
-            src={product.image_url} 
+            src={product.image_url || "https://picsum.photos/seed/zicash/400/400"} 
             alt={product.name} 
             fill 
-            className="object-contain p-5" 
-            sizes="(max-width: 768px) 30vw, 15vw"
+            className="object-contain p-4 md:p-6 transition-transform duration-500 group-hover:scale-110" 
+            sizes="(max-width: 768px) 40vw, 20vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        <span className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-tighter text-center line-clamp-1 px-2 group-hover:text-blue-600 transition-colors">
-          {product.name}
-        </span>
+        <div className="space-y-1 text-center w-full px-1">
+          <h4 className="text-[9px] md:text-[10px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
+            {product.name}
+          </h4>
+          <p className="text-[10px] font-black text-blue-600 italic">GH₵{product.price.toLocaleString()}</p>
+        </div>
       </Link>
     </motion.div>
   );
@@ -83,7 +86,6 @@ export default function CatalogPage() {
         setError(supabaseError.message);
       } else {
         setProducts(data || []);
-        // Update seed to trigger fresh randomization
         setSeed(Math.random());
       }
     } catch (err: any) {
@@ -117,7 +119,6 @@ export default function CatalogPage() {
   const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
-  // Randomize Suggested Picks based on the seed
   const suggestedPicks = useMemo(() => {
     if (products.length === 0) return [];
     return [...products].sort(() => 0.5 - Math.random()).slice(0, 10);
@@ -152,7 +153,7 @@ export default function CatalogPage() {
                     <CarouselItem key={product.id} className="pl-4 basis-[85%] md:basis-[60%] lg:basis-[45%] transition-all duration-500 ease-out">
                       <Link href={`/product/${product.id}`} className="block">
                         <div className={cn(
-                          "relative h-[280px] md:h-[400px] rounded-[2rem] md:rounded-[3rem] overflow-hidden transition-all duration-700 shadow-xl group/item",
+                          "relative h-[280px] md:h-[400px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden transition-all duration-700 shadow-xl group/item",
                           current === index ? "scale-100 opacity-100 ring-2 ring-blue-500/20" : "scale-85 md:scale-90 opacity-40"
                         )}>
                           <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/40 shadow-inner flex items-center justify-center">
@@ -174,42 +175,44 @@ export default function CatalogPage() {
             </motion.section>
           )}
 
-          {error && (
-            <div className="max-w-4xl mx-auto px-4">
-              <Alert variant="destructive" className="rounded-[2rem] bg-red-50 p-8 shadow-xl shadow-red-500/5">
-                <AlertCircle className="h-5 w-5" />
-                <AlertTitle className="text-lg font-bold uppercase tracking-tight">System Message</AlertTitle>
-                <AlertDescription className="mt-4 space-y-4">
-                  <p className="text-sm font-medium">Information: {error}</p>
-                  <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Update</Button>
-                </AlertDescription>
-              </Alert>
-            </div>
+          {!isLoading && category === "All" && suggestedPicks.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white/40 backdrop-blur-md rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5"
+            >
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/20">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Suggested <span className="text-blue-600">Picks</span></h3>
+                </div>
+              </div>
+              <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
+                <CarouselContent className="-ml-4">
+                  {suggestedPicks.map((product) => (
+                    <CarouselItem key={`suggested-${product.id}`} className="pl-4 basis-[45%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
+                      <SuggestedProductTile product={product} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </motion.div>
           )}
 
           {!error && (
-            <motion.div 
-              variants={staggerContainer(0.05)}
-              initial="initial"
-              animate="animate"
-              className="space-y-8"
-            >
+            <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
               <div className="flex items-center justify-between">
-                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Sections</motion.h2>
+                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Market Sections</motion.h2>
                 <Link href="/categories">
                   <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
                 </Link>
               </div>
-              
               <div className="flex gap-6 overflow-x-auto md:justify-center pb-4 scrollbar-hide px-2">
                 {categories.map((cat) => (
-                  <motion.button 
-                    key={cat.name} 
-                    variants={slideUp}
-                    {...buttonTap}
-                    onClick={() => setCategory(cat.name)} 
-                    className="flex flex-col items-center gap-3 shrink-0 group"
-                  >
+                  <motion.button key={cat.name} variants={slideUp} {...buttonTap} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-3 shrink-0 group">
                     <div className={cn(
                       "w-16 h-16 md:w-24 md:h-24 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
                       category === cat.name ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30 border-blue-600" : "bg-white text-slate-400 border-slate-100 hover:border-blue-200"
@@ -228,48 +231,17 @@ export default function CatalogPage() {
           )}
 
           <div id="marketplace" className="scroll-mt-24 space-y-12">
-            {category === "All" && !isLoading && suggestedPicks.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="mx-auto max-w-[100%] md:max-w-[70%] py-12 px-4 md:px-8 bg-blue-50/50 rounded-[2.5rem] md:rounded-[3rem] border border-blue-100/50"
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="w-4 h-4 text-blue-500" />
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Suggested <span className="text-blue-600 italic">Picks</span></h3>
-                  </div>
-                </div>
-                <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                  <CarouselContent className="-ml-4">
-                    {suggestedPicks.map((product) => (
-                      <CarouselItem key={`suggested-${product.id}`} className="pl-4 basis-[45%] md:basis-[20%]">
-                        <SuggestedProductTile product={product} />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </motion.div>
-            )}
-
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Items" : `${category} Section`}</h3>
+                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Inventory Units" : `${category} Section`}</h3>
                   <motion.div {...buttonTap}>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={fetchProducts} 
-                      disabled={isLoading}
-                      className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors"
-                    >
+                    <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors">
                       <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
                     </Button>
                   </motion.div>
                 </div>
-                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">View All</Button>}
+                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">View All Units</Button>}
               </div>
 
               {isLoading && products.length === 0 ? (
@@ -277,12 +249,7 @@ export default function CatalogPage() {
                   {Array.from({ length: 10 }).map((_, i) => <ProductSkeleton key={i} />)}
                 </div>
               ) : filteredProducts.length > 0 ? (
-                <motion.div 
-                  variants={staggerContainer(0.04)}
-                  initial="initial"
-                  animate="animate"
-                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10"
-                >
+                <motion.div variants={staggerContainer(0.04)} initial="initial" animate="animate" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
                   {filteredProducts.map((product) => (
                     <motion.div key={product.id} variants={fadeIn}>
                       <ProductCard product={product} />

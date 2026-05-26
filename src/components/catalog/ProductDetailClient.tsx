@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Product, ProductVariant, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { 
   ArrowLeft, Heart, ShieldCheck, Truck, Cpu, Database, 
   CircuitBoard, Monitor, Smartphone, 
   Zap, Timer, 
   Video, Layers, Info,  
-  ShoppingCart, Star, Loader2, Tag, ChevronRight, CheckCircle2,
+  ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
   Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield
 } from "lucide-react";
@@ -24,6 +24,11 @@ import {
   CarouselItem, 
   type CarouselApi
 } from "@/components/ui/carousel";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -67,6 +72,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [isAdding, setIsAdding] = useState(false);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [openSpecs, setOpenSpecs] = useState<Record<string, boolean>>({});
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category);
 
@@ -103,6 +109,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const handleThumbnailClick = useCallback((index: number) => {
     api?.scrollTo(index);
   }, [api]);
+
+  const toggleSpec = (variantId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenSpecs(prev => ({ ...prev, [variantId]: !prev[variantId] }));
+  };
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -213,12 +224,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  <div className="grid grid-cols-1 gap-6">
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
+                      const isExpanded = openSpecs[v.id] || false;
+                      
                       return (
-                        <button
+                        <div
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
                           className={cn(
-                            "text-left p-6 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden",
+                            "text-left p-6 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
                             isActive 
                               ? "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl" 
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
@@ -234,35 +247,64 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
 
                               {!isSimpleCategory && (
-                                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-5 pt-8 border-t border-slate-100/50">
-                                  {product.category === "Laptops" ? (
-                                    <>
-                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                      <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
-                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                      <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
-                                      <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
-                                      <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
-                                      <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
-                                      <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint || product.fingerprint} active={isActive} />
-                                      <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
-                                      <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
-                                      <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
-                                      <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                      <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                      <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
-                                      <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
-                                      <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
-                                      <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
-                                      <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
-                                      <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
-                                    </>
-                                  )}
+                                <div className="space-y-6">
+                                  {/* Always Visible Summary Specs */}
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-8 border-t border-slate-100/50">
+                                    {product.category === "Laptops" ? (
+                                      <>
+                                        <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                        <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                        <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                      </>
+                                    ) : (
+                                      <>
+                                        <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                        <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                        <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                      </>
+                                    )}
+                                  </div>
+
+                                  {/* Collapsible Detailed Specs */}
+                                  <Collapsible open={isExpanded} onOpenChange={() => {}}>
+                                    <CollapsibleContent className="space-y-6">
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5 pt-6 animate-in slide-in-from-top-2 duration-300">
+                                        {product.category === "Laptops" ? (
+                                          <>
+                                            <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
+                                            <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
+                                            <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
+                                            <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
+                                            <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint || product.fingerprint} active={isActive} />
+                                            <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
+                                            <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
+                                            <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
+                                            <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
+                                          </>
+                                        ) : (
+                                          <>
+                                            <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
+                                            <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
+                                            <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
+                                            <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
+                                            <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
+                                            <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
+                                          </>
+                                        )}
+                                      </div>
+                                    </CollapsibleContent>
+
+                                    <button
+                                      onClick={(e) => toggleSpec(v.id, e)}
+                                      className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
+                                    >
+                                      {isExpanded ? (
+                                        <><ChevronUp className="w-3 h-3" /> Hide Full Specs</>
+                                      ) : (
+                                        <><ChevronDown className="w-3 h-3" /> View Full Specs</>
+                                      )}
+                                    </button>
+                                  </Collapsible>
                                 </div>
                               )}
                             </div>
@@ -274,7 +316,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                </p>
                             </div>
                           </div>
-                        </button>
+                        </div>
                       );
                     })}
                  </div>
@@ -331,7 +373,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  {product.description || "No detailed description provided."}
                </p>
             </div>
-            <div className="min-h-[100px]" />
           </div>
 
           <div className="lg:col-span-4">

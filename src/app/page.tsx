@@ -68,6 +68,7 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [seed, setSeed] = useState(0);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -82,6 +83,8 @@ export default function CatalogPage() {
         setError(supabaseError.message);
       } else {
         setProducts(data || []);
+        // Trigger a re-shuffle of suggestions on initial load
+        setSeed(Math.random());
       }
     } catch (err: any) {
       console.error("Fetch Error:", err);
@@ -116,8 +119,9 @@ export default function CatalogPage() {
   
   const suggestedPicks = useMemo(() => {
     if (!products || products.length === 0) return [];
-    return [...products].sort(() => Math.random() - 0.5).slice(0, 10);
-  }, [products]);
+    // Ensure randomization actually happens using the seed
+    return [...products].sort(() => 0.5 - seed).slice(0, 10);
+  }, [products, seed]);
 
   return (
     <div className="flex flex-col min-h-screen tech-grid">

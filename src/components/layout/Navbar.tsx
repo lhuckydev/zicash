@@ -357,13 +357,13 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4"
           >
-            {/* Backdrop Layer */}
+            {/* Backdrop Layer (Free Area) - Reliable click capture */}
             <div 
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md cursor-pointer" 
               onClick={() => setIsSearchOpen(false)}
             />
             
-            {/* Modal Content */}
+            {/* Modal Content - e.stopPropagation prevents closing when clicking inside */}
             <motion.div 
               initial={{ scale: 0.9, y: -20 }}
               animate={{ scale: 1, y: 0 }}

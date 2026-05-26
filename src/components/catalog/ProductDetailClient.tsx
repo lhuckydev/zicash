@@ -73,7 +73,7 @@ const SafeShoppingCard = () => (
        <div className="flex gap-5">
           <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
           <div>
-             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
+             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Products</p>
              <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
           </div>
        </div>
@@ -81,7 +81,7 @@ const SafeShoppingCard = () => (
           <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
           <div>
              <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-             <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
+             <p className="text-sm font-medium leading-relaxed">Fast and tracked delivery ensuring your purchase reaches you safely.</p>
           </div>
        </div>
     </div>
@@ -115,7 +115,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     async function fetchFullData() {
       const { supabase } = await import('@/lib/supabase');
       
-      // Fetch Ratings
       const { data: ratingData } = await supabase
         .from('reviews')
         .select('rating')
@@ -126,7 +125,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         setRatingInfo({ average, count: ratingData.length });
       }
 
-      // Fetch Full Product
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -187,11 +185,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           <ArrowLeft className="w-3 h-3" /> Back To Shop
         </Link>
 
-        {/* Primary Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* Left Column: Visuals, Narrative & Desktop Reviews */}
           <div className="lg:col-span-6 space-y-20">
-            {/* Image Section */}
             <div className="flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
               <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
                 {productImages.map((url, idx) => (
@@ -247,24 +242,21 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
             </div>
 
-            {/* About this Item Section */}
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Product</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
                  {product.description || "No detailed description provided."}
                </p>
             </div>
 
-            {/* DESKTOP REVIEWS: Appears under About on PC */}
             <div className="hidden lg:block">
               <ProductReviews productId={product.id} />
             </div>
           </div>
 
-          {/* Right Column: Specs, Procurement & Trust */}
           <div className="lg:col-span-6 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -284,7 +276,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     ))}
                  </div>
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                   {ratingInfo ? `${ratingInfo.count} Verified Client Logs` : 'Premium Quality Verified'}
+                   {ratingInfo ? `${ratingInfo.count} Verified Customer Ratings` : 'Premium Quality Verified'}
                  </span>
               </div>
             </div>
@@ -314,7 +306,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           {isActive && <div className="absolute top-0 left-0 w-12 h-12 bg-blue-600 flex items-center justify-center rounded-br-2xl text-white shadow-lg"><CheckCircle2 className="w-6 h-6" /></div>}
                           
                           <div className="flex flex-col gap-8">
-                            {/* Header: Label and Price */}
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                               <div className="space-y-1.5 flex-1">
                                 <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
@@ -328,7 +319,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
                             </div>
 
-                            {/* Specifications Grid - Collapsible */}
                             {!isSimpleCategory && (
                               <div className="space-y-4">
                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
@@ -379,7 +369,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
                             )}
 
-                            {/* Action Button */}
                             <div className="pt-6 border-t border-slate-50">
                                <Button 
                                  onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
@@ -416,10 +405,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="flex flex-col items-start md:items-end gap-2">
                  <div className="flex items-center gap-2">
                     <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available for Dispatch' : 'Sold Out'}</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available Now' : 'Sold Out'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Warranty node: {product.warranty}
+                   <ShieldCheck className="w-3 h-3" /> Warranty period: {product.warranty}
                  </p>
               </div>
             </div>
@@ -427,20 +416,17 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <div className="grid grid-cols-1 gap-6">
                <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
                   <span className="flex items-center gap-2"><Truck className="w-3 h-3 text-blue-500" /> Free Accra Delivery</span>
-                  <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Delivery (Accra)</span>
                </div>
             </div>
 
-            {/* DESKTOP SAFE SHOPPING: Appears on right on PC */}
             <div className="hidden lg:block pt-10">
               <SafeShoppingCard />
             </div>
 
-            {/* MOBILE REVIEWS: Appears after specs on mobile */}
             <div className="lg:hidden mt-10">
               <ProductReviews productId={product.id} />
             </div>
-            {/* MOBILE SAFE SHOPPING: Appears at very bottom on mobile */}
             <div className="lg:hidden mt-10">
               <SafeShoppingCard />
             </div>

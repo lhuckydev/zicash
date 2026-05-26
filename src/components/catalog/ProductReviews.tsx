@@ -72,7 +72,7 @@ export function ProductReviews({ productId }: { productId: string }) {
       }
       setReviews(data || []);
     } catch (err: any) {
-      console.error("Fetch Logic Status:", err.message);
+      console.error("Review System Status:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +81,7 @@ export function ProductReviews({ productId }: { productId: string }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) {
-      toast({ variant: "destructive", title: "Identity Required", description: "Please sign in to share your experience." });
+      toast({ variant: "destructive", title: "Sign In Required", description: "Please sign in to share your experience." });
       return;
     }
     if (rating === 0) {
@@ -107,7 +107,7 @@ export function ProductReviews({ productId }: { productId: string }) {
         throw error;
       }
 
-      toast({ title: "Review Published", description: "Your feedback has been added to our records." });
+      toast({ title: "Review Published", description: "Your feedback has been added to the store." });
       setRating(0);
       setComment("");
       fetchReviews();
@@ -127,7 +127,7 @@ export function ProductReviews({ productId }: { productId: string }) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
            <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-           <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Client Reviews</h2>
+           <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Customer Reviews</h2>
         </div>
         <div className="flex items-center gap-6 px-2">
            <div className="flex items-baseline gap-1">
@@ -141,14 +141,13 @@ export function ProductReviews({ productId }: { productId: string }) {
                  ))}
               </div>
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {reviews.length} Verified Customer Logs
+                {reviews.length} Verified Customer Ratings
               </span>
            </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-12">
-        {/* Review Form - Visible only if authenticated, otherwise show prompt */}
         <div className="w-full">
           <div className="p-8 md:p-12 bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-600/5 space-y-10 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/[0.03] blur-3xl -mr-32 -mt-32" />
@@ -159,8 +158,8 @@ export function ProductReviews({ productId }: { productId: string }) {
                          <AlertCircle className="w-7 h-7 text-blue-600" />
                       </div>
                       <div className="space-y-2">
-                         <h3 className="text-xl font-black text-blue-900 uppercase italic">Authenticated Access Only</h3>
-                         <p className="text-sm font-medium text-blue-600/70 max-w-sm mx-auto">Please sign in to your ZiCash account to share your hardware performance logs.</p>
+                         <h3 className="text-xl font-black text-blue-900 uppercase italic">Sign In Required</h3>
+                         <p className="text-sm font-medium text-blue-600/70 max-w-sm mx-auto">Please sign in to your account to share your feedback on this product.</p>
                       </div>
                       <Button onClick={() => window.location.href='/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl h-11 px-8">
                          Sign In to Review
@@ -170,7 +169,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                    <>
                       <div className="space-y-3">
                          <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
-                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Help the ZiCash community make informed decisions</p>
+                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Help other shoppers make the right choice</p>
                       </div>
 
                       <form onSubmit={handleSubmit} className="space-y-10">
@@ -198,9 +197,9 @@ export function ProductReviews({ productId }: { productId: string }) {
                          </div>
 
                          <div className="space-y-5">
-                            <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Your Observations</label>
+                            <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Your Review</label>
                             <Textarea 
-                               placeholder="Tell us about the quality, performance and value of this hardware unit..." 
+                               placeholder="What do you think about the quality and performance of this item?" 
                                className="min-h-[180px] rounded-[2rem] bg-slate-50 border-none font-bold text-lg shadow-inner p-8 focus-visible:ring-4 focus-visible:ring-blue-600/5 placeholder:text-slate-300 leading-relaxed"
                                value={comment}
                                onChange={(e) => setComment(e.target.value)}
@@ -212,7 +211,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                            className="w-full h-20 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] rounded-3xl shadow-2xl shadow-blue-600/20 gap-4 transition-all hover:scale-[1.01]"
                          >
                             {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />} 
-                            Post Verified Review
+                            Post My Review
                          </Button>
                       </form>
                    </>
@@ -221,12 +220,11 @@ export function ProductReviews({ productId }: { productId: string }) {
           </div>
         </div>
 
-        {/* Reviews List - Always Visible */}
         <div className="w-full space-y-8">
            {isLoading ? (
              <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Syncing client logs...</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Updating reviews...</p>
              </div>
            ) : reviews.length > 0 ? (
              <div className="space-y-6">
@@ -251,7 +249,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                                 </div>
                               </div>
                               <div className="space-y-1">
-                                 <p className="font-black text-slate-900 uppercase text-lg tracking-tight leading-none">{r.profile?.full_name || 'Verified Client'}</p>
+                                 <p className="font-black text-slate-900 uppercase text-lg tracking-tight leading-none">{r.profile?.full_name || 'Verified Customer'}</p>
                                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                               </div>
                            </div>
@@ -262,7 +260,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                         </div>
                         <div className="pl-0 md:pl-2">
                            <p className="text-slate-600 font-medium text-xl leading-relaxed italic">
-                             "{r.comment || "High-performance unit. Extremely satisfied with this procurement."}"
+                             "{r.comment || "Great product. Highly recommended."}"
                            </p>
                         </div>
                      </motion.div>

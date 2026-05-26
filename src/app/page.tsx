@@ -114,7 +114,7 @@ export default function CatalogPage() {
   const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
-  // Robust Suggested Picks logic
+  // Suggested Picks logic with randomization
   const suggestedPicks = useMemo(() => {
     if (!products || products.length === 0) return [];
     // Shuffle and pick top 10 for carousel
@@ -195,9 +195,9 @@ export default function CatalogPage() {
               className="space-y-8"
             >
               <div className="flex items-center justify-between">
-                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Categories</motion.h2>
+                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Sections</motion.h2>
                 <Link href="/categories">
-                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Explore All</motion.button>
+                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
                 </Link>
               </div>
               

@@ -67,7 +67,7 @@ export function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Intelligent Indexing Search Logic
+  // Search Logic
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSuggestions([]);
@@ -77,18 +77,17 @@ export function Navbar() {
     const fetchSuggestions = async () => {
       setIsSearching(true);
       try {
-        // Intelligent Indexing: Filter by name, category, and brand
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
-          .limit(6);
+          .limit(12); // Increased limit for full-screen display
         
         if (!error && data) {
           setSuggestions(data);
         }
       } catch (err) {
-        console.error("Search index error", err);
+        console.error("Search error", err);
       } finally {
         setIsSearching(false);
       }
@@ -157,21 +156,19 @@ export function Navbar() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px] p-0 border-none rounded-r-[2rem] shadow-2xl">
-                  <SheetHeader className="p-8 border-b border-slate-50 text-left bg-slate-50/30">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-md border border-white bg-white shrink-0">
-                        <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={40} height={40} className="object-cover" />
+                  <SheetHeader className="p-8 border-b border-slate-50 bg-slate-50/30">
+                    <div className="flex flex-row items-center gap-4">
+                      <div className="relative w-12 h-12 overflow-hidden rounded-full shadow-md border border-white bg-white shrink-0">
+                        <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={48} height={48} className="object-cover" />
                       </div>
-                      <SheetTitle className="text-left">
-                        <div className="flex flex-col">
-                          <span className="text-2xl font-black font-headline tracking-tighter text-slate-900 leading-none">
-                            Zi<span className="text-blue-600">Cash</span>
-                          </span>
-                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
-                            GH Limited
-                          </span>
-                        </div>
-                      </SheetTitle>
+                      <div className="flex flex-col text-left">
+                        <span className="text-2xl font-black font-headline tracking-tighter text-slate-900 leading-none">
+                          Zi<span className="text-blue-600">Cash</span>
+                        </span>
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
+                          GH Limited
+                        </span>
+                      </div>
                     </div>
                   </SheetHeader>
                   <div className="flex flex-col p-6 space-y-2">
@@ -345,7 +342,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Full Screen Mask Search Experience */}
+      {/* Full Screen Search Experience */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div 
@@ -363,7 +360,7 @@ export function Navbar() {
                       ref={inputRef}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="What are you looking for?" 
+                      placeholder="Search items, brands, or sections..." 
                       className="pl-12 h-14 bg-slate-50 border-none rounded-2xl text-lg font-bold placeholder:text-slate-300 focus-visible:ring-4 focus-visible:ring-blue-600/5 transition-all"
                     />
                   </form>
@@ -380,12 +377,12 @@ export function Navbar() {
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-20 space-y-4">
                     <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching our inventory...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching our items...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
                     <div className="flex items-center justify-between">
-                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Suggestions</p>
+                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Recommendations</p>
                       <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View all results</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -420,7 +417,7 @@ export function Navbar() {
                 ) : (
                   <div className="space-y-12 animate-in fade-in duration-700">
                      <div className="space-y-6">
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Market Departments</p>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Departments</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                            {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
                              <Link 
@@ -439,10 +436,10 @@ export function Navbar() {
                         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
                           <Zap className="w-6 h-6 text-blue-600" />
                         </div>
-                        <h4 className="text-lg font-black uppercase italic text-slate-900">Need expert advice?</h4>
-                        <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">Our AI Advisor can help you pick the perfect hardware based on your needs and budget.</p>
+                        <h4 className="text-lg font-black uppercase italic text-slate-900">Need expert help?</h4>
+                        <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">Our Assistant can help you pick the perfect hardware based on your needs and budget.</p>
                         <Link href="/advisor" onClick={() => setIsSearchOpen(false)}>
-                          <Button className="bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest text-[10px] rounded-xl px-8 h-12 mt-4 shadow-lg shadow-blue-600/20">Talk to Advisor</Button>
+                          <Button className="bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest text-[10px] rounded-xl px-8 h-12 mt-4 shadow-lg shadow-blue-600/20">Talk to Assistant</Button>
                         </Link>
                      </div>
                   </div>

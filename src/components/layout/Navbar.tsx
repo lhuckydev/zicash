@@ -131,7 +131,7 @@ export function Navbar() {
   const mainNavLinks = [
     { name: "Shop", path: "/", icon: LayoutGrid },
     { name: "Departments", path: "/categories", icon: Zap },
-    { name: "AI Advisor", path: "/advisor", icon: BrainCircuit },
+    { name: "Expert Helper", path: "/advisor", icon: BrainCircuit },
   ];
 
   const secondaryLinks = [
@@ -240,7 +240,12 @@ export function Navbar() {
                 className="w-full h-11 pl-11 pr-4 rounded-full border border-blue-100 bg-slate-50/50 flex items-center cursor-pointer hover:bg-white hover:border-blue-300 transition-all duration-300 group shadow-sm"
               >
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-blue-600" />
-                <span className="text-slate-400 text-xs font-bold truncate">Search for items...</span>
+                <span className={cn(
+                  "text-xs font-bold truncate",
+                  searchQuery ? "text-slate-900" : "text-slate-400"
+                )}>
+                  {searchQuery || "Search for items..."}
+                </span>
               </div>
             </div>
           )}
@@ -352,7 +357,7 @@ export function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-start justify-center pt-10 sm:pt-20 px-4"
-            onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
+            onClick={() => setIsSearchOpen(false)}
           >
             <motion.div 
               initial={{ scale: 0.9, y: -20 }}

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -8,7 +9,7 @@ import { Product, useCartStore } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
   Laptop, Smartphone, Shirt, GraduationCap, Zap, 
-  LayoutGrid, Sparkles, ArrowRight, AlertCircle
+  LayoutGrid, Sparkles, ArrowRight, AlertCircle, RefreshCcw
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { 
@@ -68,30 +69,31 @@ export default function CatalogPage() {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: supabaseError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (supabaseError) {
-          setError(supabaseError.message);
-        } else {
-          setProducts(data || []);
-        }
-      } catch (err: any) {
-        console.error("Fetch Error:", err);
-        setError(err.message || "Failed to connect to the database index.");
-      } finally {
-        setIsLoading(false);
+      if (supabaseError) {
+        setError(supabaseError.message);
+      } else {
+        setProducts(data || []);
       }
+    } catch (err: any) {
+      console.error("Fetch Error:", err);
+      setError(err.message || "Failed to connect to the database index.");
+    } finally {
+      setIsLoading(false);
     }
-    fetchProducts();
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   useEffect(() => {
     if (!api) return;
@@ -123,7 +125,7 @@ export default function CatalogPage() {
         <div className="container mx-auto px-5 pt-6 space-y-16">
           
           {/* Hero Slider Section */}
-          {isLoading ? (
+          {isLoading && products.length === 0 ? (
             <section className="py-8 px-2 md:px-10">
               <Skeleton className="w-full h-[350px] md:h-[480px] rounded-[3rem]" />
             </section>
@@ -169,7 +171,7 @@ export default function CatalogPage() {
                 <AlertTitle className="text-lg font-bold uppercase tracking-tight">Database Error</AlertTitle>
                 <AlertDescription className="mt-4 space-y-4">
                   <p className="text-sm font-medium">System Response: {error}</p>
-                  <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={() => window.location.reload()}>Retry Connection</Button>
+                  <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Connection</Button>
                 </AlertDescription>
               </Alert>
             </div>
@@ -228,11 +230,22 @@ export default function CatalogPage() {
 
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Inventory" : `${category} Department`}</h3>
+                <div className="flex items-center gap-4">
+                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Inventory" : `${category} Department`}</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={fetchProducts} 
+                    disabled={isLoading}
+                    className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors"
+                  >
+                    <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
+                  </Button>
+                </div>
                 {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">Reset View</Button>}
               </div>
 
-              {isLoading ? (
+              {isLoading && products.length === 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
                   {Array.from({ length: 10 }).map((_, i) => <ProductSkeleton key={i} />)}
                 </div>

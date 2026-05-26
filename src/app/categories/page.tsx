@@ -1,15 +1,17 @@
+
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { Product } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabase";
-import { Package } from "lucide-react";
+import { Package, RefreshCcw } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 function CategoryProductSkeleton() {
   return (
@@ -57,20 +59,20 @@ export default function CategoriesPage() {
     },
   ], []);
 
-  useEffect(() => {
-    async function fetchProducts() {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (!error) setProducts(data || []);
-      // Artifical delay for skeleton demonstration if needed, but keeping it fast
-      setIsLoading(false);
-    }
-    fetchProducts();
+    if (!error) setProducts(data || []);
+    setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const activeProducts = useMemo(() => {
     return products.filter((p) => p.category === activeCategory);
@@ -119,7 +121,20 @@ export default function CategoriesPage() {
         {/* Right Side Content Area */}
         <section className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-12">
           <div className="p-4 md:p-8 space-y-6">
-            {isLoading ? (
+            <div className="flex items-center justify-between mb-4">
+               <h2 className="text-xl font-black uppercase tracking-tight text-slate-900 italic">{activeCategory}</h2>
+               <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={fetchProducts} 
+                disabled={isLoading}
+                className="rounded-xl font-bold text-[9px] uppercase tracking-widest gap-2 text-slate-400 hover:text-blue-600"
+               >
+                 <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} /> Refresh
+               </Button>
+            </div>
+
+            {isLoading && products.length === 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <CategoryProductSkeleton key={i} />

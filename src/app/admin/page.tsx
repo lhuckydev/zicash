@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -479,11 +480,32 @@ export default function AdminPage() {
             </Sheet>
             <div className="relative w-full max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search store..." className="bg-slate-50 border-none rounded-xl h-10 pl-10 text-xs w-full" /></div>
           </div>
-          <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest mr-4"><Eye className="w-4 h-4" /> Visit Store</Link>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={fetchAllData} 
+              disabled={isLoading}
+              className="h-9 w-9 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+            >
+              <RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+            </Button>
+            <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest mr-4"><Eye className="w-4 h-4" /> Visit Store</Link>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-hide pb-24">
-          <h1 className="text-3xl font-black text-slate-900 font-headline uppercase">{activeTab}</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-black text-slate-900 font-headline uppercase">{activeTab}</h1>
+            <Button 
+              variant="outline" 
+              onClick={fetchAllData} 
+              disabled={isLoading}
+              className="lg:hidden h-10 rounded-xl bg-white font-bold text-[10px] uppercase tracking-widest gap-2 shadow-sm"
+            >
+              <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} /> Refresh
+            </Button>
+          </div>
 
           {activeTab === "Overview" && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

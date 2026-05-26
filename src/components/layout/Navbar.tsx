@@ -157,8 +157,8 @@ export function Navbar() {
           isSearchOpen ? "z-[100]" : "z-50"
         )}
       >
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-1 sm:gap-4">
             {!isAdminPath && (
               <div className="lg:hidden">
                 <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -205,7 +205,7 @@ export function Navbar() {
               </div>
             )}
 
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link href="/" className="flex items-center gap-2 shrink-0">
               <motion.div whileHover={{ rotate: 5 }} className="relative w-8 h-8 sm:w-10 sm:h-10 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
                 <Image 
                   src="https://i.ibb.co/v4p0sdxs/zicash.jpg" 
@@ -215,12 +215,12 @@ export function Navbar() {
                   className="object-cover"
                 />
               </motion.div>
-              <div className="hidden sm:flex flex-col justify-center">
-                <span className="font-bold text-lg text-slate-900 font-headline leading-none">
-                  Zi<span className="text-blue-600">Cash</span>
+              <div className="flex flex-col justify-center">
+                <span className="font-bold text-base sm:text-lg text-slate-900 font-headline leading-none uppercase tracking-tight">
+                  Zi<span className="text-blue-600">Cash GH</span>
                 </span>
-                <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
-                  GH Limited
+                <span className="hidden sm:block text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
+                  Premium Marketplace
                 </span>
               </div>
             </Link>
@@ -241,31 +241,31 @@ export function Navbar() {
             </div>
           )}
 
-          <div className="flex-1 max-w-sm mx-2 sm:mx-4 relative group">
+          <div className="flex-1 max-w-xs sm:max-w-sm mx-1 sm:mx-4 relative group">
             {!isAdminPath && (
               <div className="relative w-full">
                 <div 
                   onClick={() => setIsSearchOpen(true)}
-                  className="w-full h-11 pl-11 pr-4 rounded-full border border-blue-100 bg-slate-50/50 flex items-center cursor-pointer hover:bg-white hover:border-blue-300 transition-all duration-300 group shadow-sm"
+                  className="w-full h-10 sm:h-11 pl-9 sm:pl-11 pr-4 rounded-full border border-blue-100 bg-slate-50/50 flex items-center cursor-pointer hover:bg-white hover:border-blue-300 transition-all duration-300 group shadow-sm"
                 >
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-blue-600" />
+                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-blue-600" />
                   <span className={cn(
-                    "text-xs font-bold truncate",
+                    "text-[11px] sm:text-xs font-bold truncate",
                     searchQuery ? "text-slate-900" : "text-slate-400"
                   )}>
-                    {searchQuery || "Search marketplace..."}
+                    {searchQuery || "Search..."}
                   </span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-4 md:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
             {!isAdminPath && (
               <motion.div {...buttonTap}>
                 <Link href="/cart" className="relative group p-2 transition-all duration-300">
                   <div className="relative">
-                    <ShoppingCart className="w-6 h-6 text-slate-400 group-hover:text-blue-600" />
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 group-hover:text-blue-600" />
                     <AnimatePresence>
                       {cartCount > 0 && (
                         <motion.span 
@@ -285,12 +285,12 @@ export function Navbar() {
 
             {!session ? (
               <div className="flex items-center gap-1 sm:gap-3">
-                <Link href="/auth" className="hidden sm:block">
+                <Link href="/auth" className="hidden md:block">
                   <Button variant="ghost" className="font-bold text-slate-600 p-0 hover:bg-transparent text-xs">Login</Button>
                 </Link>
                 <motion.div {...buttonTap}>
                   <Link href="/auth">
-                    <Button className="font-bold rounded-full px-3 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 h-8 sm:h-10 text-[10px] sm:text-xs">
+                    <Button className="font-bold rounded-full px-3 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 h-8 sm:h-10 text-[10px] sm:text-xs whitespace-nowrap">
                       Sign Up
                     </Button>
                   </Link>
@@ -369,13 +369,11 @@ export function Navbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[1000] flex items-start justify-center pt-10 sm:pt-20 px-4 overflow-hidden"
           >
-            {/* Darkened/Blurred Backdrop (Free Area) */}
             <div 
               className="absolute inset-0 bg-slate-950/40 backdrop-blur-md cursor-pointer" 
               onClick={() => setIsSearchOpen(false)}
             />
             
-            {/* Search Content Container - Blue and White theme */}
             <motion.div 
               initial={{ scale: 0.95, y: -20 }}
               animate={{ scale: 1, y: 0 }}
@@ -383,7 +381,6 @@ export function Navbar() {
               className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-blue-50 flex flex-col z-[1100]"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Search Bar Area */}
               <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-white">
                 <div className="relative flex-1 flex items-center">
                   <Search className="absolute left-5 w-5 h-5 text-blue-600" />
@@ -397,7 +394,6 @@ export function Navbar() {
                     />
                   </form>
                   
-                  {/* Action Group inside the bar */}
                   <div className="absolute right-2 flex items-center gap-1">
                     {searchQuery && (
                       <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-blue-600 transition-colors">
@@ -414,7 +410,6 @@ export function Navbar() {
                 </div>
               </div>
 
-              {/* Suggestions Discovery Area */}
               <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2 bg-white">
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-10 space-y-3">

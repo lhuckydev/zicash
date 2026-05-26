@@ -159,7 +159,6 @@ export default function NewProductWizard() {
     const hasName = basicInfo.name.trim().length > 0;
     const hasDesc = basicInfo.description.trim().length > 0;
     const hasImages = selectedFiles.length > 0;
-    // Brand is now optional
     return hasName && hasDesc && hasImages;
   };
 
@@ -479,7 +478,7 @@ export default function NewProductWizard() {
                     isStep2Valid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
                   )}
                 >
-                   {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : isSimpleCategory ? "Archive Unit Now" : "Continue to Advanced Details"} <ArrowRight className="w-6 h-6" />
+                   {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : isSimpleCategory ? "Upload Product Now" : "Continue to Advanced Details"} <ArrowRight className="w-6 h-6" />
                 </Button>
              </div>
           </div>
@@ -535,7 +534,7 @@ export default function NewProductWizard() {
                       <div className="pt-8 border-t border-slate-50 flex gap-4">
                         <Button variant="ghost" onClick={() => setStep(2)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back to Variants</Button>
                         <Button onClick={handleFinalSave} disabled={isSaving} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
-                           {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck className="w-6 h-6" />} Archive Product & Variants
+                           {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck className="w-6 h-6" />} Upload Product & Configurations
                         </Button>
                       </div>
                    </CardContent>

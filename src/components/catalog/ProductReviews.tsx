@@ -72,9 +72,7 @@ export function ProductReviews({ productId }: { productId: string }) {
       }
       setReviews(data || []);
     } catch (err: any) {
-      if (err.message && !err.message.includes('relation')) {
-        console.error("Review System Sync Error:", err.message);
-      }
+      // Silent fail for expected database sync states
     } finally {
       setIsLoading(false);
     }
@@ -126,48 +124,50 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   return (
     <div className="pt-12 space-y-12 border-t border-slate-100">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-         <div className="space-y-4">
-            <div className="flex items-center gap-4">
-               <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-               <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Client Reviews</h2>
-            </div>
-            <div className="flex items-center gap-4 px-2">
-               <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-slate-900">{averageRating}</span>
-                  <span className="text-slate-400 font-bold text-sm">/ 5.0</span>
-               </div>
-               <div className="flex text-amber-400">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className={cn("w-5 h-5", Number(averageRating) >= s ? "fill-current" : "opacity-20")} />
-                  ))}
-               </div>
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">{reviews.length} VERIFIED REVIEWS</span>
-            </div>
-         </div>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+           <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
+           <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Client Reviews</h2>
+        </div>
+        <div className="flex items-center gap-6 px-2">
+           <div className="flex items-baseline gap-1">
+              <span className="text-5xl font-black text-slate-900">{averageRating}</span>
+              <span className="text-slate-400 font-bold text-base">/ 5.0</span>
+           </div>
+           <div className="flex flex-col gap-1">
+              <div className="flex text-amber-400">
+                 {[1, 2, 3, 4, 5].map((s) => (
+                   <Star key={s} className={cn("w-5 h-5", Number(averageRating) >= s ? "fill-current" : "opacity-20")} />
+                 ))}
+              </div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {reviews.length} Verified Customer Logs
+              </span>
+           </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Review Form & Summary Sidebar */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-600/5 space-y-8 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl -mr-16 -mt-16" />
-             <div className="relative z-10 space-y-8">
-                <div className="space-y-2">
-                   <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
-                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Help others make a better choice</p>
+      <div className="flex flex-col gap-12">
+        {/* Review Form - Full Width Stack */}
+        <div className="w-full max-w-none">
+          <div className="p-8 md:p-12 bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-600/5 space-y-10 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/[0.03] blur-3xl -mr-32 -mt-32" />
+             <div className="relative z-10 space-y-10">
+                <div className="space-y-3">
+                   <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Help the ZiCash community make informed decisions</p>
                 </div>
 
                 {!user ? (
-                   <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100 space-y-4 text-center">
-                      <AlertCircle className="w-8 h-8 text-blue-600 mx-auto" />
-                      <p className="text-sm font-bold text-blue-900">Sign in to leave a verified review on this hardware.</p>
+                   <div className="p-10 bg-blue-50 rounded-[2rem] border border-blue-100 space-y-4 text-center">
+                      <AlertCircle className="w-10 h-10 text-blue-600 mx-auto" />
+                      <p className="text-base font-bold text-blue-900">Identification Required: Please sign in to leave a verified review.</p>
                    </div>
                 ) : (
-                   <form onSubmit={handleSubmit} className="space-y-8">
-                      <div className="space-y-4">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Your Rating</label>
-                         <div className="flex gap-3">
+                   <form onSubmit={handleSubmit} className="space-y-10">
+                      <div className="space-y-5">
+                         <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Select Rating</label>
+                         <div className="flex gap-4">
                             {[1, 2, 3, 4, 5].map((s) => (
                               <button
                                 key={s}
@@ -175,11 +175,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                                 onMouseEnter={() => setHoverRating(s)}
                                 onMouseLeave={() => setHoverRating(0)}
                                 onClick={() => setRating(s)}
-                                className="transition-all active:scale-90"
+                                className="transition-all active:scale-90 hover:scale-110"
                               >
                                 <Star 
                                   className={cn(
-                                    "w-9 h-9 transition-colors",
+                                    "w-10 h-10 transition-colors duration-300",
                                     (hoverRating || rating) >= s ? "fill-amber-400 text-amber-400" : "text-slate-100"
                                   )} 
                                 />
@@ -188,11 +188,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                          </div>
                       </div>
 
-                      <div className="space-y-4">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Your Observations</label>
+                      <div className="space-y-5">
+                         <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Your Observations</label>
                          <Textarea 
-                            placeholder="Tell us about the quality, performance and value of this unit..." 
-                            className="min-h-[160px] rounded-3xl bg-slate-50 border-none font-bold text-base shadow-inner p-6 focus-visible:ring-2 focus-visible:ring-blue-600/10 placeholder:text-slate-300"
+                            placeholder="Tell us about the quality, performance and value of this hardware unit..." 
+                            className="min-h-[180px] rounded-[2rem] bg-slate-50 border-none font-bold text-lg shadow-inner p-8 focus-visible:ring-4 focus-visible:ring-blue-600/5 placeholder:text-slate-300 leading-relaxed"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                          />
@@ -200,9 +200,9 @@ export function ProductReviews({ productId }: { productId: string }) {
 
                       <Button 
                         disabled={isSubmitting}
-                        className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl shadow-blue-600/20 gap-3 transition-all"
+                        className="w-full h-20 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] rounded-3xl shadow-2xl shadow-blue-600/20 gap-4 transition-all hover:scale-[1.01]"
                       >
-                         {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />} 
+                         {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />} 
                          Post Verified Review
                       </Button>
                    </form>
@@ -211,14 +211,14 @@ export function ProductReviews({ productId }: { productId: string }) {
           </div>
         </div>
 
-        {/* Reviews List Gallery */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Reviews List - Full Width Stack */}
+        <div className="w-full space-y-8">
            {isLoading ? (
-             <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed">
-                <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6">Syncing Client Logs...</p>
+             <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Syncing client logs...</p>
              </div>
-           ) : reviews.length > 0 && (
+           ) : reviews.length > 0 ? (
              <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
                    {reviews.map((r, idx) => (
@@ -227,46 +227,46 @@ export function ProductReviews({ productId }: { productId: string }) {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1, duration: 0.5 }}
-                        className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-50 transition-all space-y-6 group"
+                        className="p-8 md:p-12 bg-white rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-blue-50 transition-all space-y-8 group"
                      >
                         <div className="flex items-start justify-between">
-                           <div className="flex items-center gap-5">
+                           <div className="flex items-center gap-6">
                               <div className="relative">
-                                <Avatar className="w-14 h-14 border-4 border-slate-50 shadow-md rounded-2xl overflow-hidden transition-transform group-hover:scale-105">
+                                <Avatar className="w-16 h-16 border-4 border-slate-50 shadow-md rounded-2xl overflow-hidden transition-transform group-hover:rotate-3">
                                    <AvatarImage src={r.profile?.avatar_url} className="object-cover" />
-                                   <AvatarFallback className="bg-blue-50 text-blue-600 font-black text-xl">{r.profile?.full_name?.[0]}</AvatarFallback>
+                                   <AvatarFallback className="bg-blue-50 text-blue-600 font-black text-2xl">{r.profile?.full_name?.[0]}</AvatarFallback>
                                 </Avatar>
-                                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-lg shadow-lg">
-                                   <CheckCircle2 className="w-3 h-3" />
+                                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1.5 rounded-xl shadow-lg">
+                                   <CheckCircle2 className="w-4 h-4" />
                                 </div>
                               </div>
                               <div className="space-y-1">
-                                 <p className="font-black text-slate-900 uppercase text-base tracking-tight">{r.profile?.full_name || 'Verified Client'}</p>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                 <p className="font-black text-slate-900 uppercase text-lg tracking-tight leading-none">{r.profile?.full_name || 'Verified Client'}</p>
+                                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                               </div>
                            </div>
-                           <div className="flex items-center gap-1.5 p-2 bg-slate-50 rounded-xl">
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                              <span className="text-sm font-black text-slate-900">{r.rating}.0</span>
+                           <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-2xl">
+                              <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                              <span className="text-lg font-black text-slate-900 leading-none">{r.rating}.0</span>
                            </div>
                         </div>
                         <div className="pl-0 md:pl-2">
-                           <p className="text-slate-600 font-medium text-lg leading-relaxed italic">
-                             "{r.comment || "High-performance item. Very satisfied with the acquisition."}"
+                           <p className="text-slate-600 font-medium text-xl leading-relaxed italic">
+                             "{r.comment || "High-performance unit. Extremely satisfied with this procurement."}"
                            </p>
-                           <div className="flex items-center gap-2 mt-6 pt-6 border-t border-slate-50">
-                              <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full flex items-center gap-2">
-                                <CheckCircle2 className="w-3 h-3" />
-                                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Verified Acquisition</span>
+                           <div className="flex items-center gap-4 mt-8 pt-8 border-t border-slate-50">
+                              <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full flex items-center gap-2">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verified Transaction</span>
                               </div>
-                              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-auto">Log ID: #{r.id.slice(0,6).toUpperCase()}</span>
+                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-auto">Log: #{r.id.slice(0,8).toUpperCase()}</span>
                            </div>
                         </div>
                      </motion.div>
                    ))}
                 </AnimatePresence>
              </div>
-           )}
+           ) : null}
         </div>
       </div>
     </div>

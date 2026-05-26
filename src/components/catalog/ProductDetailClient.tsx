@@ -120,13 +120,13 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     setOpenSpecs(prev => ({ ...prev, [variantId]: !prev[variantId] }));
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (variant?: ProductVariant) => {
     if (!product) return;
     setIsAdding(true);
-    addItem(product, selectedVariant);
+    addItem(product, variant || selectedVariant);
     toast({ 
       title: "Added to Cart", 
-      description: `${product.name} added to your selection.` 
+      description: `${product.name} ${variant ? `(${variant.label})` : ''} added to your selection.` 
     });
     setTimeout(() => setIsAdding(false), 500);
   };
@@ -266,39 +266,25 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
                               </div>
                               <div className="md:text-right">
-                                <p className="text-2xl md:text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                 <p className={cn("text-[10px] font-black uppercase mt-1 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
                                   {v.stock > 0 ? 'In Stock' : 'Sold Out'}
                                 </p>
                               </div>
                             </div>
 
-                            {/* Specifications Grid */}
+                            {/* Specifications Grid (Collapsible on Mobile, Managed via state) */}
                             {!isSimpleCategory && (
-                              <div className="space-y-6">
-                                {/* Always Visible Summary Specs - Full Width Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6 pt-8 border-t border-slate-100/50">
-                                  {product.category === "Laptops" ? (
-                                    <>
-                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                      <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
-                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                      <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                    </>
-                                  )}
-                                </div>
-
-                                {/* Collapsible Detailed Specs */}
+                              <div className="space-y-4">
                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
-                                  <CollapsibleContent className="space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
+                                  <CollapsibleContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
+                                    {/* Core & Advanced Specs Grid */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 pt-8 border-t border-slate-100/50">
                                       {product.category === "Laptops" ? (
                                         <>
+                                          <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                          <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                          <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                           <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
                                           <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
                                           <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
@@ -311,6 +297,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                         </>
                                       ) : (
                                         <>
+                                          <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                          <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                           <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
                                           <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
                                           <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
@@ -324,17 +313,33 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
                                   <button
                                     onClick={(e) => toggleSpec(v.id, e)}
-                                    className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
+                                    className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
                                   >
                                     {isExpanded ? (
-                                      <><ChevronUp className="w-3 h-3" /> Hide Details</>
+                                      <><ChevronUp className="w-3 h-3" /> Hide Technical Matrix</>
                                     ) : (
-                                      <><ChevronDown className="w-3 h-3" /> Full Specifications</>
+                                      <><ChevronDown className="w-3 h-3" /> View All Details</>
                                     )}
                                   </button>
                                 </Collapsible>
                               </div>
                             )}
+
+                            {/* Action Button inside card */}
+                            <div className="pt-6 border-t border-slate-50">
+                               <Button 
+                                 onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
+                                 className={cn(
+                                   "w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-[0.15em] gap-3 shadow-lg transition-all",
+                                   isActive 
+                                     ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20" 
+                                     : "bg-slate-900 hover:bg-blue-600 text-white shadow-slate-900/10"
+                                 )}
+                                 disabled={v.stock <= 0}
+                               >
+                                 <ShoppingCart className="w-4 h-4" /> Add to Shopping Cart
+                               </Button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -345,7 +350,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate for selected spec</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Spec Rate</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-black text-slate-900">GHS</span>
                   <span className="text-5xl md:text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
@@ -366,14 +371,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-               <Button 
-                 onClick={handleAddToCart} 
-                 className="w-full h-20 bg-blue-600 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-600/30 text-xl uppercase tracking-[0.2em] hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-95 gap-4"
-                 disabled={!inStock || isAdding}
-               >
-                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add to Shopping Cart</>}
-               </Button>
-               
                <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
                   <span className="flex items-center gap-2"><Truck className="w-3 h-3 text-blue-500" /> Free Accra Delivery</span>
                   <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>

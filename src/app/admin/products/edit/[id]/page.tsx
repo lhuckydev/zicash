@@ -154,7 +154,6 @@ export default function EditProductPage() {
     const hasPrice = (product.price || 0) > 0;
     const hasDesc = product.description?.trim().length > 0;
     const hasImages = existingImages.length > 0 || selectedFiles.length > 0;
-    // Brand is now optional
     return hasName && hasPrice && hasDesc && hasImages;
   };
 
@@ -162,8 +161,8 @@ export default function EditProductPage() {
     if (!isFormValid()) {
       toast({ 
         variant: "destructive", 
-        title: "Validation Error", 
-        description: "Please ensure Name, Price, Description and Images are present before saving." 
+        title: "Missing Information", 
+        description: "Please fill in all required fields." 
       });
       return;
     }
@@ -201,7 +200,7 @@ export default function EditProductPage() {
       } else if (product.category === "Closet") {
         finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
       } else {
-        finalSpecs = product.specs || "Standard Unit";
+        finalSpecs = product.specs || "Standard Item";
       }
 
       const { error } = await supabase
@@ -218,10 +217,10 @@ export default function EditProductPage() {
 
       if (error) throw error;
 
-      toast({ title: "Update Success", description: "Product has been successfully synchronized." });
+      toast({ title: "Product Updated", description: "Changes saved successfully." });
       router.push("/admin");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Sync Failure", description: err.message });
+      toast({ variant: "destructive", title: "Save Failed", description: err.message });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
@@ -235,12 +234,12 @@ export default function EditProductPage() {
       <main className="flex min-h-screen items-center justify-center p-6 bg-[#0F172A] tech-grid">
         <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
            <div className="bg-slate-950 p-10 text-center">
-               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Auth</span></h1>
+               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Login</span></h1>
            </div>
            <CardContent className="p-10">
              <form onSubmit={handleAuth} className="space-y-6">
-               <Input type="password" placeholder="Key" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
-               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Login</Button>
+               <Input type="password" placeholder="Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black" />
+               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Sign In</Button>
              </form>
            </CardContent>
         </Card>
@@ -249,16 +248,16 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 tech-grid pb-24 md:pb-12 text-slate-900">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <Link href="/admin">
             <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600">
-              <ArrowLeft className="w-4 h-4" /> Dashboard
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
             </Button>
           </Link>
           <div className="text-right">
-            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Modifier Node</p>
+            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Editor</p>
             <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Edit <span className="text-blue-600">Product</span></h1>
           </div>
         </div>
@@ -268,7 +267,7 @@ export default function EditProductPage() {
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">1. Modify Department</label>
+                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">Change Category</label>
                     <Select value={product.category} onValueChange={(val) => setProduct({ ...product, category: val })}>
                       <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black shadow-sm focus:ring-2 focus:ring-blue-600/10">
                         <SelectValue />
@@ -283,20 +282,20 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2 pt-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">2. Media Payload (Multi) <span className="text-red-500">*</span></label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Images <span className="text-red-500">*</span></label>
                     <div 
                       onClick={() => fileInputRef.current?.click()}
                       className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer overflow-hidden group hover:border-blue-600 transition-all mb-6"
                     >
                       <div className="text-center">
                         <Upload className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="text-[10px] font-black uppercase text-slate-400">Add Images</p>
+                        <p className="text-[10px] font-black uppercase text-slate-400">Add Photos</p>
                       </div>
                       <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
                     </div>
 
                     <div className="space-y-4">
-                       <p className="text-[10px] font-black uppercase text-slate-400">Inventory Photos</p>
+                       <p className="text-[10px] font-black uppercase text-slate-400">Current Photos</p>
                        <div className="grid grid-cols-3 gap-2">
                           {existingImages.map((url, idx) => (
                             <div key={`exist-${idx}`} className="relative aspect-square rounded-xl overflow-hidden border border-slate-100 group/img">
@@ -319,14 +318,14 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">3. Price (GH₵) <span className="text-red-500">*</span></label>
+                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">Price (GH₵) <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
                       <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">4. Stock Count <span className="text-red-500">*</span></label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Stock Level <span className="text-red-500">*</span></label>
                     <Input type="number" className="h-12 rounded-xl bg-slate-50 border-none font-black text-lg" value={product.stock} onChange={(e) => setProduct({...product, stock: parseInt(e.target.value)})} />
                   </div>
                 </div>
@@ -336,7 +335,7 @@ export default function EditProductPage() {
           <div className="lg:col-span-2 space-y-8">
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden">
                 <CardHeader className="p-10 bg-slate-950 text-white flex justify-between items-center">
-                   <div><CardTitle className="text-2xl uppercase tracking-tighter">Product <span className="text-blue-500 italic">Blueprint</span></CardTitle></div>
+                   <div><CardTitle className="text-2xl uppercase tracking-tighter">Product <span className="text-blue-500 italic">Details</span></CardTitle></div>
                    <div className="p-3 bg-blue-600 rounded-2xl">
                      {product.category === "Laptops" && <Monitor className="w-6 h-6" />}
                      {product.category === "Phones" && <Smartphone className="w-6 h-6" />}
@@ -347,7 +346,7 @@ export default function EditProductPage() {
                 <CardContent className="p-10 space-y-8">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Item Title <span className="text-red-500">*</span></label>
                         <Input placeholder="Full Product Name" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
@@ -374,9 +373,9 @@ export default function EditProductPage() {
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">CPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Clock Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Resolution</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">GPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Screen</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Graphics (GPU)</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
                      </div>
                    )}
 
@@ -384,14 +383,14 @@ export default function EditProductPage() {
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Internal</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Camera</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
                         <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Battery</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
                      </div>
                    )}
 
                    <div className="space-y-2">
-                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Descriptive Payload <span className="text-red-500">*</span></label>
+                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Description <span className="text-red-500">*</span></label>
                       <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description || ""} onChange={(e) => setProduct({...product, description: e.target.value})} />
                    </div>
 

@@ -99,8 +99,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     setIsAdding(true);
     addItem(product, selectedVariant);
     toast({ 
-      title: "Added to Order", 
-      description: `${product.name} (${selectedVariant?.label || 'Standard'}) added to your basket.` 
+      title: "Added to Cart", 
+      description: `${product.name} added to your order.` 
     });
     setTimeout(() => setIsAdding(false), 500);
   };
@@ -157,9 +157,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               
               <div className="absolute top-8 left-8 flex flex-col gap-2 z-20">
                  {product.featured && (
-                   <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[9px] tracking-widest px-4 py-2 shadow-xl">Top Performance Unit</Badge>
+                   <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[9px] tracking-widest px-4 py-2 shadow-xl">Top Selection</Badge>
                  )}
-                 <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1 shadow-sm">Verified Hardware</Badge>
+                 <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1 shadow-sm">Verified</Badge>
               </div>
 
               <button 
@@ -181,22 +181,22 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                    <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">{product.brand}</Badge>
                  )}
                  {product.brand && <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">/</span>}
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.category} Section</span>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.category}</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-headline tracking-tighter leading-none uppercase italic">
                 {product.name}
               </h1>
               <div className="flex items-center gap-4">
                  <div className="flex text-amber-400"><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /></div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Certified Performance</span>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Quality</span>
               </div>
             </div>
 
             {product.variants && product.variants.length > 0 && (
               <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">1. Select Configuration</h3>
-                    <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Options Available</Badge>
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">Select Options</h3>
+                    <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Available</Badge>
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {product.variants.map((v) => {
@@ -218,7 +218,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           <div className="mt-3 flex items-center justify-between">
                              <p className="text-xs font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                              <p className={cn("text-[8px] font-bold uppercase", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                               {v.stock > 0 ? `${v.stock} Units In Stock` : 'Out of Stock'}
+                               {v.stock > 0 ? `${v.stock} In Stock` : 'Sold Out'}
                              </p>
                           </div>
                         </button>
@@ -230,7 +230,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Valuation</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-black text-slate-900">GHS</span>
                   <span className="text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
@@ -242,10 +242,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="flex flex-col items-start md:items-end gap-2">
                  <div className="flex items-center gap-2">
                     <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Archive Availability: Confirmed' : 'Archive Availability: Exhausted'}</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available' : 'Out of Stock'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Warranty Node: {product.warranty}
+                   <ShieldCheck className="w-3 h-3" /> Warranty: {product.warranty}
                  </p>
               </div>
             </div>
@@ -256,12 +256,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  className="w-full h-20 bg-blue-600 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-600/30 text-xl uppercase tracking-[0.2em] hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-95 gap-4"
                  disabled={!inStock || isAdding}
                >
-                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Archival Sync Failed (Out of Stock)" : <><ShoppingCart className="w-7 h-7" /> Add Configuration to Order</>}
+                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add to Cart</>}
                </Button>
                
                <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
                   <span className="flex items-center gap-2"><Truck className="w-3 h-3 text-blue-500" /> Free Accra Delivery</span>
-                  <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Payment on Receipt (Accra)</span>
+                  <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>
                </div>
             </div>
           </div>
@@ -272,10 +272,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <div className="space-y-6">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Descriptive Metadata</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Description</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "The high-performance hardware unit is currently undergoing final data verification."}
+                 {product.description || "No description provided for this item."}
                </p>
             </div>
 
@@ -283,35 +283,35 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="space-y-8">
                  <div className="flex items-center gap-4">
                     <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Hardware Schematics</h2>
+                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Specifications</h2>
                  </div>
                  <div className="bg-white rounded-[3.5rem] border border-slate-100 p-8 md:p-16 shadow-xl shadow-blue-600/5">
                    <Table>
                      <TableBody>
                        {product.category === "Laptops" && (
                          <>
-                           <TechTableRow icon={Cpu} label="System Processor" value={selectedVariant?.cpu || product.advanced_specs?.cpu} />
+                           <TechTableRow icon={Cpu} label="Processor" value={selectedVariant?.cpu || product.advanced_specs?.cpu} />
                            <TechTableRow icon={CircuitBoard} label="Memory (RAM)" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                           <TechTableRow icon={Database} label="Archive Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                           <TechTableRow icon={Layers} label="Graphics Node" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
-                           <TechTableRow icon={Maximize} label="Display Real-estate" value={selectedVariant?.screen || product.advanced_specs?.res} />
-                           <TechTableRow icon={Zap} label="Touch Interface" value={selectedVariant?.touchscreen ? "Capacitive Multi-touch Enabled" : "Standard Interface"} />
-                           <TechTableRow icon={Monitor} label="Physical Condition" value={selectedVariant?.condition || "Verified Tier 1"} />
-                           <TechTableRow icon={Info} label="I/O Matrix" value={product.advanced_specs?.ports} />
+                           <TechTableRow icon={Database} label="Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
+                           <TechTableRow icon={Layers} label="Graphics" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
+                           <TechTableRow icon={Maximize} label="Display" value={selectedVariant?.screen || product.advanced_specs?.res} />
+                           <TechTableRow icon={Zap} label="Touchscreen" value={selectedVariant?.touchscreen ? "Yes" : "No"} />
+                           <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
+                           <TechTableRow icon={Info} label="Ports" value={product.advanced_specs?.ports} />
                            <TechTableRow icon={Zap} label="Operating System" value={product.advanced_specs?.os} />
-                           <TechTableRow icon={Box} label="Audio System" value={product.advanced_specs?.audio} />
+                           <TechTableRow icon={Box} label="Audio" value={product.advanced_specs?.audio} />
                          </>
                        )}
                        {product.category === "Phones" && (
                          <>
-                           <TechTableRow icon={SmartphoneIcon} label="Processing Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
-                           <TechTableRow icon={CircuitBoard} label="System Memory" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                           <TechTableRow icon={Database} label="Storage Capacity" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                           <TechTableRow icon={Smartphone} label="Battery Node" value={selectedVariant?.battery || product.advanced_specs?.charge} />
-                           <TechTableRow icon={Video} label="Primary Optics" value={product.advanced_specs?.camera} />
-                           <TechTableRow icon={Zap} label="Refresh Dynamics" value={product.advanced_specs?.refresh} />
-                           <TechTableRow icon={Monitor} label="Structural Integrity" value={selectedVariant?.condition || "Verified Tier 1"} />
-                           <TechTableRow icon={ShieldCheck} label="IP Resilience" value={product.advanced_specs?.rating} />
+                           <TechTableRow icon={SmartphoneIcon} label="Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
+                           <TechTableRow icon={CircuitBoard} label="RAM" value={selectedVariant?.ram || product.advanced_specs?.ram} />
+                           <TechTableRow icon={Database} label="Internal Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
+                           <TechTableRow icon={Smartphone} label="Battery" value={selectedVariant?.battery || product.advanced_specs?.charge} />
+                           <TechTableRow icon={Video} label="Camera" value={product.advanced_specs?.camera} />
+                           <TechTableRow icon={Zap} label="Refresh Rate" value={product.advanced_specs?.refresh} />
+                           <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
+                           <TechTableRow icon={ShieldCheck} label="Protection" value={product.advanced_specs?.rating} />
                          </>
                        )}
                      </TableBody>
@@ -324,21 +324,21 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           <div className="lg:col-span-4">
              <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 sticky top-32 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-                <h3 className="text-xl font-black uppercase italic relative z-10">Purchase <span className="text-blue-500">Security</span></h3>
+                <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
                 
                 <div className="space-y-8 relative z-10">
                    <div className="flex gap-5">
                       <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
                       <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authenticity Check</p>
-                         <p className="text-sm font-medium leading-relaxed">Every hardware unit is verified for genuine components and serialized tracking.</p>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Genuine Items</p>
+                         <p className="text-sm font-medium leading-relaxed">Every item we sell is verified for quality and authenticity.</p>
                       </div>
                    </div>
                    <div className="flex gap-5">
                       <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
                       <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Receipt Archiving</p>
-                         <p className="text-sm font-medium leading-relaxed">Your digital invoice is generated and archived immediately upon transaction confirmation.</p>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Receipt Provided</p>
+                         <p className="text-sm font-medium leading-relaxed">A digital receipt is generated for every purchase you make.</p>
                       </div>
                    </div>
                 </div>

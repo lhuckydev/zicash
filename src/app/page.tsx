@@ -94,8 +94,8 @@ export default function CatalogPage() {
         setSeed(Math.random());
       }
     } catch (err: any) {
-      console.error("Fetch Error:", err);
-      setError(err.message || "Failed to connect to the store database.");
+      console.error("Update Error:", err);
+      setError(err.message || "Failed to connect to the shop.");
     } finally {
       setIsLoading(false);
     }
@@ -193,7 +193,7 @@ export default function CatalogPage() {
                   <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
                     <Sparkles className="w-5 h-5" />
                   </div>
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Suggested <span className="text-blue-600">Picks</span></h3>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Our <span className="text-blue-600">Picks</span></h3>
                 </div>
               </div>
               <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
@@ -211,7 +211,7 @@ export default function CatalogPage() {
           {!error && (
             <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
               <div className="flex items-center justify-between">
-                <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Market Sections</motion.h2>
+                <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Product Categories</motion.h2>
                 <Link href="/categories">
                   <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
                 </Link>
@@ -240,14 +240,14 @@ export default function CatalogPage() {
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Inventory Units" : `${category} Section`}</h3>
+                  <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Our Items" : `${category} Section`}</h3>
                   <motion.div {...buttonTap}>
                     <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors">
                       <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
                     </Button>
                   </motion.div>
                 </div>
-                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-black uppercase">View All Units</Button>}
+                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-black uppercase">View All Items</Button>}
               </div>
 
               {isLoading && products.length === 0 ? (

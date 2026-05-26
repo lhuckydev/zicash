@@ -109,14 +109,14 @@ const SafeShoppingCard = () => (
           <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
           <div>
              <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Products</p>
-             <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
+             <p className="text-sm font-medium leading-relaxed">Every item in our shop is checked for quality and performance.</p>
           </div>
        </div>
        <div className="flex gap-5">
           <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
           <div>
              <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-             <p className="text-sm font-medium leading-relaxed">Fast and tracked delivery ensuring your purchase reaches you safely.</p>
+             <p className="text-sm font-medium leading-relaxed">Fast delivery ensuring your purchase reaches you safely.</p>
           </div>
        </div>
     </div>
@@ -202,7 +202,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     addItem(product, variant || selectedVariant);
     toast({ 
       title: "Added to Cart", 
-      description: `${product.name} ${variant ? `(${variant.label})` : ''} added to your selection.` 
+      description: `${product.name} ${variant ? `(${variant.label})` : ''} added to your basket.` 
     });
     setTimeout(() => setIsAdding(false), 500);
   };
@@ -257,7 +257,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 
                 <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
                    {product.featured && (
-                     <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Selection</Badge>
+                     <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Choice</Badge>
                    )}
                    <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-sm">Verified</Badge>
                 </div>
@@ -277,10 +277,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Product</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "No detailed description provided."}
+                 {product.description || "No detailed description available."}
                </p>
             </div>
 
@@ -308,7 +308,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     ))}
                  </div>
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                   {ratingInfo ? `${ratingInfo.count} Verified Customer Ratings` : 'Premium Quality Verified'}
+                   {ratingInfo ? `${ratingInfo.count} Verified Customer Ratings` : 'Premium Quality Guaranteed'}
                  </span>
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             {product.variants && product.variants.length > 0 && (
               <div className="space-y-8 bg-white p-4 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Available Specifications</h3>
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Choose your Version</h3>
                     <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg mr-4">{product.variants.length} Options</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-6">
@@ -344,7 +344,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                 <div className="flex items-center gap-3">
                                   <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'New'}</p>
                                   {hasDiscount && (
-                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Offer</Badge>
+                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Price</Badge>
                                   )}
                                 </div>
                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
@@ -380,23 +380,23 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                           <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
                                           <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
                                           <MiniSpec icon={Fingerprint} label="Fingerprint" value={v.fingerprint} active={isActive} />
-                                          <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
-                                          <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
+                                          <MiniSpec icon={Terminal} label="System" value={product.advanced_specs?.os} active={isActive} />
+                                          <MiniSpec icon={Usb} label="Plug Ports" value={product.advanced_specs?.ports} active={isActive} />
                                           <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
                                           <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       ) : (
                                         <>
-                                          <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                          <MiniSpec icon={SmartphoneIcon} label="Main Chip" value={v.chipset} active={isActive} />
+                                          <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                           <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
                                           <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
                                           <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
-                                          <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
+                                          <MiniSpec icon={Shield} label="Protection" value={product.advanced_specs?.rating} active={isActive} />
                                           <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
-                                          <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
+                                          <MiniSpec icon={Timer} label="Screen Speed" value={product.advanced_specs?.refresh} active={isActive} />
                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       )}
@@ -408,9 +408,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
                                   >
                                     {isExpanded ? (
-                                      <><ChevronUp className="w-3 h-3" /> Hide Spec Details</>
+                                      <><ChevronUp className="w-3 h-3" /> Hide Details</>
                                     ) : (
-                                      <><ChevronDown className="w-3 h-3" /> View Spec Details</>
+                                      <><ChevronDown className="w-3 h-3" /> View Full Details</>
                                     )}
                                   </button>
                                 </Collapsible>
@@ -428,7 +428,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                  )}
                                  disabled={v.stock <= 0}
                                >
-                                 <ShoppingCart className="w-4 h-4" /> Add to Shopping Cart
+                                 <ShoppingCart className="w-4 h-4" /> Add to Shopping Basket
                                </Button>
                             </div>
                           </div>

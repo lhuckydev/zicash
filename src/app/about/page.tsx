@@ -24,7 +24,7 @@ export default function AboutPage() {
           setHeroImage(data[randomIndex].image_url);
         }
       } catch (err) {
-        console.error("About Page: Image sync error", err);
+        console.error("About Page: Image update error", err);
       } finally {
         setIsLoading(false);
       }
@@ -56,7 +56,7 @@ export default function AboutPage() {
                 <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 font-headline uppercase italic">
                   Zi<span className="text-blue-600">Cash GH Limited</span>
                 </h1>
-                <p className="text-blue-600 font-black uppercase tracking-[0.3em] text-xs mt-1">Premium Online Marketplace</p>
+                <p className="text-blue-600 font-black uppercase tracking-[0.3em] text-xs mt-1">Premium Online Shop</p>
               </div>
             </div>
             
@@ -65,7 +65,7 @@ export default function AboutPage() {
                 "All You Need, <span className="text-blue-600 italic underline decoration-blue-200 underline-offset-8">All For You</span>"
               </h2>
               <p className="text-xl text-slate-600 leading-relaxed font-medium max-w-3xl">
-                ZiCash GH Limited is Ghana's premier destination for high-quality goods and professional services. We curate the best in technology, fashion, and education to ensure excellence is accessible to everyone.
+                ZiCash GH Limited is Ghana's premier destination for high-quality goods and professional services. We curate the best in products, fashion, and education to ensure excellence is accessible to everyone.
               </p>
             </div>
           </div>
@@ -73,9 +73,9 @@ export default function AboutPage() {
           {/* Value Pillars */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Zap, title: "Premium Quality", text: "We only source products that meet the highest standards of quality, utility, and aesthetic value.", color: "blue" },
-              { icon: ShieldCheck, title: "Trusted Verification", text: "Every item in our marketplace undergoes a strict evaluation before being offered to our community.", color: "emerald" },
-              { icon: Award, title: "Client Satisfaction", text: "Our commitment to you continues long after your purchase. We are your partners in finding what you need.", color: "orange" }
+              { icon: Zap, title: "Premium Quality", text: "We only source items that meet the highest standards of quality and style.", color: "blue" },
+              { icon: ShieldCheck, title: "Trusted Products", text: "Every item in our shop undergoes a strict check before being offered to you.", color: "emerald" },
+              { icon: Award, title: "Client Satisfaction", text: "Our commitment to you continues long after your purchase. We are your partners in shopping.", color: "orange" }
             ].map((pillar, i) => (
               <div key={i} className="p-10 bg-white rounded-[2.5rem] space-y-6 border border-slate-100 shadow-xl shadow-slate-200/50 hover:scale-[1.02] transition-transform duration-500">
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
@@ -97,16 +97,16 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center border-t border-slate-200 pt-20">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest">
-                Our Strategic Vision
+                Our Primary Goal
               </div>
-              <h2 className="text-4xl font-black uppercase tracking-tighter italic">Empowering <span className="text-blue-600">The Modern Lifestyle</span></h2>
+              <h2 className="text-4xl font-black uppercase tracking-tighter italic">Empowering <span className="text-blue-600">Your Modern Life</span></h2>
               <div className="space-y-4 text-slate-600 font-medium">
-                <p>At ZiCash GH Limited, we believe that access to quality tools and lifestyle essentials is a catalyst for progress. Whether you are seeking professional equipment or personal style, we provide the infrastructure you need to thrive.</p>
-                <p>Our marketplace is a dynamic hub, constantly updated with the latest innovations and curated selections across multiple departments.</p>
+                <p>At ZiCash GH Limited, we believe that access to quality tools and life essentials is a step towards progress. Whether you are seeking work equipment or personal style, we provide everything you need to thrive.</p>
+                <p>Our shop is a lively hub, constantly updated with the latest items and curated choices across many categories.</p>
               </div>
               <div className="flex gap-4">
                 <Link href="/categories">
-                  <button className="h-14 px-8 bg-slate-900 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10">Explore Catalog</button>
+                  <button className="h-14 px-8 bg-slate-900 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10">Browse Items</button>
                 </Link>
                 <Link href="/contact">
                   <button className="h-14 px-8 bg-white border border-slate-200 text-slate-900 font-black rounded-2xl uppercase tracking-widest text-[10px] hover:bg-slate-50 transition-all">Support Center</button>
@@ -121,7 +121,7 @@ export default function AboutPage() {
                 <>
                   <Image 
                     src={displayImage} 
-                    alt="ZiCash Marketplace Highlight" 
+                    alt="ZiCash Shop Highlight" 
                     fill 
                     className="object-contain p-8 md:p-12"
                     data-ai-hint="product highlight"

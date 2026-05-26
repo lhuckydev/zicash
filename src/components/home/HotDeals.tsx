@@ -33,7 +33,7 @@ export function HotDeals() {
           setProducts(discounted);
         }
       } catch (err) {
-        console.error("Hot Deals Sync Error:", err);
+        console.error("Hot Deals Update Error:", err);
       } finally {
         setIsLoading(false);
       }
@@ -52,11 +52,11 @@ export function HotDeals() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-100 text-[10px] font-black uppercase tracking-widest animate-pulse">
-              <Zap className="w-3 h-3 fill-current" /> High Performance Offers
+              <Zap className="w-3 h-3 fill-current" /> Exclusive Offers
             </div>
             <h2 className="text-4xl md:text-6xl font-black font-headline uppercase italic">Hot <span className="text-red-600">Deals</span></h2>
             <p className="text-slate-500 font-medium max-w-xl">
-              Limited time reductions on premium hardware nodes. Secure your configuration before the cycle ends.
+              Exclusive discounts on our premium products. Pick your favorite version before the sale ends.
             </p>
           </div>
           

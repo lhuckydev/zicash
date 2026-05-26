@@ -81,7 +81,7 @@ export function Navbar() {
           .from('products')
           .select('*')
           .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
-          .limit(12); // Increased limit for full-screen display
+          .limit(12);
         
         if (!error && data) {
           setSuggestions(data);
@@ -99,7 +99,10 @@ export function Navbar() {
 
   useEffect(() => {
     if (isSearchOpen) {
+      document.body.style.overflow = 'hidden';
       setTimeout(() => inputRef.current?.focus(), 100);
+    } else {
+      document.body.style.overflow = 'unset';
     }
   }, [isSearchOpen]);
 
@@ -342,16 +345,15 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Full Screen Search Experience */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-white flex flex-col pt-4 sm:pt-0"
+            className="fixed inset-0 z-[100] bg-white flex flex-col pt-4 sm:pt-0 overflow-hidden"
           >
-            <div className="container mx-auto px-6 flex flex-col h-full">
+            <div className="container mx-auto px-6 flex flex-col h-full max-w-7xl">
               <div className="flex items-center gap-4 py-6 border-b border-blue-50 shrink-0">
                 <div className="relative flex-1 group">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-600" />
@@ -377,13 +379,13 @@ export function Navbar() {
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-20 space-y-4">
                     <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching our items...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning inventory...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
                     <div className="flex items-center justify-between">
-                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Recommendations</p>
-                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View all results</button>
+                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Suggestions</p>
+                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">See all results</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {suggestions.map((p) => (

@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 export default function CartPage() {
   const { items, total, updateQuantity, removeItem } = useCartStore();
@@ -95,7 +96,7 @@ export default function CartPage() {
           </div>
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-slate-900 uppercase italic">Your Basket is Clear</h1>
-            <p className="text-slate-500 font-medium">Browse our hardware catalog to find what you need.</p>
+            <p className="text-slate-500 font-medium">Browse our catalog to find what you need.</p>
           </div>
           <Link href="/">
             <Button size="lg" className="bg-blue-600 px-10 font-black rounded-2xl shadow-xl shadow-blue-600/20 uppercase tracking-widest text-xs h-14">
@@ -127,7 +128,7 @@ export default function CartPage() {
                 <AlertTitle className="font-black uppercase tracking-tight text-blue-900 text-lg">Identity Verification Required</AlertTitle>
                 <AlertDescription className="flex flex-col md:flex-row md:items-center justify-between gap-6 mt-4">
                   <span className="text-sm font-medium text-blue-700 leading-relaxed">
-                    You cannot finalize this transaction until your contact number and delivery coordinates are updated.
+                    You cannot finalize this transaction until your contact number and delivery address are updated.
                   </span>
                   <Link href="/profile">
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl gap-2 h-11 px-6 shrink-0 shadow-lg shadow-blue-600/20">
@@ -140,7 +141,11 @@ export default function CartPage() {
 
             <div className="space-y-4">
               {items.map((item) => {
-                const price = item.selectedVariant ? item.selectedVariant.price : item.price;
+                const originalPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
+                const discountPrice = item.selectedVariant ? item.selectedVariant.discount_price : item.discount_price;
+                const finalPrice = (discountPrice && discountPrice > 0) ? discountPrice : originalPrice;
+                const hasDiscount = discountPrice && discountPrice > 0;
+                
                 const cartId = item.selectedVariant ? `${item.id}-${item.selectedVariant.id}` : item.id;
 
                 return (
@@ -183,8 +188,15 @@ export default function CartPage() {
                         </Button>
                       </div>
                       <div className="w-32 text-right">
-                        <p className="font-black text-xl text-slate-900 italic tracking-tighter">GH₵ {(price * item.quantity).toLocaleString()}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Rate: GH₵ {price.toLocaleString()}</p>
+                        {hasDiscount && (
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60 mb-0.5">
+                            GHS {(originalPrice * item.quantity).toLocaleString()}
+                          </p>
+                        )}
+                        <p className={cn("font-black text-xl italic tracking-tighter", hasDiscount ? "text-red-600" : "text-slate-900")}>
+                          GH₵ {(finalPrice * item.quantity).toLocaleString()}
+                        </p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Rate: GH₵ {finalPrice.toLocaleString()}</p>
                       </div>
                       <Button variant="ghost" size="icon" className="text-red-300 hover:text-red-500 hover:bg-red-50 rounded-full h-11 w-11 transition-colors" onClick={() => removeItem(cartId)}>
                         <Trash2 className="w-5 h-5" />
@@ -197,7 +209,7 @@ export default function CartPage() {
 
             <Link href="/">
               <Button variant="ghost" className="mt-8 text-slate-400 hover:text-blue-600 font-black uppercase text-[10px] tracking-widest">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Resume Procurement
+                <ArrowLeft className="w-4 h-4 mr-2" /> Resume Shopping
               </Button>
             </Link>
           </div>
@@ -243,7 +255,7 @@ export default function CartPage() {
               <div className="pt-6 text-center space-y-4">
                  <div className="flex items-center justify-center gap-3 text-slate-400">
                     <ShieldCheck className="w-4 h-4" />
-                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">High Entropy Secure Link</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em]">Secure Checkout Active</span>
                  </div>
               </div>
             </div>

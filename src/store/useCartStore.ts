@@ -119,9 +119,10 @@ export const useCartStore = create<CartStore>()(
 
 function calculateTotal(items: CartItem[]) {
   return items.reduce((sum, item) => {
-    const unitPrice = item.selectedVariant 
-      ? (item.selectedVariant.discount_price || item.selectedVariant.price) 
-      : (item.discount_price || item.price);
-    return sum + (unitPrice * item.quantity);
+    const originalPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
+    const discountPrice = item.selectedVariant ? item.selectedVariant.discount_price : item.discount_price;
+    const finalPrice = (discountPrice && discountPrice > 0) ? discountPrice : originalPrice;
+    
+    return sum + (finalPrice * item.quantity);
   }, 0);
 }

@@ -39,6 +39,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const GHANA_REGIONS = [
   "Greater Accra", "Ashanti", "Central", "Eastern", "Western", "Western North", "Volta", "Oti", "Northern", "North East", "Savannah", "Upper East", "Upper West", "Bono", "Bono East", "Ahafo"
@@ -117,7 +118,7 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (isAddressIncomplete) { toast({ variant: "destructive", title: "Address Required" }); return; }
-    if (paymentType === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { toast({ variant: "destructive", title: "Payment Info Required" }); return; }
+    if (paymentType === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { toast({ variant: "destructive", title: "Payment Information Required" }); return; }
     setIsSubmitting(true);
     let screenshotUrl = "";
     try {
@@ -144,15 +145,21 @@ export default function CheckoutPage() {
         shipping_region: region, 
         shipping_area: area, 
         shipping_community: community,
-        items: items.map(i => ({ 
-          id: i.id, 
-          name: i.name, 
-          price: i.selectedVariant ? i.selectedVariant.price : i.price, 
-          quantity: i.quantity, 
-          image_url: i.image_url,
-          variant_label: i.selectedVariant?.label,
-          variant_id: i.selectedVariant?.id
-        }))
+        items: items.map(i => {
+           const unitOriginalPrice = i.selectedVariant ? i.selectedVariant.price : i.price;
+           const unitDiscountPrice = i.selectedVariant ? i.selectedVariant.discount_price : i.discount_price;
+           const finalUnitPrice = (unitDiscountPrice && unitDiscountPrice > 0) ? unitDiscountPrice : unitOriginalPrice;
+           
+           return { 
+             id: i.id, 
+             name: i.name, 
+             price: finalUnitPrice, 
+             quantity: i.quantity, 
+             image_url: i.image_url,
+             variant_label: i.selectedVariant?.label,
+             variant_id: i.selectedVariant?.id
+           };
+        })
       }]);
       
       if (orderError) throw orderError;
@@ -167,7 +174,7 @@ export default function CheckoutPage() {
       await sendSms(admin1, adminMessage);
       
       if (profile?.contact) {
-        await sendSms(profile.contact, `Hi ${customerName}, your order for ${mainItem} has been received. We are verifying it now. Thank you!`);
+        await sendSms(profile.contact, `Hi ${customerName}, your order for ${mainItem} has been received. We are checking it now. Thank you!`);
       }
 
       clearCart();
@@ -303,7 +310,11 @@ export default function CheckoutPage() {
                   <CardContent className="p-10 space-y-8">
                     <div className="space-y-6 max-h-[400px] overflow-y-auto scrollbar-hide pr-2">
                       {items.map((item) => {
-                        const price = item.selectedVariant ? item.selectedVariant.price : item.price;
+                        const originalPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
+                        const discountPrice = item.selectedVariant ? item.selectedVariant.discount_price : item.discount_price;
+                        const finalPrice = (discountPrice && discountPrice > 0) ? discountPrice : originalPrice;
+                        const hasDiscount = discountPrice && discountPrice > 0;
+                        
                         const cartId = item.selectedVariant ? `${item.id}-${item.selectedVariant.id}` : item.id;
                         return (
                           <div key={cartId} className="flex items-center gap-5 group">
@@ -322,9 +333,16 @@ export default function CheckoutPage() {
                                 </div>
                               )}
                             </div>
-                            <p className="text-sm font-black text-slate-900 italic tracking-tighter shrink-0">
-                               GH₵ {(price * item.quantity).toLocaleString()}
-                            </p>
+                            <div className="text-right shrink-0">
+                               {hasDiscount && (
+                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60">
+                                   GH₵ {(originalPrice * item.quantity).toLocaleString()}
+                                 </p>
+                               )}
+                               <p className={cn("text-sm font-black italic tracking-tighter", hasDiscount ? "text-red-600" : "text-slate-900")}>
+                                  GH₵ {(finalPrice * item.quantity).toLocaleString()}
+                               </p>
+                            </div>
                           </div>
                         );
                       })}

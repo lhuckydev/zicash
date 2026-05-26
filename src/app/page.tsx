@@ -43,7 +43,7 @@ function SuggestedProductTile({ product }: { product: Product }) {
   return (
     <motion.div variants={fadeIn} whileHover={{ scale: 1.05 }} className="h-full">
       <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300">
-        <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-slate-200/40 mb-3 shadow-sm border border-slate-100/50">
+        <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-slate-200/40 mb-3 shadow-sm border border-slate-100/50">
           <Image 
             src={product.image_url} 
             alt={product.name} 
@@ -83,7 +83,7 @@ export default function CatalogPage() {
         setError(supabaseError.message);
       } else {
         setProducts(data || []);
-        // Trigger randomization by updating the seed
+        // Update seed to trigger fresh randomization
         setSeed(Math.random());
       }
     } catch (err: any) {
@@ -117,11 +117,10 @@ export default function CatalogPage() {
   const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
-  // Reinforced randomization for Suggested Picks
+  // Randomize Suggested Picks based on the seed
   const suggestedPicks = useMemo(() => {
     if (products.length === 0) return [];
-    // Shuffle the array using the seed as a trigger
-    return [...products].sort(() => Math.random() - 0.5).slice(0, 10);
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 10);
   }, [products, seed]);
 
   return (
@@ -212,7 +211,7 @@ export default function CatalogPage() {
                     className="flex flex-col items-center gap-3 shrink-0 group"
                   >
                     <div className={cn(
-                      "w-16 h-16 md:w-24 md:h-24 rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
+                      "w-16 h-16 md:w-24 md:h-24 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
                       category === cat.name ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30 border-blue-600" : "bg-white text-slate-400 border-slate-100 hover:border-blue-200"
                     )}>
                       {cat.imageUrl ? (
@@ -234,7 +233,7 @@ export default function CatalogPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="mx-auto max-w-[95%] md:max-w-[70%] py-12 px-6 md:px-8 bg-blue-50/50 rounded-[3rem] border border-blue-100/50"
+                className="mx-auto max-w-[100%] md:max-w-[70%] py-12 px-4 md:px-8 bg-blue-50/50 rounded-[2.5rem] md:rounded-[3rem] border border-blue-100/50"
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">

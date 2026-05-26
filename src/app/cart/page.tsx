@@ -115,7 +115,7 @@ export default function CartPage() {
         <div className="flex flex-col md:flex-row md:items-center gap-4 mb-12">
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-headline uppercase italic">Your <span className="text-blue-600">Basket</span></h1>
           <Badge className="bg-blue-50 text-blue-600 border-none text-[10px] px-4 py-2 font-black uppercase tracking-[0.2em] shadow-sm w-fit">
-            {items.length} ACTIVE NODES
+            {items.length} ACTIVE ITEMS
           </Badge>
         </div>
 
@@ -205,7 +205,7 @@ export default function CartPage() {
           <div className="space-y-6">
             <div className="bg-white p-10 rounded-[3rem] border border-slate-100 space-y-10 shadow-2xl shadow-blue-600/5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl -mr-16 -mt-16" />
-              <h2 className="text-2xl font-black text-slate-900 uppercase tracking-widest italic font-headline relative z-10">Archival Summary</h2>
+              <h2 className="text-2xl font-black text-slate-900 uppercase tracking-widest italic font-headline relative z-10">Order Summary</h2>
               
               <div className="space-y-6 relative z-10">
                 <div className="flex justify-between text-[11px] text-slate-400 font-black uppercase tracking-widest">
@@ -213,7 +213,7 @@ export default function CartPage() {
                   <span className="text-slate-900">GH₵ {total.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-[11px] text-slate-400 font-black uppercase tracking-widest">
-                  <span>Logistics</span>
+                  <span>Delivery</span>
                   <span className="text-emerald-600">INCLUDED</span>
                 </div>
                 <div className="pt-8 border-t-2 border-dashed border-slate-100 flex justify-between items-end">

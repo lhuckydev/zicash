@@ -90,12 +90,12 @@ export default function NewProductWizard() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
-  // Step 2: Variants
+  // Step 2: Options
   const [variants, setVariants] = useState<ProductVariantForm[]>([
     { price: 0, stock: 10, condition: "New", touchscreen: false }
   ]);
 
-  // Step 3: Advanced Optional Specs
+  // Step 3: Additional Details
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
   const isSimpleCategory = ["Accessories", "Educational Consult"].includes(basicInfo.category);
@@ -248,7 +248,7 @@ export default function NewProductWizard() {
       router.push("/admin");
     } catch (err: any) {
       console.error("Save Error:", err);
-      toast({ variant: "destructive", title: "Upload Failed", description: err.message });
+      toast({ variant: "destructive", title: "Upload Failed", description: err.message || "Permission error. Check database rules." });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
@@ -534,7 +534,7 @@ export default function NewProductWizard() {
                       <div className="pt-8 border-t border-slate-50 flex gap-4">
                         <Button variant="ghost" onClick={() => setStep(2)} className="h-16 px-10 rounded-2xl font-black uppercase text-[12px] tracking-widest border border-slate-100 bg-white">Back</Button>
                         <Button onClick={handleFinalSave} disabled={isSaving} className="flex-1 h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-lg shadow-xl shadow-blue-600/20 gap-3">
-                           {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck className="w-6 h-6" />} Upload Product
+                           {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <ShieldCheck className="w-6 h-6" />} Upload Product
                         </Button>
                       </div>
                    </CardContent>

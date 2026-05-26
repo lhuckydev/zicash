@@ -142,7 +142,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       }
     }
     fetchFullData();
-  }, [initialProduct.id, selectedVariant]);
+  }, [initialProduct.id]);
 
   useEffect(() => {
     if (!api) return;
@@ -175,7 +175,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const isFavorite = hasItem(product.id);
   const productImages = (product.image_urls?.length ? product.image_urls : [product.image_url]).filter(Boolean);
   
-  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
   const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock_status === 'In Stock';
 
   return (
@@ -252,8 +251,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                </p>
             </div>
 
+            {/* Desktop Review Positioning */}
             <div className="hidden lg:block">
-              <ProductReviews productId={product.id} />
+               <ProductReviews productId={product.id} />
             </div>
           </div>
 
@@ -314,7 +314,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               <div className="md:text-right">
                                 <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                 <p className={cn("text-[10px] font-black uppercase mt-1 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                                  {v.stock > 0 ? 'In Stock' : 'Sold Out'}
+                                  {v.stock > 0 ? 'Available Now' : 'Sold Out'}
                                 </p>
                               </div>
                             </div>
@@ -338,6 +338,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                           <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
                                           <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
                                           <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
+                                          <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       ) : (
                                         <>
@@ -350,6 +351,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                           <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
                                           <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
                                           <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
+                                          <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       )}
                                     </div>
@@ -391,43 +393,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
             )}
 
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price for this Option</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-slate-900">GHS</span>
-                  <span className="text-5xl md:text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
-                    {displayPrice.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-start md:items-end gap-2">
-                 <div className="flex items-center gap-2">
-                    <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available Now' : 'Sold Out'}</span>
-                 </div>
-                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Warranty period: {product.warranty}
-                 </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-               <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
-                  <span className="flex items-center gap-2"><Truck className="w-3 h-3 text-blue-500" /> Free Accra Delivery</span>
-                  <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Delivery (Accra)</span>
-               </div>
-            </div>
-
-            <div className="hidden lg:block pt-10">
-              <SafeShoppingCard />
-            </div>
-
+            {/* Mobile Review Positioning */}
             <div className="lg:hidden mt-10">
-              <ProductReviews productId={product.id} />
+               <ProductReviews productId={product.id} />
             </div>
-            <div className="lg:hidden mt-10">
+
+            <div className="mt-10">
               <SafeShoppingCard />
             </div>
           </div>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Product, ProductVariant, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { 
   ArrowLeft, Heart, ShieldCheck, Truck, Cpu, Database, 
@@ -219,7 +220,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           <h4 className="text-sm font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
                           <div className="mt-3 flex items-center justify-between">
                              <p className="text-xs font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                             <p className={cn("text-[8px] font-bold uppercase", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                             <p className={cn("text-[8px] font-bold uppercase", v.stock > 0 ? `${v.stock} Available` : 'Sold Out', v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
                                {v.stock > 0 ? `${v.stock} Available` : 'Sold Out'}
                              </p>
                           </div>

@@ -121,7 +121,9 @@ export default function CatalogPage() {
     { name: "Educational Consult", imageUrl: "https://i.ibb.co/pB4yX4JL/high-resolution-graduation-cap-png-icon-17-removebg-preview.png", icon: GraduationCap },
   ];
 
-  const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
+  // Logic: Show up to 5 products marked as featured in the slider
+  const featuredProducts = useMemo(() => products.filter(p => p.featured).slice(0, 5), [products]);
+  
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
   const suggestedPicks = useMemo(() => {
@@ -167,7 +169,7 @@ export default function CatalogPage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-20" />
                           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 z-30">
                              <div className="space-y-1">
-                                <h2 className="text-xl md:text-2xl font-black text-white font-headline tracking-tight line-clamp-1 drop-shadow-xl">{product.name}</h2>
+                                <h2 className="text-xl md:text-2xl font-black text-white font-headline tracking-tight line-clamp-1 drop-shadow-xl uppercase">{product.name}</h2>
                                 <p className="text-blue-300 font-black text-lg md:text-xl italic tracking-tighter drop-shadow-md">GH₵ {product.price.toLocaleString()}</p>
                              </div>
                           </div>

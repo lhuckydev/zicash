@@ -45,10 +45,10 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
   const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
 
   return (
-    <div className="flex items-start gap-2.5 py-1">
+    <div className="flex items-start gap-3 py-1">
       <Icon className={cn("w-4 h-4 shrink-0 mt-0.5", active ? "text-blue-600" : "text-slate-300")} />
       <div className="flex flex-col min-w-0">
-        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">{label}</span>
+        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 leading-none mb-1.5">{label}</span>
         <span className={cn(
           "text-[10px] md:text-[11px] font-black italic leading-tight break-words",
           active ? "text-slate-900" : "text-slate-600"
@@ -140,63 +140,77 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          {/* Image Section - Expanded for Desktop and Offset to align with first spec card */}
-          <div className="lg:col-span-6 flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
-            <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
-              {productImages.map((url, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => handleThumbnailClick(idx)}
-                  className={cn(
-                    "relative aspect-square w-16 md:w-full rounded-2xl border-2 overflow-hidden bg-white cursor-pointer transition-all shrink-0 shadow-sm",
-                    current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-60 hover:opacity-100"
-                  )}
-                >
-                  <Image src={url as string} alt={`View ${idx + 1}`} fill className="object-contain p-2" />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[600px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
-              <Carousel setApi={setApi} className="w-full h-full [&>div]:h-full">
-                <CarouselContent className="h-full ml-0">
-                  {productImages.map((url, idx) => (
-                    <CarouselItem key={idx} className="relative h-full w-full pl-0">
-                      <div className="relative w-full h-full bg-white flex items-center justify-center">
-                        <Image 
-                          src={url as string} 
-                          alt={`${product?.name} ${idx + 1}`} 
-                          fill 
-                          className="object-contain p-6 transition-all duration-1000 group-hover:scale-105" 
-                          priority={idx === 0} 
-                          sizes="(max-width: 768px) 100vw, 40vw"
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-              
-              <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
-                 {product.featured && (
-                   <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Selection</Badge>
-                 )}
-                 <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-sm">Verified</Badge>
+          {/* Left Column: Visuals & Narrative */}
+          <div className="lg:col-span-6 space-y-20">
+            {/* Image Section */}
+            <div className="flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
+              <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
+                {productImages.map((url, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => handleThumbnailClick(idx)}
+                    className={cn(
+                      "relative aspect-square w-16 md:w-full rounded-2xl border-2 overflow-hidden bg-white cursor-pointer transition-all shrink-0 shadow-sm",
+                      current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    <Image src={url as string} alt={`View ${idx + 1}`} fill className="object-contain p-2" />
+                  </div>
+                ))}
               </div>
 
-              <button 
-                onClick={() => toggleItem(product)} 
-                className={cn(
-                  "absolute top-6 right-6 p-3 rounded-full border shadow-xl transition-all z-20 hover:scale-110 active:scale-95",
-                  isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-300 bg-white/90 border-slate-100"
-                )}
-              >
-                <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
-              </button>
+              <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[600px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
+                <Carousel setApi={setApi} className="w-full h-full [&>div]:h-full">
+                  <CarouselContent className="h-full ml-0">
+                    {productImages.map((url, idx) => (
+                      <CarouselItem key={idx} className="relative h-full w-full pl-0">
+                        <div className="relative w-full h-full bg-white flex items-center justify-center">
+                          <Image 
+                            src={url as string} 
+                            alt={`${product?.name} ${idx + 1}`} 
+                            fill 
+                            className="object-contain p-6 transition-all duration-1000 group-hover:scale-105" 
+                            priority={idx === 0} 
+                            sizes="(max-width: 768px) 100vw, 40vw"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
+                
+                <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
+                   {product.featured && (
+                     <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Selection</Badge>
+                   )}
+                   <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-sm">Verified</Badge>
+                </div>
+
+                <button 
+                  onClick={() => toggleItem(product)} 
+                  className={cn(
+                    "absolute top-6 right-6 p-3 rounded-full border shadow-xl transition-all z-20 hover:scale-110 active:scale-95",
+                    isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-300 bg-white/90 border-slate-100"
+                  )}
+                >
+                  <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
+                </button>
+              </div>
+            </div>
+
+            {/* About this Item Section */}
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+               <div className="flex items-center gap-4">
+                  <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
+               </div>
+               <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
+                 {product.description || "No detailed description provided."}
+               </p>
             </div>
           </div>
 
-          {/* Details Section */}
+          {/* Right Column: Specs & Procurement */}
           <div className="lg:col-span-6 space-y-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -268,14 +282,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                   {/* Collapsible Detailed Specs */}
                                   <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                     <CollapsibleContent className="space-y-6">
-                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5 pt-6 animate-in slide-in-from-top-2 duration-300">
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
                                         {product.category === "Laptops" ? (
                                           <>
                                             <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
                                             <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
                                             <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
                                             <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
-                                            <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint || product.fingerprint} active={isActive} />
+                                            <MiniSpec icon={Fingerprint} label="Fingerprint" value={v.fingerprint} active={isActive} />
                                             <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
                                             <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
                                             <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
@@ -296,12 +310,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
                                     <button
                                       onClick={(e) => toggleSpec(v.id, e)}
-                                      className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
+                                      className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
                                     >
                                       {isExpanded ? (
-                                        <><ChevronUp className="w-3 h-3" /> Hide Full Specs</>
+                                        <><ChevronUp className="w-3 h-3" /> Hide Details</>
                                       ) : (
-                                        <><ChevronDown className="w-3 h-3" /> View Full Specs</>
+                                        <><ChevronDown className="w-3 h-3" /> Full Specifications</>
                                       )}
                                     </button>
                                   </Collapsible>
@@ -359,48 +373,33 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>
                </div>
             </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-20 border-t border-slate-100">
-          <div className="lg:col-span-8 space-y-16">
-            <div className="space-y-6">
-               <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
+            {/* Safe Shopping Card - Moved to sidebar */}
+            <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
+               <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
+               
+               <div className="space-y-8 relative z-10">
+                  <div className="flex gap-5">
+                     <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
+                     <div>
+                        <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
+                        <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
+                     </div>
+                  </div>
+                  <div className="flex gap-5">
+                     <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
+                     <div>
+                        <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
+                        <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
+                     </div>
+                  </div>
                </div>
-               <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "No detailed description provided."}
-               </p>
-            </div>
-          </div>
 
-          <div className="lg:col-span-4">
-             <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 sticky top-32 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-                <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
-                
-                <div className="space-y-8 relative z-10">
-                   <div className="flex gap-5">
-                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
-                      <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
-                         <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
-                      </div>
-                   </div>
-                   <div className="flex gap-5">
-                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
-                      <div>
-                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-                         <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="pt-8 border-t border-white/10 relative z-10">
-                   <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
-                </div>
-             </Card>
+               <div className="pt-8 border-t border-white/10 relative z-10">
+                  <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
+               </div>
+            </Card>
           </div>
         </div>
       </div>

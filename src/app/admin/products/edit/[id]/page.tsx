@@ -85,7 +85,8 @@ export default function EditProductPage() {
     color: "",
     touchscreen: true,
     keyboard_light: true,
-    fingerprint: true
+    fingerprint: true,
+    featured: false
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -204,8 +205,6 @@ export default function EditProductPage() {
         finalSpecs = `CPU: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | GPU: ${product.gpu || "Standard"} | Screen: ${product.screen_resolution || "Standard"} | Speed: ${product.clock_speed || "Standard"}`;
       } else if (product.category === "Phones") {
         finalSpecs = `Chipset: ${product.cpu || "Standard"} | RAM: ${product.ram_size || "Standard"} | Storage: ${product.storage_size || "Standard"} | Camera: ${product.camera || "Standard"} | Battery: ${product.battery || "Standard"}`;
-      } else if (product.category === "Closet") {
-        finalSpecs = `Size: ${product.size || "Standard"} | Material: ${product.material || "Standard"} | Color: ${product.color || "Standard"} | Condition: ${product.condition || "New"}`;
       } else {
         finalSpecs = product.specs || "Standard Item";
       }
@@ -274,7 +273,7 @@ export default function EditProductPage() {
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">Change Category</label>
+                    <label className="text-[15px] font-black uppercase text-blue-700 ml-1">Category</label>
                     <Select value={product.category} onValueChange={(val) => setProduct({ ...product, category: val })}>
                       <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black shadow-sm focus:ring-2 focus:ring-blue-600/10">
                         <SelectValue />
@@ -325,7 +324,7 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">Price (GH₵) <span className="text-red-500">*</span></label>
+                    <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">Base Price (GH₵) <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
                       <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
@@ -346,14 +345,14 @@ export default function EditProductPage() {
                    <div className="p-3 bg-blue-600 rounded-2xl">
                      {product.category === "Laptops" && <Monitor className="w-6 h-6" />}
                      {product.category === "Phones" && <Smartphone className="w-6 h-6" />}
-                     {product.category === "Closet" && <Shirt className="w-6 h-6" />}
                      {product.category === "Educational Consult" && <GraduationCap className="w-6 h-6" />}
+                     {["Accessories", "Closet"].includes(product.category || "") && <Box className="w-6 h-6" />}
                    </div>
                 </CardHeader>
                 <CardContent className="p-10 space-y-8">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
-                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Item Title <span className="text-red-500">*</span></label>
+                        <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
                         <Input placeholder="Full Product Name" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
@@ -373,6 +372,17 @@ export default function EditProductPage() {
                            </SelectContent>
                         </Select>
                       </div>
+                   </div>
+
+                   <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 shadow-sm">
+                      <div className="flex items-center gap-4">
+                         <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600"><Zap className="w-6 h-6" /></div>
+                         <div>
+                            <p className="font-black text-slate-900 uppercase text-xs">Featured Product</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Show on the homepage slider</p>
+                         </div>
+                      </div>
+                      <Switch checked={product.featured} onCheckedChange={(val) => setProduct({...product, featured: val})} className="data-[state=checked]:bg-blue-600" />
                    </div>
 
                    {!isSimpleCategory && (

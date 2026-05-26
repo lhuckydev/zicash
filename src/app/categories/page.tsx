@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -35,7 +34,7 @@ export default function CategoriesPage() {
     { 
       id: "laptops",
       name: "Laptops", 
-      imageUrl: "https://i.ibb.co/nMy2cj24/dell-icon-11-removebg-preview.png",
+      imageUrl: "https://i.ibb.co/fGBPB9y4/laptop-586-removebg-preview.png",
     },
     { 
       id: "phones",

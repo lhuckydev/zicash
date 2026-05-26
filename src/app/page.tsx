@@ -113,7 +113,7 @@ export default function CatalogPage() {
 
   const categories = [
     { name: "All", icon: LayoutGrid },
-    { name: "Laptops", imageUrl: "https://i.ibb.co/nMy2cj24/dell-icon-11-removebg-preview.png", icon: Laptop },
+    { name: "Laptops", imageUrl: "https://i.ibb.co/fGBPB9y4/laptop-586-removebg-preview.png", icon: Laptop },
     { name: "Phones", imageUrl: "https://i.ibb.co/WvdsfcTh/Samsung-Galaxy-S24-Ultra-Titanium-Violet-Smartphone-transparent-PNG-image-300x300-removebg-preview.png", icon: Smartphone },
     { name: "Accessories", imageUrl: "https://i.ibb.co/qFn4CMBf/hd-blue-apple-smart-watch-series-6-png-704081694622170ogfulucxw5-removebg-preview.png", icon: Zap },
     { name: "Closet", imageUrl: "https://i.ibb.co/MxNHbcw2/Armor-Hoodie-Black-01-removebg-preview.png", icon: Shirt },

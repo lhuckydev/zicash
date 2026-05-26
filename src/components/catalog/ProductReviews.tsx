@@ -264,13 +264,6 @@ export function ProductReviews({ productId }: { productId: string }) {
                            <p className="text-slate-600 font-medium text-xl leading-relaxed italic">
                              "{r.comment || "High-performance unit. Extremely satisfied with this procurement."}"
                            </p>
-                           <div className="flex items-center gap-4 mt-8 pt-8 border-t border-slate-50">
-                              <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full flex items-center gap-2">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Verified Transaction</span>
-                              </div>
-                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest ml-auto">Log: #{r.id.slice(0,8).toUpperCase()}</span>
-                           </div>
                         </div>
                      </motion.div>
                    ))}

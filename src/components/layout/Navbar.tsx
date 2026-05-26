@@ -82,7 +82,7 @@ export function Navbar() {
           .from('products')
           .select('*')
           .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
-          .limit(5);
+          .limit(6);
         
         if (!error && data) {
           setSuggestions(data);
@@ -128,14 +128,14 @@ export function Navbar() {
 
   const mainNavLinks = [
     { name: "Shop", path: "/", icon: LayoutGrid },
-    { name: "Categories", path: "/categories", icon: Zap },
+    { name: "Departments", path: "/categories", icon: Zap },
     { name: "AI Advisor", path: "/advisor", icon: BrainCircuit },
   ];
 
   const secondaryLinks = [
-    { name: "About Us", path: "/about", icon: Info },
-    { name: "Contact & Support", path: "/contact", icon: Phone },
-    { name: "Terms & Conditions", path: "/terms", icon: Gavel },
+    { name: "Our Vision", path: "/about", icon: Info },
+    { name: "Support Center", path: "/contact", icon: Phone },
+    { name: "Market Policy", path: "/terms", icon: Gavel },
   ];
 
   const allMobileLinks = [...mainNavLinks, ...secondaryLinks];
@@ -156,15 +156,15 @@ export function Navbar() {
                     <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] p-0 border-none rounded-r-[2rem]">
-                  <SheetHeader className="p-8 border-b border-slate-50 text-left">
+                <SheetContent side="left" className="w-[300px] p-0 border-none rounded-r-[2rem] shadow-2xl">
+                  <SheetHeader className="p-8 border-b border-slate-50 text-left bg-slate-50/30">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center p-2">
-                        <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={40} height={40} className="rounded-full object-cover" />
+                      <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-md border border-white bg-white shrink-0">
+                        <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={40} height={40} className="object-cover" />
                       </div>
                       <SheetTitle className="text-left">
                         <div className="flex flex-col">
-                          <span className="text-xl font-bold font-headline leading-none text-slate-900">
+                          <span className="text-2xl font-black font-headline tracking-tighter text-slate-900 leading-none">
                             Zi<span className="text-blue-600">Cash</span>
                           </span>
                           <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
@@ -175,7 +175,7 @@ export function Navbar() {
                     </div>
                   </SheetHeader>
                   <div className="flex flex-col p-6 space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Menu</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Market Navigation</p>
                     {allMobileLinks.map((link) => (
                       <Link 
                         key={link.path} 
@@ -183,10 +183,10 @@ export function Navbar() {
                         onClick={() => setIsMenuOpen(false)}
                         className={cn(
                           "flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm group",
-                          pathname === link.path ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"
+                          pathname === link.path ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50"
                         )}
                       >
-                        <link.icon className={cn("w-5 h-5", pathname === link.path ? "text-blue-600" : "text-slate-400 group-hover:text-blue-600")} />
+                        <link.icon className={cn("w-5 h-5", pathname === link.path ? "text-white" : "text-slate-400 group-hover:text-blue-600")} />
                         {link.name}
                       </Link>
                     ))}
@@ -297,13 +297,13 @@ export function Navbar() {
                 </motion.div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-2 border-blue-100 rounded-[1.5rem] p-2 shadow-2xl bg-white">
-                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
                 <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer">
                   <Link href="/profile" className="flex items-center w-full">
                     <SettingsIcon className="mr-3 h-4 w-4 text-slate-400" />
-                    <span className="font-bold text-slate-700 text-xs">Profile Settings</span>
+                    <span className="font-bold text-slate-700 text-xs">Account Settings</span>
                   </Link>
                 </DropdownMenuItem>
                 
@@ -345,7 +345,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Full Screen Search Experience Overlay */}
+      {/* Full Screen Mask Search Experience */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div 
@@ -355,7 +355,7 @@ export function Navbar() {
             className="fixed inset-0 z-[100] bg-white flex flex-col pt-4 sm:pt-0"
           >
             <div className="container mx-auto px-6 flex flex-col h-full">
-              <div className="flex items-center gap-4 py-6 border-b border-blue-50">
+              <div className="flex items-center gap-4 py-6 border-b border-blue-50 shrink-0">
                 <div className="relative flex-1 group">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-600" />
                   <form onSubmit={handleSearchSubmit}>
@@ -380,31 +380,31 @@ export function Navbar() {
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-20 space-y-4">
                     <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching inventory...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching our inventory...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top Recommendations</p>
-                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View all matches</button>
+                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Suggestions</p>
+                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View all results</button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {suggestions.map((p) => (
                         <Link 
                           key={p.id} 
                           href={`/product/${p.id}`}
                           onClick={() => setIsSearchOpen(false)}
-                          className="flex items-center gap-4 p-4 bg-white rounded-3xl border border-slate-100 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/5 transition-all group"
+                          className="flex items-center gap-5 p-5 bg-white rounded-[2rem] border border-slate-100 hover:border-blue-600 hover:shadow-2xl hover:shadow-blue-600/5 transition-all group"
                         >
-                          <div className="relative w-16 h-16 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shrink-0">
+                          <div className="relative w-20 h-20 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shrink-0 shadow-inner flex items-center justify-center">
                             <Image src={p.image_url} alt={p.name} fill className="object-contain p-2" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-slate-900 truncate uppercase group-hover:text-blue-600 transition-colors">{p.name}</p>
-                            <p className="text-xs font-bold text-blue-600 italic">GH₵{p.price.toLocaleString()}</p>
-                            <div className="flex items-center gap-1 mt-1">
-                               <span className="text-[8px] font-black uppercase bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Verified</span>
-                               <span className="text-[8px] font-black uppercase bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded">{p.category}</span>
+                            <p className="text-sm font-bold text-blue-600 italic mt-1">GH₵{p.price.toLocaleString()}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                               <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded shadow-sm">Verified Unit</span>
+                               <span className="text-[8px] font-black uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">{p.category}</span>
                             </div>
                           </div>
                         </Link>
@@ -414,25 +414,36 @@ export function Navbar() {
                 ) : searchQuery.length >= 2 ? (
                   <div className="text-center py-20 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
                     <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-slate-900">No matching items</h3>
-                    <p className="text-slate-400 mt-2 max-w-xs mx-auto text-sm font-medium">We couldn't find any products matching your current search. Try checking your spelling or using more general terms.</p>
+                    <h3 className="text-xl font-bold text-slate-900 uppercase">No matching items</h3>
+                    <p className="text-slate-400 mt-2 max-w-xs mx-auto text-sm font-medium">We couldn't find any items matching your current search. Try checking your spelling or using more general terms.</p>
                   </div>
                 ) : (
-                  <div className="space-y-12">
+                  <div className="space-y-12 animate-in fade-in duration-700">
                      <div className="space-y-6">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quick Departments</p>
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Market Departments</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                            {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
                              <Link 
                                key={cat} 
                                href={`/categories`} 
                                onClick={() => setIsSearchOpen(false)}
-                               className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:bg-blue-600 hover:text-white transition-all text-center group"
+                               className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:bg-blue-600 hover:text-white transition-all text-center group shadow-sm hover:shadow-xl hover:shadow-blue-600/10"
                              >
-                               <span className="text-xs font-black uppercase tracking-widest">{cat}</span>
+                               <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
                              </Link>
                            ))}
                         </div>
+                     </div>
+
+                     <div className="p-10 rounded-[3rem] bg-blue-50/50 border border-blue-100 text-center space-y-4">
+                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                          <Zap className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <h4 className="text-lg font-black uppercase italic text-slate-900">Need expert advice?</h4>
+                        <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">Our AI Advisor can help you pick the perfect hardware based on your needs and budget.</p>
+                        <Link href="/advisor" onClick={() => setIsSearchOpen(false)}>
+                          <Button className="bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest text-[10px] rounded-xl px-8 h-12 mt-4 shadow-lg shadow-blue-600/20">Talk to Advisor</Button>
+                        </Link>
                      </div>
                   </div>
                 )}

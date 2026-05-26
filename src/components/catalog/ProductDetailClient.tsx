@@ -235,10 +235,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
 
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-8 bg-white p-6 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
+              <div className="space-y-8 bg-white p-4 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">Available Specifications</h3>
-                    <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg">{product.variants.length} Options</Badge>
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Available Specifications</h3>
+                    <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg mr-4">{product.variants.length} Options</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-6">
                     {product.variants.map((v) => {
@@ -256,84 +256,85 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                           )}
                         >
-                          {isActive && <div className="absolute top-0 right-0 w-10 h-10 bg-blue-600 flex items-center justify-center rounded-bl-2xl text-white shadow-lg"><CheckCircle2 className="w-5 h-5" /></div>}
+                          {isActive && <div className="absolute top-0 left-0 w-12 h-12 bg-blue-600 flex items-center justify-center rounded-br-2xl text-white shadow-lg"><CheckCircle2 className="w-6 h-6" /></div>}
                           
-                          <div className="flex flex-col md:flex-row gap-8 md:gap-10">
-                            <div className="space-y-6 flex-1 min-w-0">
-                              <div>
-                                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1.5", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
-                                <h4 className="text-lg md:text-xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
+                          <div className="flex flex-col gap-8">
+                            {/* Header: Label and Price */}
+                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                              <div className="space-y-1.5 flex-1">
+                                <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
                               </div>
+                              <div className="md:text-right">
+                                <p className="text-2xl md:text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                <p className={cn("text-[10px] font-black uppercase mt-1 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                                  {v.stock > 0 ? 'In Stock' : 'Sold Out'}
+                                </p>
+                              </div>
+                            </div>
 
-                              {!isSimpleCategory && (
-                                <div className="space-y-6">
-                                  {/* Always Visible Summary Specs */}
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 pt-8 border-t border-slate-100/50">
-                                    {product.category === "Laptops" ? (
-                                      <>
-                                        <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                        <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
-                                        <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                      </>
-                                    ) : (
-                                      <>
-                                        <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                        <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                        <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                      </>
-                                    )}
-                                  </div>
-
-                                  {/* Collapsible Detailed Specs */}
-                                  <Collapsible open={isExpanded} onOpenChange={() => {}}>
-                                    <CollapsibleContent className="space-y-6">
-                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
-                                        {product.category === "Laptops" ? (
-                                          <>
-                                            <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
-                                            <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
-                                            <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
-                                            <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
-                                            <MiniSpec icon={Fingerprint} label="Fingerprint" value={v.fingerprint} active={isActive} />
-                                            <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
-                                            <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
-                                            <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
-                                            <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
-                                          </>
-                                        ) : (
-                                          <>
-                                            <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
-                                            <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
-                                            <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
-                                            <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
-                                            <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
-                                            <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
-                                          </>
-                                        )}
-                                      </div>
-                                    </CollapsibleContent>
-
-                                    <button
-                                      onClick={(e) => toggleSpec(v.id, e)}
-                                      className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
-                                    >
-                                      {isExpanded ? (
-                                        <><ChevronUp className="w-3 h-3" /> Hide Details</>
-                                      ) : (
-                                        <><ChevronDown className="w-3 h-3" /> Full Specifications</>
-                                      )}
-                                    </button>
-                                  </Collapsible>
+                            {/* Specifications Grid */}
+                            {!isSimpleCategory && (
+                              <div className="space-y-6">
+                                {/* Always Visible Summary Specs - Full Width Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6 pt-8 border-t border-slate-100/50">
+                                  {product.category === "Laptops" ? (
+                                    <>
+                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                      <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                      <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                    </>
+                                  )}
                                 </div>
-                              )}
-                            </div>
 
-                            <div className="md:text-right shrink-0 flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-10">
-                               <p className="text-2xl md:text-3xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                               <p className={cn("text-[10px] font-black uppercase mt-3 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                                 {v.stock > 0 ? 'In Stock' : 'Sold Out'}
-                               </p>
-                            </div>
+                                {/* Collapsible Detailed Specs */}
+                                <Collapsible open={isExpanded} onOpenChange={() => {}}>
+                                  <CollapsibleContent className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-6 pt-8 animate-in slide-in-from-top-2 duration-300">
+                                      {product.category === "Laptops" ? (
+                                        <>
+                                          <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
+                                          <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
+                                          <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
+                                          <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
+                                          <MiniSpec icon={Fingerprint} label="Fingerprint" value={v.fingerprint} active={isActive} />
+                                          <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
+                                          <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
+                                          <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
+                                          <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
+                                        </>
+                                      ) : (
+                                        <>
+                                          <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
+                                          <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
+                                          <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
+                                          <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
+                                          <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
+                                          <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
+                                        </>
+                                      )}
+                                    </div>
+                                  </CollapsibleContent>
+
+                                  <button
+                                    onClick={(e) => toggleSpec(v.id, e)}
+                                    className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
+                                  >
+                                    {isExpanded ? (
+                                      <><ChevronUp className="w-3 h-3" /> Hide Details</>
+                                    ) : (
+                                      <><ChevronDown className="w-3 h-3" /> Full Specifications</>
+                                    )}
+                                  </button>
+                                </Collapsible>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );

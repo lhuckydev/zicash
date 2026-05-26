@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, ArrowLeft, KeyRound } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, KeyRound, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
@@ -21,7 +23,6 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     
     try {
-      // Directs the user to the reset-password page after they click the email link
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
@@ -33,9 +34,10 @@ export default function ForgotPasswordPage() {
           description: error.message 
         });
       } else {
+        setIsSubmitting(true);
         toast({ 
           title: "Reset Link Sent", 
-          description: "Please check your email. If an account exists, you will receive a link to choose a new password." 
+          description: "Check your inbox and your SPAM folder." 
         });
       }
     } catch (err: any) {
@@ -66,25 +68,66 @@ export default function ForgotPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 px-10 pb-10">
-            <form onSubmit={handleResetRequest} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input 
-                    type="email" 
-                    placeholder="your@email.com" 
-                    required 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-slate-50 border-none rounded-2xl h-14 pl-12 focus-visible:ring-blue-600/20 font-bold"
-                  />
-                </div>
-              </div>
-              <Button className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 text-white transition-all" disabled={isLoading}>
-                {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Send Reset Link"}
-              </Button>
-            </form>
+            <AnimatePresence mode="wait">
+              {!isSubmitted ? (
+                <motion.form 
+                  key="request-form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleResetRequest} 
+                  className="space-y-6"
+                >
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        required 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="bg-slate-50 border-none rounded-2xl h-14 pl-12 focus-visible:ring-blue-600/20 font-bold"
+                      />
+                    </div>
+                  </div>
+                  <Button className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 text-white transition-all" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : "Send Reset Link"}
+                  </Button>
+                </motion.form>
+              ) : (
+                <motion.div 
+                  key="success-message"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="space-y-6"
+                >
+                  <div className="p-6 bg-blue-50 rounded-3xl border border-blue-100 space-y-4">
+                    <div className="flex items-center gap-3 text-blue-600">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <p className="text-sm font-black uppercase tracking-tight italic">Important Notice</p>
+                    </div>
+                    <p className="text-sm font-medium text-blue-900 leading-relaxed">
+                      We've sent a link to <span className="font-bold underline">{email}</span>. 
+                      Please check your inbox.
+                    </p>
+                    <div className="pt-3 border-t border-blue-200">
+                      <p className="text-[11px] font-bold text-blue-700/70 uppercase tracking-widest leading-relaxed">
+                        If you don't see the email within 2 minutes, <span className="text-blue-600 underline">please check your SPAM folder</span>.
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setIsSubmitting(false)}
+                    className="w-full h-12 rounded-2xl font-bold uppercase text-[10px] tracking-widest border-slate-200"
+                  >
+                    Try Another Email
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <Link href="/auth" className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">
               <ArrowLeft className="w-3 h-3" /> Back to Login

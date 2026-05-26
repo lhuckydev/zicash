@@ -145,7 +145,6 @@ export default function CheckoutPage() {
           const data = await response.json();
           const readableAddress = data.display_name || "Location found";
           
-          // Update the Landmark field with the fetched address for this order
           setCommunity(readableAddress);
           
           toast({ title: "Address Found", description: "We've updated your landmark with your current location." });
@@ -314,6 +313,22 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
+                        <MessageSquareQuote className="w-4 h-4" /> Special Instructions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0">
+                       <Textarea 
+                        placeholder="Any extra details? (e.g. gate color, preferred time...)" 
+                        className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-bold p-6 shadow-inner"
+                        value={extraNotes}
+                        onChange={(e) => setExtraNotes(e.target.value)}
+                       />
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
+                    <CardHeader className="p-8 pb-4">
+                      <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
                         <CreditCard className="w-4 h-4" /> Payment Choice
                       </CardTitle>
                     </CardHeader>
@@ -395,22 +410,6 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                      <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
-                        <MessageSquareQuote className="w-4 h-4" /> Special Instructions
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                       <Textarea 
-                        placeholder="Any extra details? (e.g. gate color, preferred time...)" 
-                        className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-bold p-6 shadow-inner"
-                        value={extraNotes}
-                        onChange={(e) => setExtraNotes(e.target.value)}
-                       />
                     </CardContent>
                   </Card>
                 </>

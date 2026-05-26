@@ -145,6 +145,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
           <ArrowLeft className="w-3 h-3" /> Back To Shop
         </Link>
 
+        {/* Primary Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
           {/* Left Column: Visuals & Narrative */}
           <div className="lg:col-span-6 space-y-20">
@@ -274,7 +275,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               </div>
                             </div>
 
-                            {/* Specifications Grid (Collapsible on Mobile, Managed via state) */}
+                            {/* Specifications Grid */}
                             {!isSimpleCategory && (
                               <div className="space-y-4">
                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
@@ -377,37 +378,40 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                   <span className="flex items-center gap-2"><CheckCircle2 className="w-3 h-3 text-blue-500" /> Pay on Receipt (Accra)</span>
                </div>
             </div>
+          </div>
+        </div>
 
-            <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-               <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
-               
-               <div className="space-y-8 relative z-10">
-                  <div className="flex gap-5">
-                     <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
-                     <div>
-                        <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
-                        <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
-                     </div>
-                  </div>
-                  <div className="flex gap-5">
-                     <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
-                     <div>
-                        <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-                        <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
-                     </div>
-                  </div>
-               </div>
+        {/* Secondary Grid: Ratings and Trust Module */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mt-10">
+          <div className="lg:col-span-6">
+            <ProductReviews productId={product.id} />
+          </div>
+          <div className="lg:col-span-6">
+             <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden h-fit">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
+                <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
+                
+                <div className="space-y-8 relative z-10">
+                   <div className="flex gap-5">
+                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
+                      <div>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Goods</p>
+                         <p className="text-sm font-medium leading-relaxed">Every item in our marketplace is verified for quality and performance.</p>
+                      </div>
+                   </div>
+                   <div className="flex gap-5">
+                      <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
+                      <div>
+                         <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
+                         <p className="text-sm font-medium leading-relaxed">Fast and tracked logistics ensuring your purchase reaches you safely.</p>
+                      </div>
+                   </div>
+                </div>
 
-               <div className="pt-8 border-t border-white/10 relative z-10">
-                  <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
-               </div>
-            </Card>
-
-            {/* Ratings and Reviews - Positioned under the last spec card on mobile */}
-            <div className="pt-10">
-               <ProductReviews productId={product.id} />
-            </div>
+                <div className="pt-8 border-t border-white/10 relative z-10">
+                   <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
+                </div>
+             </Card>
           </div>
         </div>
       </div>

@@ -316,9 +316,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                     className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
                                   >
                                     {isExpanded ? (
-                                      <><ChevronUp className="w-3 h-3" /> Hide Technical Matrix</>
+                                      <><ChevronUp className="w-3 h-3" /> Hide Spec Details</>
                                     ) : (
-                                      <><ChevronDown className="w-3 h-3" /> View All Details</>
+                                      <><ChevronDown className="w-3 h-3" /> View Spec Details</>
                                     )}
                                   </button>
                                 </Collapsible>
@@ -350,7 +350,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Spec Rate</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price for this Option</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-black text-slate-900">GHS</span>
                   <span className="text-5xl md:text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
@@ -362,10 +362,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="flex flex-col items-start md:items-end gap-2">
                  <div className="flex items-center gap-2">
                     <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available for Dispatch' : 'Out of Stock'}</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available for Dispatch' : 'Sold Out'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                   <ShieldCheck className="w-3 h-3" /> Warranty Node: {product.warranty}
+                   <ShieldCheck className="w-3 h-3" /> Warranty node: {product.warranty}
                  </p>
               </div>
             </div>

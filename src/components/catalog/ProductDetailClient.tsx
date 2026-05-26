@@ -40,12 +40,12 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
   const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
 
   return (
-    <div className="flex items-center gap-2">
-      <Icon className={cn("w-3 h-3 shrink-0", active ? "text-blue-600" : "text-slate-300")} />
+    <div className="flex items-center gap-3 py-1">
+      <Icon className={cn("w-4 h-4 shrink-0", active ? "text-blue-600" : "text-slate-300")} />
       <div className="flex flex-col min-w-0">
-        <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 leading-none mb-0.5">{label}</span>
+        <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">{label}</span>
         <span className={cn(
-          "text-[10px] font-black italic truncate leading-none",
+          "text-[11px] font-black italic truncate leading-none",
           active ? "text-slate-900" : "text-slate-600"
         )}>{displayValue}</span>
       </div>
@@ -203,12 +203,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
 
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">Available Options</h3>
-                    <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Configurations</Badge>
+              <div className="space-y-6 bg-white p-6 md:p-10 rounded-[3rem] border border-slate-100 shadow-sm">
+                 <div className="flex items-center justify-between border-b border-slate-50 pb-6">
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">Available Configurations</h3>
+                    <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg">{product.variants.length} Options</Badge>
                  </div>
-                 <div className="grid grid-cols-1 gap-6">
+                 <div className="grid grid-cols-1 gap-8">
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
                       return (
@@ -216,23 +216,23 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
                           className={cn(
-                            "text-left p-6 rounded-[2rem] border-2 transition-all group relative overflow-hidden",
+                            "text-left p-8 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden",
                             isActive 
-                              ? "border-blue-600 bg-blue-50/30 ring-4 ring-blue-600/5 shadow-md" 
+                              ? "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl" 
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                           )}
                         >
-                          {isActive && <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 flex items-center justify-center rounded-bl-xl text-white shadow-lg"><CheckCircle2 className="w-4 h-4" /></div>}
+                          {isActive && <div className="absolute top-0 right-0 w-10 h-10 bg-blue-600 flex items-center justify-center rounded-bl-2xl text-white shadow-lg"><CheckCircle2 className="w-5 h-5" /></div>}
                           
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div className="space-y-3 flex-1">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
+                            <div className="space-y-4 flex-1">
                               <div>
-                                <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
-                                <h4 className="text-sm font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
+                                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1.5", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <h4 className="text-lg font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
                               </div>
 
                               {!isSimpleCategory && (
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-4 pt-3 border-t border-slate-100/50">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-6 pt-5 border-t border-slate-100/50">
                                   {product.category === "Laptops" ? (
                                     <>
                                       <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
@@ -242,6 +242,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                       <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
                                       <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
                                       <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
+                                      <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint || product.fingerprint} active={isActive} />
                                       <MiniSpec icon={Terminal} label="OS" value={product.advanced_specs?.os} active={isActive} />
                                       <MiniSpec icon={Usb} label="Ports" value={product.advanced_specs?.ports} active={isActive} />
                                       <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
@@ -256,7 +257,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                       <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
                                       <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
                                       <MiniSpec icon={Shield} label="Rating" value={product.advanced_specs?.rating} active={isActive} />
-                                      <MiniSpec icon={Fingerprint} label="Security" value={product.advanced_specs?.biometrics} active={isActive} />
+                                      <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
                                       <MiniSpec icon={Timer} label="Hz" value={product.advanced_specs?.refresh} active={isActive} />
                                     </>
                                   )}
@@ -265,8 +266,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                             </div>
 
                             <div className="md:text-right shrink-0">
-                               <p className="text-xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                               <p className={cn("text-[9px] font-bold uppercase mt-1", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                               <p className="text-2xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                               <p className={cn("text-[10px] font-bold uppercase mt-2", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
                                  {v.stock > 0 ? `${v.stock} Units In Stock` : 'Currently Sold Out'}
                                </p>
                             </div>

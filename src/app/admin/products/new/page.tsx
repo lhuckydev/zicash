@@ -28,7 +28,8 @@ import {
   GraduationCap,
   Tag,
   Keyboard,
-  MousePointer2
+  MousePointer2,
+  Fingerprint
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,7 @@ interface ProductVariantForm {
   screen?: string;
   touchscreen?: boolean;
   keyboard_light?: boolean;
+  fingerprint?: boolean;
   condition?: string;
   chipset?: string;
   color?: string;
@@ -92,7 +94,7 @@ export default function NewProductWizard() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [variants, setVariants] = useState<ProductVariantForm[]>([
-    { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true }
+    { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true, fingerprint: true }
   ]);
   const [advancedSpecs, setAdvancedSpecs] = useState<Record<string, string>>({});
 
@@ -128,7 +130,7 @@ export default function NewProductWizard() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true }]);
+    setVariants([...variants, { price: 0, stock: 10, condition: "New", touchscreen: true, keyboard_light: true, fingerprint: true }]);
   };
 
   const removeVariant = (index: number) => {
@@ -223,8 +225,7 @@ export default function NewProductWizard() {
         .single();
 
       if (productError) {
-        console.error("Product Table Error:", productError);
-        throw productError;
+        throw new Error(`Product Save Error: ${productError.message}`);
       }
 
       const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
@@ -239,18 +240,17 @@ export default function NewProductWizard() {
         .insert(variantsToInsert);
 
       if (variantError) {
-        console.error("Variant Table Error:", variantError);
-        throw variantError;
+        throw new Error(`Variant Save Error: ${variantError.message}`);
       }
 
       toast({ title: "Product Uploaded", description: "The item is now live in the store." });
       router.push("/admin");
     } catch (err: any) {
-      console.error("Detailed Save Error:", err);
+      console.error("Upload Logic Failure:", err);
       toast({ 
         variant: "destructive", 
         title: "Upload Failed", 
-        description: err.message || "Database permission denied. Ensure RLS is disabled and columns exist." 
+        description: err.message || "A database connectivity error occurred." 
       });
     } finally {
       setIsSaving(false);
@@ -371,7 +371,7 @@ export default function NewProductWizard() {
                       </div>
 
                       <div className="space-y-2">
-                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Description <span className="text-red-500">*</span></label>
+                         <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Product Description <span className="text-red-500">*</span></label>
                          <Textarea placeholder="Describe the item clearly..." className="rounded-[2rem] bg-slate-50 border-none min-h-[160px] font-medium text-lg leading-relaxed shadow-inner" value={basicInfo.description} onChange={e => setBasicInfo({...basicInfo, description: e.target.value})} />
                       </div>
 
@@ -438,19 +438,26 @@ export default function NewProductWizard() {
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 512GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics</label><Input placeholder="Optional" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
                                 
-                                <div className="md:col-span-2 flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                    <div className="flex items-center gap-3">
                                       <MousePointer2 className="w-4 h-4 text-blue-600" />
-                                      <span className="text-[10px] font-black uppercase text-slate-600">Touchscreen Interface</span>
+                                      <span className="text-[10px] font-black uppercase text-slate-600">Touchscreen</span>
                                    </div>
                                    <Switch checked={v.touchscreen} onCheckedChange={val => updateVariant(idx, 'touchscreen', val)} />
                                 </div>
-                                <div className="md:col-span-2 flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                    <div className="flex items-center gap-3">
                                       <Keyboard className="w-4 h-4 text-blue-600" />
-                                      <span className="text-[10px] font-black uppercase text-slate-600">Backlit Keyboard</span>
+                                      <span className="text-[10px] font-black uppercase text-slate-600">Backlit Keys</span>
                                    </div>
                                    <Switch checked={v.keyboard_light} onCheckedChange={val => updateVariant(idx, 'keyboard_light', val)} />
+                                </div>
+                                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 md:col-span-2">
+                                   <div className="flex items-center gap-3">
+                                      <Fingerprint className="w-4 h-4 text-blue-600" />
+                                      <span className="text-[10px] font-black uppercase text-slate-600">Fingerprint Reader</span>
+                                   </div>
+                                   <Switch checked={v.fingerprint} onCheckedChange={val => updateVariant(idx, 'fingerprint', val)} />
                                 </div>
                               </>
                             ) : (
@@ -536,11 +543,11 @@ export default function NewProductWizard() {
                                { id: 'refresh', label: 'Refresh Rate', placeholder: 'e.g. 120Hz LTPO' },
                                { id: 'charge', label: 'Charging Speed', placeholder: 'e.g. 67W HyperCharge' },
                                { id: 'rating', label: 'IP Rating', placeholder: 'e.g. IP68' },
-                               { id: 'biometrics', label: 'Security', placeholder: 'e.g. Under-display Fingerprint' }
+                               { id: 'biometrics', label: 'Biometrics', placeholder: 'e.g. Face ID, Fingerprint' }
                              ].map(f => (
                                <div key={f.id} className="space-y-2">
                                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">{f.label}</label>
-                                  <Input placeholder={f.placeholder} className="h-12 bg-slate-50 border-none font-medium" value={advancedSpecs[f.id] || ""} onChange={e => setAdvancedSpecs({...advancedSpecs, [f.id]: e.target.value})} />
+                                  <Input placeholder={f.placeholder} className="h-12 bg-slate-50 border-none font-medium" value={advancedSpecs[f.id] || ""} onChange={e => setAdvancedSpecs({...advancedSpecs, [f.id]: f.id === 'biometrics' ? e.target.value : e.target.value})} />
                                </div>
                              ))}
                            </>

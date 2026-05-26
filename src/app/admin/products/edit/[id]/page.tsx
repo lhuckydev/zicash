@@ -23,7 +23,10 @@ import {
   Info,
   Trash2,
   X,
-  Tag
+  Tag,
+  Fingerprint,
+  Keyboard,
+  MousePointer2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +39,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/store/useCartStore";
@@ -78,7 +82,10 @@ export default function EditProductPage() {
     battery: "",
     size: "",
     material: "",
-    color: ""
+    color: "",
+    touchscreen: true,
+    keyboard_light: true,
+    fingerprint: true
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -368,6 +375,32 @@ export default function EditProductPage() {
                       </div>
                    </div>
 
+                   {!isSimpleCategory && (
+                     <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in">
+                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                           <div className="flex items-center gap-3">
+                              <MousePointer2 className="w-4 h-4 text-blue-600" />
+                              <span className="text-[10px] font-black uppercase text-slate-600">Touchscreen</span>
+                           </div>
+                           <Switch checked={product.touchscreen} onCheckedChange={val => setProduct({...product, touchscreen: val})} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                           <div className="flex items-center gap-3">
+                              <Keyboard className="w-4 h-4 text-blue-600" />
+                              <span className="text-[10px] font-black uppercase text-slate-600">Backlit Keys</span>
+                           </div>
+                           <Switch checked={product.keyboard_light} onCheckedChange={val => setProduct({...product, keyboard_light: val})} />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                           <div className="flex items-center gap-3">
+                              <Fingerprint className="w-4 h-4 text-blue-600" />
+                              <span className="text-[10px] font-black uppercase text-slate-600">Fingerprint</span>
+                           </div>
+                           <Switch checked={product.fingerprint} onCheckedChange={val => setProduct({...product, fingerprint: val})} />
+                        </div>
+                     </div>
+                   )}
+
                    {!isSimpleCategory && product.category === "Laptops" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
                         <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">CPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
@@ -390,7 +423,7 @@ export default function EditProductPage() {
                    )}
 
                    <div className="space-y-2">
-                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Description <span className="text-red-500">*</span></label>
+                      <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Info className="w-3 h-3" /> Product Description <span className="text-red-500">*</span></label>
                       <Textarea className="rounded-2xl bg-slate-50 border-none min-h-[150px] font-black text-lg leading-relaxed" value={product.description || ""} onChange={(e) => setProduct({...product, description: e.target.value})} />
                    </div>
 
@@ -402,7 +435,7 @@ export default function EditProductPage() {
                       isFormValid() ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-slate-200 cursor-not-allowed shadow-none"
                     )}
                    >
-                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Save Changes
+                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Upload Product
                    </Button>
                 </CardContent>
              </div>

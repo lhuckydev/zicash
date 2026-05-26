@@ -6,12 +6,13 @@ import { Product, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Tag, ChevronRight } from "lucide-react";
+import { Heart, Tag, ChevronRight, Star } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { cardHover, buttonTap } from "@/lib/animations";
+import { supabase } from "@/lib/supabase";
 
 export function ProductCard({ 
   product, 
@@ -25,6 +26,8 @@ export function ProductCard({
   const { toast } = useToast();
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
+  
   const images = product.image_urls && product.image_urls.length > 0 
     ? product.image_urls 
     : [product.image_url];
@@ -44,6 +47,21 @@ export function ProductCard({
     }, 5000);
     return () => clearInterval(interval);
   }, [images]);
+
+  useEffect(() => {
+    async function fetchRatings() {
+      const { data } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('product_id', product.id);
+      
+      if (data && data.length > 0) {
+        const average = data.reduce((acc, r) => acc + r.rating, 0) / data.length;
+        setRatingInfo({ average, count: data.length });
+      }
+    }
+    fetchRatings();
+  }, [product.id]);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,7 +110,19 @@ export function ProductCard({
             <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{product.brand}</p>
           )}
           <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">{product.name}</h3>
-          <div className="flex flex-col">
+          
+          <div className="flex items-center gap-3">
+             <div className="flex text-amber-400">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className={cn("w-3 h-3", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
+                ))}
+             </div>
+             {ratingInfo && (
+               <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">({ratingInfo.count})</span>
+             )}
+          </div>
+
+          <div className="flex flex-col pt-1">
              {hasVariants && (
                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Starting at</p>
              )}

@@ -8,6 +8,7 @@ import { Product, ProductVariant, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProductReviews } from "@/components/catalog/ProductReviews";
 import Image from "next/image";
 import { 
   ArrowLeft, Heart, ShieldCheck, Truck, Cpu, Database, 
@@ -212,6 +213,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
                  {product.description || "No detailed description provided."}
                </p>
+
+               {/* Integrated Reviews Component */}
+               <ProductReviews productId={product.id} />
             </div>
           </div>
 

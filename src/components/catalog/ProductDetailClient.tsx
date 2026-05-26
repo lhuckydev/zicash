@@ -155,7 +155,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </h1>
               <div className="flex items-center gap-3">
                  <div className="flex text-amber-400"><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /></div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quality Information</span>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified Quality</span>
               </div>
             </div>
 
@@ -164,9 +164,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing</p>
                 <div className="flex flex-col">
                   {activeDiscount && (
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className="text-sm font-bold text-slate-400 line-through">GH₵{product.price.toLocaleString()}</span>
-                      <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] uppercase">You save GH₵{savings.toLocaleString()}</Badge>
+                    <div className="flex flex-col gap-1 mb-2">
+                      <span className="text-sm font-bold text-slate-400 line-through">WAS GH₵ {product.price.toLocaleString()}</span>
+                      <Badge className="w-fit bg-emerald-50 text-emerald-600 border-none font-black text-[10px] uppercase px-3 py-1">Save GH₵ {savings.toLocaleString()} ({savingsPercent}%)</Badge>
                     </div>
                   )}
                   <div className="flex items-baseline gap-1">
@@ -192,14 +192,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </div>
             
             <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1 p-8 rounded-[2rem] bg-slate-50 border border-slate-100 space-y-4 shadow-inner">
+              <div className="flex-1 p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 space-y-4 shadow-inner">
                  <div className="flex items-center gap-3">
                    <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/20"><ShieldCheck className="w-5 h-5" /></div>
                    <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">Quality Node</h3>
                  </div>
-                 <p className="text-slate-500 text-sm leading-relaxed font-medium">This unit has been tested and certified for peak performance.</p>
+                 <p className="text-slate-500 text-sm leading-relaxed font-medium">This item has been tested and certified for peak performance.</p>
               </div>
-              <div className="flex-1 p-8 rounded-[2rem] bg-emerald-50/50 border border-emerald-100 space-y-4 shadow-inner">
+              <div className="flex-1 p-8 rounded-[2.5rem] bg-emerald-50/50 border border-emerald-100 space-y-4 shadow-inner">
                  <div className="flex items-center gap-3">
                    <div className="p-2 bg-emerald-600 rounded-xl text-white shadow-lg shadow-emerald-600/20"><Truck className="w-5 h-5" /></div>
                    <h3 className="font-black text-slate-900 uppercase text-[10px] tracking-[0.15em]">Delivery Network</h3>

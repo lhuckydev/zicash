@@ -131,7 +131,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-// Extracted Component to fix Hook Rules
 interface DiscountRowProps {
   product: Product;
   onSave: (product: Product, price: number, date: string) => Promise<void>;
@@ -143,31 +142,32 @@ const DiscountRow = ({ product, onSave, isSaving }: DiscountRowProps) => {
   const [dDate, setDDate] = useState(product.discount_ends_at ? product.discount_ends_at.split('T')[0] : "");
 
   return (
-    <TableRow className="border-white group">
+    <TableRow className="border-slate-50 group hover:bg-slate-50/30">
       <TableCell className="pl-8 py-5">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-white rounded-lg relative border border-slate-100">
+          <div className="w-12 h-12 bg-white rounded-xl relative border border-slate-100 shrink-0">
             <Image src={product.image_url} alt={product.name} fill className="object-contain p-1" />
           </div>
-          <span className="text-xs font-bold text-slate-900 line-clamp-1 max-w-[200px]">{product.name}</span>
+          <span className="text-xs font-bold text-slate-900 leading-tight">{product.name}</span>
         </div>
       </TableCell>
       <TableCell className="text-xs font-black text-slate-400">GH₵ {product.price.toLocaleString()}</TableCell>
       <TableCell>
-        <div className="relative max-w-[120px]">
+        <div className="relative max-w-[140px]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GH₵</span>
           <input 
             type="number" 
-            className="pl-10 w-full h-10 rounded-xl bg-white border-slate-200 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border" 
+            className="pl-10 w-full h-11 rounded-xl bg-white border-slate-200 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border transition-all" 
             value={dPrice || ""} 
             onChange={(e) => setDPrice(parseFloat(e.target.value))} 
+            placeholder="New Price"
           />
         </div>
       </TableCell>
       <TableCell>
         <input 
           type="date" 
-          className="h-10 w-full rounded-xl bg-white border-slate-200 text-xs font-bold max-w-[160px] px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border" 
+          className="h-11 w-full rounded-xl bg-white border-slate-200 text-xs font-bold max-w-[160px] px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border transition-all" 
           value={dDate} 
           onChange={(e) => setDDate(e.target.value)} 
         />
@@ -177,16 +177,16 @@ const DiscountRow = ({ product, onSave, isSaving }: DiscountRowProps) => {
           <Button 
             onClick={() => onSave(product, dPrice, dDate)} 
             disabled={isSaving}
-            className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-bold text-[10px] uppercase tracking-widest gap-2"
+            className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-bold text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10"
           >
-            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
+            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Update
           </Button>
           {(product.discount_price || product.discount_ends_at) && (
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => onSave(product, 0, "")}
-              className="h-10 w-10 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600"
+              className="h-11 w-11 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -213,6 +213,7 @@ export default function AdminPage() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [discountSearch, setDiscountSearch] = useState("");
   const [productCategory, setProductCategory] = useState("all");
   const [customerSearch, setCustomerSearch] = useState("");
 
@@ -273,7 +274,7 @@ export default function AdminPage() {
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || !session.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
-      toast({ variant: "destructive", title: "Access Denied", description: "Your account is not on the admin list." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Your account is not on the administrator whitelist." });
       return;
     }
 
@@ -282,7 +283,7 @@ export default function AdminPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect password." });
+      toast({ variant: "destructive", title: "Denied", description: "Incorrect login credentials." });
     }
   };
 
@@ -334,7 +335,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     await supabase.auth.signOut();
     router.push('/');
-    toast({ title: "Logged Out", description: "Admin session ended." });
+    toast({ title: "Logged Out", description: "Administrator session ended." });
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -342,7 +343,7 @@ export default function AdminPage() {
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Removed", description: "Item removed from inventory." });
+      toast({ title: "Removed", description: "Item removed from store records." });
       fetchAllData();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Error", description: err.message });
@@ -381,6 +382,12 @@ export default function AdminPage() {
       (productCategory === "all" || p.category === productCategory)
     ), 
   [products, productSearch, productCategory]);
+
+  const filteredDiscounting = useMemo(() => 
+    products.filter(p => 
+      p.name.toLowerCase().includes(discountSearch.toLowerCase())
+    ), 
+  [products, discountSearch]);
 
   const SidebarItem = ({ tab, icon: Icon, active, onClick, children }: any) => (
     <button onClick={onClick} className={cn("flex items-center justify-between w-full px-4 py-2.5 rounded-lg transition-all text-sm font-medium text-left", active ? "bg-blue-600 text-white" : "text-white/50 hover:bg-white/5 hover:text-white")}>
@@ -468,7 +475,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-6 flex-1">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden"><Menu className="w-5 h-5" /></Button></SheetTrigger>
-              <SheetContent side="left" className="p-0 bg-slate-950 border-none w-[280px] flex flex-col"><AdminSidebarContent /></SheetContent>
+              <SheetContent side="left" className="p-0 bg-slate-950 border-none w-[280px] flex flex-col rounded-r-3xl overflow-hidden"><AdminSidebarContent /></SheetContent>
             </Sheet>
             <div className="relative w-full max-w-xs"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search store..." className="bg-slate-50 border-none rounded-xl h-10 pl-10 text-xs w-full" /></div>
           </div>
@@ -486,7 +493,7 @@ export default function AdminPage() {
                 { label: "Pending", value: activeOrdersCount, icon: Clock, bg: "bg-orange-50", color: "text-orange-600" },
                 { label: "Customers", value: customers.length, icon: UserCheck, bg: "bg-blue-50", color: "text-blue-600" },
               ].map((stat, i) => (
-                <Card key={i} className="border-none shadow-sm rounded-2xl p-6 flex items-center justify-between bg-white">
+                <Card key={i} className="border-none shadow-sm rounded-2xl p-6 flex items-center justify-between bg-white hover:shadow-md transition-shadow">
                   <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><h3 className="text-2xl font-black text-slate-900 mt-1 italic tracking-tighter">{stat.value}</h3></div>
                   <div className={cn("p-3 rounded-xl", stat.bg)}><stat.icon className={cn("w-5 h-5", stat.color)} /></div>
                 </Card>
@@ -496,16 +503,16 @@ export default function AdminPage() {
 
           {activeTab === "Products" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center"><Input placeholder="Search items..." className="max-w-md h-12 rounded-2xl bg-white border-slate-100" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} /><Link href="/admin/products/new"><Button className="bg-blue-600 px-8 rounded-2xl font-bold gap-3"><Plus className="w-4 h-4" /> Add Product</Button></Link></div>
+              <div className="flex justify-between items-center"><Input placeholder="Search items..." className="max-w-md h-12 rounded-2xl bg-white border-slate-100 shadow-sm" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} /><Link href="/admin/products/new"><Button className="bg-blue-600 px-8 rounded-2xl font-bold gap-3 shadow-lg shadow-blue-600/20"><Plus className="w-4 h-4" /> Add Product</Button></Link></div>
               <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
                 <Table>
                   <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] uppercase font-black">Product</TableHead><TableHead className="text-[10px] uppercase font-black">Price</TableHead><TableHead className="text-[10px] uppercase font-black">Stock</TableHead><TableHead className="pr-8 text-right text-[10px] uppercase font-black">Edit</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {filteredProducts.map((p) => (
-                      <TableRow key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                        <TableCell className="pl-8 py-4"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-xl relative overflow-hidden"><Image src={p.image_url} alt={p.name} fill className="object-contain p-1" /></div><span className="text-xs font-bold">{p.name}</span></div></TableCell>
+                      <TableRow key={p.id} className="hover:bg-slate-50/30 transition-colors">
+                        <TableCell className="pl-8 py-4"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-slate-50 rounded-xl relative overflow-hidden border border-slate-100"><Image src={p.image_url} alt={p.name} fill className="object-contain p-1" /></div><span className="text-xs font-bold">{p.name}</span></div></TableCell>
                         <TableCell className="text-xs font-black">GH₵ {p.price.toLocaleString()}</TableCell>
-                        <TableCell><Badge className="bg-blue-50 text-blue-600 border-none">{p.stock} Units</Badge></TableCell>
+                        <TableCell><Badge className="bg-blue-50 text-blue-600 border-none font-bold">{p.stock} Units</Badge></TableCell>
                         <TableCell className="pr-8 text-right space-x-2"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="text-slate-300 hover:text-blue-600"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-600" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
@@ -517,28 +524,39 @@ export default function AdminPage() {
 
           {activeTab === "Discounting" && (
             <div className="space-y-6">
-              <Card className="rounded-[2rem] border-none shadow-xl bg-white p-8">
-                 <div className="flex items-center justify-between mb-8">
+              <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8">
+                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
                     <div>
-                       <h2 className="text-xl font-black uppercase tracking-tight">Active Discounts</h2>
-                       <p className="text-xs text-slate-400 mt-1 font-medium">Set discounted prices and duration for your products.</p>
+                       <h2 className="text-xl font-black uppercase tracking-tight">Active Promotions</h2>
+                       <p className="text-xs text-slate-400 mt-1 font-medium">Set special pricing and duration for your inventory.</p>
                     </div>
-                    <Badge className="bg-blue-600 font-bold px-4 py-1.5 uppercase text-[10px] tracking-widest">{products.filter(p => p.discount_price).length} Items on Sale</Badge>
+                    <div className="flex items-center gap-4">
+                       <div className="relative w-full max-w-sm">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input 
+                             placeholder="Search products for discount..." 
+                             className="h-12 pl-11 rounded-2xl bg-slate-50 border-none font-bold" 
+                             value={discountSearch} 
+                             onChange={(e) => setDiscountSearch(e.target.value)} 
+                          />
+                       </div>
+                       <Badge className="bg-blue-600 font-bold px-4 py-2.5 uppercase text-[10px] tracking-widest shrink-0 shadow-lg shadow-blue-600/20">{products.filter(p => p.discount_price).length} Items on Sale</Badge>
+                    </div>
                  </div>
                  
-                 <div className="bg-slate-50/50 rounded-2xl border border-slate-100 overflow-hidden">
+                 <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden">
                     <Table>
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100">
-                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-widest">Item Description</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-widest">Normal Rate</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-widest">Discounted Rate</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-widest">Expiry Date</TableHead>
-                          <TableHead className="pr-8 text-right text-[9px] uppercase font-black tracking-widest">Update</TableHead>
+                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product Name</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Normal Price</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Discounted Price (GHS)</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Expiry Date</TableHead>
+                          <TableHead className="pr-8 text-right text-[9px] uppercase font-black tracking-[0.2em] py-5">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {products.map((p) => (
+                        {filteredDiscounting.map((p) => (
                           <DiscountRow 
                             key={p.id} 
                             product={p} 
@@ -546,6 +564,11 @@ export default function AdminPage() {
                             isSaving={savingDiscountId === p.id} 
                           />
                         ))}
+                        {filteredDiscounting.length === 0 && (
+                          <TableRow>
+                             <TableCell colSpan={5} className="py-20 text-center text-slate-400 font-bold italic">No matching items found.</TableCell>
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
                  </div>
@@ -559,11 +582,11 @@ export default function AdminPage() {
                 <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50"><TableHead className="pl-8 text-[10px] font-black uppercase">Order #</TableHead><TableHead className="text-[10px] font-black uppercase">Customer</TableHead><TableHead className="text-[10px] font-black uppercase">Amount</TableHead><TableHead className="text-[10px] font-black uppercase">Status</TableHead><TableHead className="pr-8 text-right text-[10px] font-black uppercase">Action</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {orders.map((o) => (
-                    <TableRow key={o.id} className="cursor-pointer hover:bg-slate-50/50" onClick={() => router.push(`/admin/order/${o.id}`)}>
+                    <TableRow key={o.id} className="cursor-pointer hover:bg-slate-50/30 transition-colors" onClick={() => router.push(`/admin/order/${o.id}`)}>
                       <TableCell className="pl-8 font-black text-xs text-blue-600">#{o.id.slice(0, 8).toUpperCase()}</TableCell>
                       <TableCell className="text-xs font-bold">{o.customer_name}</TableCell>
-                      <TableCell className="text-xs font-black">GH₵ {parseFloat(o.total_amount).toLocaleString()}</TableCell>
-                      <TableCell><Badge className={cn("text-[9px] font-black uppercase", o.status === "Delivered" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600")}>{o.status}</Badge></TableCell>
+                      <TableCell className="text-xs font-black italic">GH₵ {parseFloat(o.total_amount).toLocaleString()}</TableCell>
+                      <TableCell><Badge className={cn("text-[9px] font-black uppercase px-2 py-0.5", o.status === "Delivered" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600")}>{o.status}</Badge></TableCell>
                       <TableCell className="pr-8 text-right"><ChevronRight className="w-4 h-4 ml-auto text-slate-200" /></TableCell>
                     </TableRow>
                   ))}

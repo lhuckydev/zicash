@@ -6,7 +6,7 @@ import { Product, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Tag, ChevronRight, Star } from "lucide-react";
+import { Heart, Tag, ChevronRight, Star, Zap } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,14 @@ export function ProductCard({
 
   const isFavorite = hasItem(product.id);
   
+  // Calculate best current price among variants or base
+  const discountActive = product.variants?.some(v => v.discount_price) || !!product.discount_price;
+  
   const displayPrice = product.variants && product.variants.length > 0 
+    ? Math.min(...product.variants.map(v => v.discount_price || v.price))
+    : (product.discount_price || product.price);
+
+  const originalPrice = product.variants && product.variants.length > 0
     ? Math.min(...product.variants.map(v => v.price))
     : product.price;
 
@@ -72,7 +79,10 @@ export function ProductCard({
   return (
     <motion.div 
       {...cardHover}
-      className="group bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-2xl border border-transparent hover:border-slate-100 flex flex-col h-full relative"
+      className={cn(
+        "group bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-2xl border flex flex-col h-full relative",
+        discountActive ? "border-red-500/50 shadow-red-500/5 bg-red-50/5" : "border-transparent hover:border-slate-100"
+      )}
     >
       <Link href={`/product/${product.id}`} className="relative aspect-square rounded-[2rem] overflow-hidden bg-slate-50 mb-5">
         <Image 
@@ -83,14 +93,14 @@ export function ProductCard({
           className="object-contain p-6 transition-all duration-1000 group-hover:scale-110" 
         />
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {hasVariants && (
-            <Badge className="bg-blue-600 text-white border-none text-[8px] font-black uppercase flex items-center gap-1.5 py-1.5 px-3 shadow-lg shadow-blue-500/20">
-              Multiple Options
+          {discountActive && (
+            <Badge className="bg-red-600 text-white border-none text-[8px] font-black uppercase flex items-center gap-1.5 py-1.5 px-3 shadow-lg shadow-red-500/20">
+              <Zap className="w-3 h-3 fill-current" /> Hot Deal
             </Badge>
           )}
-          {product.featured && (
-            <Badge className="bg-slate-900 text-white border-none text-[8px] font-black uppercase px-3 py-1.5">
-              Featured Pick
+          {hasVariants && !discountActive && (
+            <Badge className="bg-blue-600 text-white border-none text-[8px] font-black uppercase flex items-center gap-1.5 py-1.5 px-3 shadow-lg shadow-blue-500/20">
+              Multiple Options
             </Badge>
           )}
         </div>
@@ -107,7 +117,7 @@ export function ProductCard({
       <div className="flex flex-col flex-1 space-y-4 px-1">
         <div className="space-y-1.5">
           {product.brand && (
-            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{product.brand}</p>
+            <p className={cn("text-[10px] font-black uppercase tracking-widest", discountActive ? "text-red-600" : "text-blue-600")}>{product.brand}</p>
           )}
           <h3 className="font-bold text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">{product.name}</h3>
           
@@ -123,16 +133,21 @@ export function ProductCard({
           </div>
 
           <div className="flex flex-col pt-1">
-             {hasVariants && (
-               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Starting at</p>
+             {discountActive && (
+               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through mb-0.5 opacity-60">GHS {originalPrice.toLocaleString()}</p>
              )}
-             <p className="text-xl font-black text-blue-600 font-headline italic tracking-tighter">GH₵ {displayPrice.toLocaleString()}</p>
+             <p className={cn("text-xl font-black font-headline italic tracking-tighter", discountActive ? "text-red-600" : "text-blue-600")}>
+               GH₵ {displayPrice.toLocaleString()}
+             </p>
           </div>
         </div>
 
         <motion.div {...buttonTap} className="mt-auto">
           <Link href={`/product/${product.id}`} className="block">
-            <Button className="w-full rounded-xl h-11 font-black bg-slate-950 text-white hover:bg-blue-600 transition-all text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/5 active:scale-95 gap-2">
+            <Button className={cn(
+              "w-full rounded-xl h-11 font-black text-white transition-all text-[10px] uppercase tracking-widest shadow-xl active:scale-95 gap-2",
+              discountActive ? "bg-red-600 hover:bg-red-700 shadow-red-900/5" : "bg-slate-950 hover:bg-blue-600 shadow-slate-900/5"
+            )}>
               View Specifications <ChevronRight className="w-3 h-3" />
             </Button>
           </Link>

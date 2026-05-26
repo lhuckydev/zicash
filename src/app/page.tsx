@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { HotDeals } from "@/components/home/HotDeals";
 import { Product } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
@@ -83,7 +84,7 @@ export default function CatalogPage() {
     try {
       const { data, error: supabaseError } = await supabase
         .from('products')
-        .select('*')
+        .select('*, variants:product_variants(*)')
         .order('created_at', { ascending: false });
 
       if (supabaseError) {
@@ -178,6 +179,8 @@ export default function CatalogPage() {
               </Carousel>
             </motion.section>
           )}
+
+          {category === "All" && <HotDeals />}
 
           {!isLoading && category === "All" && suggestedPicks.length > 0 && (
             <motion.div 

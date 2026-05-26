@@ -20,6 +20,8 @@ export interface ProductVariant {
   battery?: string;
   network?: string;
   is_default?: boolean;
+  discount_price?: number;
+  discount_ends_at?: string;
 }
 
 export interface Product {
@@ -40,6 +42,8 @@ export interface Product {
   keyboard_light?: boolean;
   created_at?: string;
   updated_at?: string;
+  discount_price?: number;
+  discount_ends_at?: string;
 }
 
 export interface CartItem extends Product {
@@ -64,7 +68,6 @@ export const useCartStore = create<CartStore>()(
       total: 0,
       addItem: (product, variant) => {
         const currentItems = get().items;
-        // Unique key: product_id + variant_id (if exists)
         const cartId = variant ? `${product.id}-${variant.id}` : product.id;
         
         const existingItem = currentItems.find((item) => {
@@ -116,7 +119,9 @@ export const useCartStore = create<CartStore>()(
 
 function calculateTotal(items: CartItem[]) {
   return items.reduce((sum, item) => {
-    const unitPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
+    const unitPrice = item.selectedVariant 
+      ? (item.selectedVariant.discount_price || item.selectedVariant.price) 
+      : (item.discount_price || item.price);
     return sum + (unitPrice * item.quantity);
   }, 0);
 }

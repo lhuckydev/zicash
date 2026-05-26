@@ -87,7 +87,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/store/useCartStore";
+import { Product, ProductVariant } from "@/store/useCartStore";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -133,41 +133,91 @@ const chartConfig = {
 
 interface DiscountRowProps {
   product: Product;
-  onSave: (product: Product, price: number, date: string) => Promise<void>;
-  isSaving: boolean;
+  onSaveVariant: (variant: ProductVariant, price: number, date: string) => Promise<void>;
+  isSaving: string | null;
 }
 
-const DiscountRow = ({ product, onSave, isSaving }: DiscountRowProps) => {
-  const [dPrice, setDPrice] = useState(product.discount_price || 0);
-  const [dDate, setDDate] = useState(product.discount_ends_at ? product.discount_ends_at.split('T')[0] : "");
+const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => {
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <TableRow className="border-slate-50 group hover:bg-slate-50/30">
-      <TableCell className="pl-8 py-5">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-white rounded-xl relative border border-slate-100 shrink-0">
-            <Image src={product.image_url} alt={product.name} fill className="object-contain p-1" />
+    <>
+      <TableRow className="border-slate-50 group hover:bg-slate-50/30">
+        <TableCell className="pl-8 py-5">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-xl relative border border-slate-100 shrink-0">
+              <Image src={product.image_url} alt={product.name} fill className="object-contain p-1" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-slate-900 leading-tight">{product.name}</span>
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest">{product.brand}</span>
+            </div>
           </div>
-          <span className="text-xs font-bold text-slate-900 leading-tight">{product.name}</span>
+        </TableCell>
+        <TableCell className="text-xs font-black text-slate-400">GH₵ {product.price.toLocaleString()}</TableCell>
+        <TableCell>
+          <Badge className="bg-blue-50 text-blue-600 border-none font-bold">
+            {product.variants?.length || 0} Options
+          </Badge>
+        </TableCell>
+        <TableCell></TableCell>
+        <TableCell className="pr-8 text-right">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setExpanded(!expanded)}
+            className="text-blue-600 font-bold gap-2"
+          >
+            {expanded ? "Close Options" : "Manage Discounts"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
+        </TableCell>
+      </TableRow>
+      
+      {expanded && product.variants?.map((v) => (
+        <VariantDiscountSubRow 
+          key={v.id} 
+          variant={v} 
+          onSave={onSaveVariant} 
+          isSaving={isSaving === v.id} 
+        />
+      ))}
+    </>
+  );
+};
+
+const VariantDiscountSubRow = ({ variant, onSave, isSaving }: { 
+  variant: ProductVariant, 
+  onSave: (v: ProductVariant, p: number, d: string) => Promise<void>,
+  isSaving: boolean 
+}) => {
+  const [dPrice, setDPrice] = useState(variant.discount_price || 0);
+  const [dDate, setDDate] = useState(variant.discount_ends_at ? variant.discount_ends_at.split('T')[0] : "");
+
+  return (
+    <TableRow className="bg-blue-50/20 border-l-4 border-l-blue-600">
+      <TableCell className="pl-12 py-4">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 bg-blue-100 rounded-lg text-blue-600"><Settings className="w-3 h-3" /></div>
+          <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">{variant.label}</span>
         </div>
       </TableCell>
-      <TableCell className="text-xs font-black text-slate-400">GH₵ {product.price.toLocaleString()}</TableCell>
+      <TableCell className="text-[11px] font-bold text-slate-400">GH₵ {variant.price.toLocaleString()}</TableCell>
       <TableCell>
-        <div className="relative max-w-[140px]">
+        <div className="relative max-w-[130px]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GH₵</span>
           <input 
             type="number" 
-            className="pl-10 w-full h-11 rounded-xl bg-white border-slate-200 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border transition-all" 
+            className="pl-10 w-full h-10 rounded-lg bg-white border-slate-200 text-xs font-bold px-3 focus:outline-none border transition-all" 
             value={dPrice || ""} 
             onChange={(e) => setDPrice(parseFloat(e.target.value))} 
-            placeholder="New Price"
+            placeholder="Sale Price"
           />
         </div>
       </TableCell>
       <TableCell>
         <input 
           type="date" 
-          className="h-11 w-full rounded-xl bg-white border-slate-200 text-xs font-bold max-w-[160px] px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border transition-all" 
+          className="h-10 w-full rounded-lg bg-white border-slate-200 text-xs font-bold max-w-[150px] px-3 focus:outline-none border transition-all" 
           value={dDate} 
           onChange={(e) => setDDate(e.target.value)} 
         />
@@ -175,18 +225,19 @@ const DiscountRow = ({ product, onSave, isSaving }: DiscountRowProps) => {
       <TableCell className="pr-8 text-right">
         <div className="flex items-center justify-end gap-2">
           <Button 
-            onClick={() => onSave(product, dPrice, dDate)} 
+            size="sm"
+            onClick={() => onSave(variant, dPrice, dDate)} 
             disabled={isSaving}
-            className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-bold text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10"
+            className="h-10 rounded-lg bg-blue-600 hover:bg-blue-700 px-4 font-bold text-[9px] uppercase tracking-widest gap-2"
           >
-            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Update
+            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Sync
           </Button>
-          {(product.discount_price || product.discount_ends_at) && (
+          {(variant.discount_price || variant.discount_ends_at) && (
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => onSave(product, 0, "")}
-              className="h-11 w-11 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+              onClick={() => onSave(variant, 0, "")}
+              className="h-10 w-10 rounded-lg text-red-400 hover:bg-red-50"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -215,11 +266,9 @@ export default function AdminPage() {
   const [productSearch, setProductSearch] = useState("");
   const [discountSearch, setDiscountSearch] = useState("");
   const [productCategory, setProductCategory] = useState("all");
-  const [customerSearch, setCustomerSearch] = useState("");
 
   const [momoName, setMomoName] = useState("Kanisatu Fouseni");
   const [momoNumber, setMomoNumber] = useState("0243708691");
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const [savingDiscountId, setSavingDiscountId] = useState<string | null>(null);
 
@@ -227,7 +276,7 @@ export default function AdminPage() {
     setIsLoading(true);
     try {
       const [pRes, oRes, cRes, sRes] = await Promise.all([
-        supabase.from('products').select('*').order('created_at', { ascending: false }),
+        supabase.from('products').select('*, variants:product_variants(*)').order('created_at', { ascending: false }),
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('settings').select('*').eq('key', 'momo_payment_details').maybeSingle()
@@ -287,43 +336,22 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveSettings = async () => {
-    setIsSavingSettings(true);
+  const handleSaveVariantDiscount = async (variant: ProductVariant, dPrice: number, dDate: string) => {
+    setSavingDiscountId(variant.id);
     try {
       const { error } = await supabase
-        .from('settings')
-        .upsert({
-          key: 'momo_payment_details',
-          value: { name: momoName, number: momoNumber },
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'key' });
-
-      if (error) throw error;
-      toast({ title: "Settings Updated", description: "Payment details saved for the store." });
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Update Failed", description: err.message });
-    } finally {
-      setIsSavingSettings(false);
-    }
-  };
-
-  const handleSaveDiscount = async (product: Product, dPrice: number, dDate: string) => {
-    setSavingDiscountId(product.id);
-    try {
-      const { error } = await supabase
-        .from('products')
+        .from('product_variants')
         .update({
           discount_price: dPrice || null,
           discount_ends_at: dDate || null,
-          updated_at: new Date().toISOString()
         })
-        .eq('id', product.id);
+        .eq('id', variant.id);
 
       if (error) throw error;
-      toast({ title: "Discount Set", description: `Pricing updated for ${product.name}.` });
+      toast({ title: "Pricing Updated", description: `Discount applied to ${variant.label}.` });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Update Failed", description: err.message });
+      toast({ variant: "destructive", title: "Sync Failed", description: err.message });
     } finally {
       setSavingDiscountId(null);
     }
@@ -361,20 +389,6 @@ export default function AdminPage() {
   const activeOrdersCount = useMemo(() => 
     orders.filter(o => o.status === "Pending").length, 
   [orders]);
-
-  const chartData = useMemo(() => {
-    const performance: Record<string, number> = {};
-    approvedOrders.forEach(order => {
-      const items = Array.isArray(order.items) ? order.items : [];
-      items.forEach((item: any) => {
-        performance[item.name] = (performance[item.name] || 0) + (parseFloat(item.price || 0) * (item.quantity || 0));
-      });
-    });
-    return Object.entries(performance).slice(0, 10).map(([name, revenue]) => ({
-      name: name.split(' ').slice(0, 2).join(' '),
-      revenue
-    }));
-  }, [approvedOrders]);
 
   const filteredProducts = useMemo(() => 
     products.filter(p => 
@@ -431,7 +445,6 @@ export default function AdminPage() {
             )}
           </div>
           <SidebarItem tab="Customers" icon={Users} active={activeTab === "Customers"} onClick={() => { setActiveTab("Customers"); setIsMobileMenuOpen(false); }} />
-          <SidebarItem tab="Analytics" icon={TrendingUp} active={activeTab === "Analytics"} onClick={() => { setActiveTab("Analytics"); setIsMobileMenuOpen(false); }} />
           <SidebarItem tab="Settings" icon={Settings} active={activeTab === "Settings"} onClick={() => { setActiveTab("Settings"); setIsMobileMenuOpen(false); }} />
         </nav>
       </div>
@@ -549,7 +562,7 @@ export default function AdminPage() {
                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
                     <div>
                        <h2 className="text-xl font-black uppercase tracking-tight">Active Promotions</h2>
-                       <p className="text-xs text-slate-400 mt-1 font-medium">Set special pricing and duration for your store items.</p>
+                       <p className="text-xs text-slate-400 mt-1 font-medium">Set individual discounts for specific hardware specifications.</p>
                     </div>
                     <div className="flex items-center gap-4">
                        <div className="relative w-full max-w-sm">
@@ -561,7 +574,6 @@ export default function AdminPage() {
                              onChange={(e) => setDiscountSearch(e.target.value)} 
                           />
                        </div>
-                       <Badge className="bg-blue-600 font-bold px-4 py-2.5 uppercase text-[10px] tracking-widest shrink-0 shadow-lg shadow-blue-600/20">{products.filter(p => p.discount_price).length} Items on Sale</Badge>
                     </div>
                  </div>
                  
@@ -569,11 +581,11 @@ export default function AdminPage() {
                     <Table>
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100">
-                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product Name</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Standard Price</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Discount Price (GHS)</TableHead>
-                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Ends On</TableHead>
-                          <TableHead className="pr-8 text-right text-[9px] uppercase font-black tracking-[0.2em] py-5">Action</TableHead>
+                          <TableHead className="pl-8 text-[9px] uppercase font-black tracking-[0.2em] py-5">Product / Variant</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Standard Rate</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Sale Price (GHS)</TableHead>
+                          <TableHead className="text-[9px] uppercase font-black tracking-[0.2em] py-5">Offer Expiry</TableHead>
+                          <TableHead className="pr-8 text-right text-[9px] uppercase font-black tracking-[0.2em] py-5">Control</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -581,15 +593,10 @@ export default function AdminPage() {
                           <DiscountRow 
                             key={p.id} 
                             product={p} 
-                            onSave={handleSaveDiscount} 
-                            isSaving={savingDiscountId === p.id} 
+                            onSaveVariant={handleSaveVariantDiscount} 
+                            isSaving={savingDiscountId} 
                           />
                         ))}
-                        {filteredDiscounting.length === 0 && (
-                          <TableRow>
-                             <TableCell colSpan={5} className="py-20 text-center text-slate-400 font-bold italic">No matching items found.</TableCell>
-                          </TableRow>
-                        )}
                       </TableBody>
                     </Table>
                  </div>

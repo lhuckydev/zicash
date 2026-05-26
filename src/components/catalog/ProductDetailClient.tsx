@@ -17,7 +17,7 @@ import {
   Video, Layers, Info,  
   ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
-  Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield
+  Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock
 } from "lucide-react";
 import { 
   Carousel, 
@@ -63,6 +63,41 @@ function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
     </div>
   );
 }
+
+const CountdownTimer = ({ expiryDate }: { expiryDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState<{h:number, m:number, s:number} | null>(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = new Date(expiryDate).getTime() - now;
+
+      if (distance < 0) {
+        setTimeLeft(null);
+        clearInterval(timer);
+      } else {
+        setTimeLeft({
+          h: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          m: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          s: Math.floor((distance % (1000 * 60)) / 1000)
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expiryDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <div className="flex items-center gap-2 mt-4 text-red-600 animate-pulse">
+      <Clock className="w-3.5 h-3.5" />
+      <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+        Offer Ends in: {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
+      </span>
+    </div>
+  );
+};
 
 const SafeShoppingCard = () => (
   <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden h-fit relative">
@@ -174,8 +209,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   const isFavorite = hasItem(product.id);
   const productImages = (product.image_urls?.length ? product.image_urls : [product.image_url]).filter(Boolean);
-  
-  const inStock = selectedVariant ? selectedVariant.stock > 0 : product.stock_status === 'In Stock';
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
@@ -251,7 +284,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                </p>
             </div>
 
-            {/* Desktop Review Positioning */}
             <div className="hidden lg:block">
                <ProductReviews productId={product.id} />
             </div>
@@ -291,6 +323,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
                       const isExpanded = openSpecs[v.id] || false;
+                      const hasDiscount = !!v.discount_price;
                       
                       return (
                         <div
@@ -299,20 +332,33 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           className={cn(
                             "text-left p-6 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
                             isActive 
-                              ? "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl" 
+                              ? (hasDiscount ? "border-red-600 bg-red-50/20 ring-8 ring-red-600/5 shadow-xl" : "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl")
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                           )}
                         >
-                          {isActive && <div className="absolute top-0 left-0 w-12 h-12 bg-blue-600 flex items-center justify-center rounded-br-2xl text-white shadow-lg"><CheckCircle2 className="w-6 h-6" /></div>}
+                          {isActive && <div className={cn("absolute top-0 left-0 w-12 h-12 flex items-center justify-center rounded-br-2xl text-white shadow-lg", hasDiscount ? "bg-red-600" : "bg-blue-600")}><CheckCircle2 className="w-6 h-6" /></div>}
                           
                           <div className="flex flex-col gap-8">
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                               <div className="space-y-1.5 flex-1">
-                                <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <div className="flex items-center gap-3">
+                                  <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'New'}</p>
+                                  {hasDiscount && (
+                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Offer</Badge>
+                                  )}
+                                </div>
                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
+                                {hasDiscount && v.discount_ends_at && isActive && <CountdownTimer expiryDate={v.discount_ends_at} />}
                               </div>
                               <div className="md:text-right">
-                                <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                {hasDiscount ? (
+                                  <>
+                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
+                                    <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount_price!.toLocaleString()}</p>
+                                  </>
+                                ) : (
+                                  <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                )}
                                 <p className={cn("text-[10px] font-black uppercase mt-1 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
                                   {v.stock > 0 ? 'Available Now' : 'Sold Out'}
                                 </p>
@@ -359,7 +405,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
                                   <button
                                     onClick={(e) => toggleSpec(v.id, e)}
-                                    className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 tracking-widest hover:opacity-70 transition-opacity"
+                                    className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
                                   >
                                     {isExpanded ? (
                                       <><ChevronUp className="w-3 h-3" /> Hide Spec Details</>
@@ -377,7 +423,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                  className={cn(
                                    "w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-[0.15em] gap-3 shadow-lg transition-all",
                                    isActive 
-                                     ? "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20" 
+                                     ? (hasDiscount ? "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20") 
                                      : "bg-slate-900 hover:bg-blue-600 text-white shadow-slate-900/10"
                                  )}
                                  disabled={v.stock <= 0}
@@ -393,7 +439,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
             )}
 
-            {/* Mobile Review Positioning */}
             <div className="lg:hidden mt-10">
                <ProductReviews productId={product.id} />
             </div>

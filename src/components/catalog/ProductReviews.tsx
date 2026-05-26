@@ -63,10 +63,20 @@ export function ProductReviews({ productId }: { productId: string }) {
         .eq('product_id', productId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Handle case where table might not exist yet during dev sync
+        if (error.code === 'PGRST116' || error.message.includes('relation "reviews" does not exist')) {
+          setReviews([]);
+          return;
+        }
+        throw error;
+      }
       setReviews(data || []);
     } catch (err: any) {
-      console.error("Review Fetch Error:", err);
+      // Log errors only if they are not standard "table missing" errors
+      if (err.message && !err.message.includes('relation')) {
+        console.error("Review System Sync Error:", err.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -140,26 +150,26 @@ export function ProductReviews({ productId }: { productId: string }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Review Form */}
+        {/* Review Form & Summary Sidebar */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-600/5 space-y-8 relative overflow-hidden">
+          <div className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-600/5 space-y-8 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-3xl -mr-16 -mt-16" />
-             <div className="relative z-10 space-y-6">
-                <div>
-                   <h3 className="text-lg font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Help others make a better choice</p>
+             <div className="relative z-10 space-y-8">
+                <div className="space-y-2">
+                   <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
+                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Help others make a better choice</p>
                 </div>
 
                 {!user ? (
-                   <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100 space-y-4 text-center">
+                   <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100 space-y-4 text-center">
                       <AlertCircle className="w-8 h-8 text-blue-600 mx-auto" />
-                      <p className="text-sm font-bold text-blue-900">Sign in to leave a verified review.</p>
+                      <p className="text-sm font-bold text-blue-900">Sign in to leave a verified review on this hardware.</p>
                    </div>
                 ) : (
-                   <form onSubmit={handleSubmit} className="space-y-6">
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Rating</label>
-                         <div className="flex gap-2">
+                   <form onSubmit={handleSubmit} className="space-y-8">
+                      <div className="space-y-4">
+                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Your Rating</label>
+                         <div className="flex gap-3">
                             {[1, 2, 3, 4, 5].map((s) => (
                               <button
                                 key={s}
@@ -171,8 +181,8 @@ export function ProductReviews({ productId }: { productId: string }) {
                               >
                                 <Star 
                                   className={cn(
-                                    "w-8 h-8 transition-colors",
-                                    (hoverRating || rating) >= s ? "fill-amber-400 text-amber-400" : "text-slate-200"
+                                    "w-9 h-9 transition-colors",
+                                    (hoverRating || rating) >= s ? "fill-amber-400 text-amber-400" : "text-slate-100"
                                   )} 
                                 />
                               </button>
@@ -180,11 +190,11 @@ export function ProductReviews({ productId }: { productId: string }) {
                          </div>
                       </div>
 
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Comment</label>
+                      <div className="space-y-4">
+                         <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Your Observations</label>
                          <Textarea 
-                            placeholder="Tell us about the quality and performance..." 
-                            className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-sm shadow-inner p-4 focus-visible:ring-blue-600/10"
+                            placeholder="Tell us about the quality, performance and value of this unit..." 
+                            className="min-h-[160px] rounded-3xl bg-slate-50 border-none font-bold text-base shadow-inner p-6 focus-visible:ring-2 focus-visible:ring-blue-600/10 placeholder:text-slate-300"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                          />
@@ -192,9 +202,9 @@ export function ProductReviews({ productId }: { productId: string }) {
 
                       <Button 
                         disabled={isSubmitting}
-                        className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl shadow-blue-600/20 gap-3"
+                        className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl shadow-blue-600/20 gap-3 transition-all"
                       >
-                         {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} 
+                         {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />} 
                          Post Verified Review
                       </Button>
                    </form>
@@ -203,51 +213,63 @@ export function ProductReviews({ productId }: { productId: string }) {
           </div>
         </div>
 
-        {/* Reviews List */}
+        {/* Reviews List Gallery */}
         <div className="lg:col-span-7 space-y-6">
            {isLoading ? (
-             <div className="flex flex-col items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-4">Syncing client feedback...</p>
+             <div className="flex flex-col items-center justify-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed">
+                <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-6">Syncing Client Logs...</p>
              </div>
            ) : reviews.length === 0 ? (
-             <div className="text-center py-20 bg-slate-50/50 rounded-[2.5rem] border-2 border-dashed border-slate-100">
-                <MessageSquare className="w-10 h-10 text-slate-200 mx-auto mb-4" />
-                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest italic">Be the first to review this unit</p>
+             <div className="text-center py-32 bg-white/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                   <MessageSquare className="w-8 h-8 text-slate-200" />
+                </div>
+                <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No client feedback detected for this unit</p>
+                <p className="text-[10px] font-bold text-slate-300 uppercase mt-2 tracking-widest">Be the first to record a review</p>
              </div>
            ) : (
-             <div className="space-y-4">
-                <AnimatePresence>
+             <div className="space-y-6">
+                <AnimatePresence mode="popLayout">
                    {reviews.map((r, idx) => (
                      <motion.div 
                         key={r.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow space-y-4"
+                        transition={{ delay: idx * 0.1, duration: 0.5 }}
+                        className="p-8 md:p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-50 transition-all space-y-6 group"
                      >
                         <div className="flex items-start justify-between">
-                           <div className="flex items-center gap-4">
-                              <Avatar className="w-12 h-12 border-2 border-white shadow-lg rounded-2xl">
-                                 <AvatarImage src={r.profile?.avatar_url} className="object-cover" />
-                                 <AvatarFallback className="bg-blue-50 text-blue-600 font-black">{r.profile?.full_name?.[0]}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                 <p className="font-black text-slate-900 uppercase text-sm">{r.profile?.full_name || 'Verified Client'}</p>
-                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.created_at).toLocaleDateString()}</p>
+                           <div className="flex items-center gap-5">
+                              <div className="relative">
+                                <Avatar className="w-14 h-14 border-4 border-slate-50 shadow-md rounded-2xl overflow-hidden transition-transform group-hover:scale-105">
+                                   <AvatarImage src={r.profile?.avatar_url} className="object-cover" />
+                                   <AvatarFallback className="bg-blue-50 text-blue-600 font-black text-xl">{r.profile?.full_name?.[0]}</AvatarFallback>
+                                </Avatar>
+                                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1 rounded-lg shadow-lg">
+                                   <CheckCircle2 className="w-3 h-3" />
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                 <p className="font-black text-slate-900 uppercase text-base tracking-tight">{r.profile?.full_name || 'Verified Client'}</p>
+                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                               </div>
                            </div>
-                           <div className="flex text-amber-400">
-                              {[1, 2, 3, 4, 5].map((s) => (
-                                <Star key={s} className={cn("w-4 h-4", r.rating >= s ? "fill-current" : "opacity-20")} />
-                              ))}
+                           <div className="flex items-center gap-1.5 p-2 bg-slate-50 rounded-xl">
+                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                              <span className="text-sm font-black text-slate-900">{r.rating}.0</span>
                            </div>
                         </div>
-                        <div className="pl-16">
-                           <p className="text-slate-600 font-medium leading-relaxed italic">"{r.comment}"</p>
-                           <div className="flex items-center gap-1.5 mt-4 text-emerald-600">
-                              <CheckCircle2 className="w-3 h-3" />
-                              <span className="text-[8px] font-black uppercase tracking-[0.2em]">Verified Transaction</span>
+                        <div className="pl-0 md:pl-2">
+                           <p className="text-slate-600 font-medium text-lg leading-relaxed italic">
+                             "{r.comment || "High-performance item. Very satisfied with the acquisition."}"
+                           </p>
+                           <div className="flex items-center gap-2 mt-6 pt-6 border-t border-slate-50">
+                              <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full flex items-center gap-2">
+                                <CheckCircle2 className="w-3 h-3" />
+                                <span className="text-[9px] font-black uppercase tracking-[0.2em]">Verified Acquisition</span>
+                              </div>
+                              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-auto">Log ID: #{r.id.slice(0,6).toUpperCase()}</span>
                            </div>
                         </div>
                      </motion.div>

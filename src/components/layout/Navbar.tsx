@@ -67,26 +67,36 @@ export function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Intelligent Indexing Search Logic
   useEffect(() => {
-    if (!isSearchOpen || searchQuery.length < 2) {
+    if (searchQuery.length < 2) {
       setSuggestions([]);
       return;
     }
 
-    const timer = setTimeout(async () => {
+    const fetchSuggestions = async () => {
       setIsSearching(true);
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .ilike('name', `%${searchQuery}%`)
-        .limit(6);
-      
-      if (data) setSuggestions(data);
-      setIsSearching(false);
-    }, 300);
+      try {
+        // Intelligent Indexing: Filter by name, category, and brand
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
+          .limit(5);
+        
+        if (!error && data) {
+          setSuggestions(data);
+        }
+      } catch (err) {
+        console.error("Search index error", err);
+      } finally {
+        setIsSearching(false);
+      }
+    };
 
+    const timer = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, isSearchOpen]);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (isSearchOpen) {
@@ -134,7 +144,7 @@ export function Navbar() {
     <motion.nav 
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500 overflow-hidden"
+      className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500"
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -191,16 +201,16 @@ export function Navbar() {
               <Image 
                 src="https://i.ibb.co/v4p0sdxs/zicash.jpg" 
                 alt="ZiCash Logo" 
-                width={40}
-                height={40}
+                width={40} 
+                height={40} 
                 className="object-cover"
               />
             </motion.div>
-            <div className="flex flex-col justify-center">
-              <span className="font-bold text-xs sm:text-lg text-slate-900 font-headline leading-none">
+            <div className="hidden sm:flex flex-col justify-center">
+              <span className="font-bold text-lg text-slate-900 font-headline leading-none">
                 Zi<span className="text-blue-600">Cash</span>
               </span>
-              <span className="text-[7px] sm:text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
+              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
                 GH Limited
               </span>
             </div>
@@ -222,56 +232,41 @@ export function Navbar() {
           </div>
         )}
 
-        {!isAdminPath && (
-          <div className="hidden md:flex flex-1 max-w-sm mx-4 relative">
-            <form onSubmit={handleSearchSubmit} className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input 
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-11 pr-4 rounded-full border-blue-100 bg-white/50 focus-visible:ring-blue-600/20"
-              />
-            </form>
-          </div>
-        )}
+        <div className="flex-1 max-w-sm mx-2 sm:mx-4 relative group">
+          {!isAdminPath && (
+            <div className="relative w-full">
+              <div 
+                onClick={() => setIsSearchOpen(true)}
+                className="w-full h-11 pl-11 pr-4 rounded-full border border-blue-100 bg-slate-50/50 flex items-center cursor-pointer hover:bg-white hover:border-blue-300 transition-all duration-300 group shadow-sm"
+              >
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-blue-600" />
+                <span className="text-slate-400 text-xs font-bold truncate">Search for items...</span>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-1 sm:gap-4 md:gap-6">
           {!isAdminPath && (
-            <>
-              {/* Mobile Search Icon */}
-              <motion.div {...buttonTap} className="md:hidden">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-slate-400 hover:text-blue-600 h-9 w-9"
-                  onClick={() => setIsSearchOpen(true)}
-                >
-                  <Search className="w-5 h-5" />
-                </Button>
-              </motion.div>
-
-              <motion.div {...buttonTap}>
-                <Link href="/cart" className="relative group p-2 transition-all duration-300">
-                  <div className="relative">
-                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 group-hover:text-blue-600" />
-                    <AnimatePresence>
-                      {cartCount > 0 && (
-                        <motion.span 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                          className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[8px] sm:text-[9px] font-black h-3.5 sm:h-4 min-w-3.5 sm:min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1 shadow-sm"
-                        >
-                          {cartCount}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </Link>
-              </motion.div>
-            </>
+            <motion.div {...buttonTap}>
+              <Link href="/cart" className="relative group p-2 transition-all duration-300">
+                <div className="relative">
+                  <ShoppingCart className="w-6 h-6 text-slate-400 group-hover:text-blue-600" />
+                  <AnimatePresence>
+                    {cartCount > 0 && (
+                      <motion.span 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[8px] sm:text-[9px] font-black h-4 min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1 shadow-sm"
+                      >
+                        {cartCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </Link>
+            </motion.div>
           )}
 
           {!session ? (
@@ -350,68 +345,98 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Full Screen Search Overlay (Mobile) */}
+      {/* Full Screen Search Experience Overlay */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden fixed inset-0 z-[60] bg-white flex flex-col print:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-white flex flex-col pt-4 sm:pt-0"
           >
-            <div className="p-6 flex items-center gap-4 border-b border-blue-100/20">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <form onSubmit={handleSearchSubmit}>
-                  <Input 
-                    ref={inputRef}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Find items..." 
-                    className="pl-10 h-12 bg-slate-50 border-none rounded-2xl focus-visible:ring-blue-600/20"
-                  />
-                </form>
+            <div className="container mx-auto px-6 flex flex-col h-full">
+              <div className="flex items-center gap-4 py-6 border-b border-blue-50">
+                <div className="relative flex-1 group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-600" />
+                  <form onSubmit={handleSearchSubmit}>
+                    <Input 
+                      ref={inputRef}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="What are you looking for?" 
+                      className="pl-12 h-14 bg-slate-50 border-none rounded-2xl text-lg font-bold placeholder:text-slate-300 focus-visible:ring-4 focus-visible:ring-blue-600/5 transition-all"
+                    />
+                  </form>
+                </div>
+                <button 
+                  onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
+                  className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-              <button 
-                onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
-                className="p-2 bg-slate-50 rounded-xl text-slate-500"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {isSearching ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                </div>
-              ) : suggestions.length > 0 ? (
-                <div className="space-y-4">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recommended items</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {suggestions.map((p) => (
-                      <Link 
-                        key={p.id} 
-                        href={`/product/${p.id}`}
-                        onClick={() => setIsSearchOpen(false)}
-                        className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100"
-                      >
-                        <div className="relative w-14 h-14 bg-white rounded-xl overflow-hidden border border-slate-100 shrink-0">
-                          <Image src={p.image_url} alt={p.name} width={56} height={56} className="object-contain p-2" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-900 truncate">{p.name}</p>
-                          <p className="text-xs font-bold text-blue-600">GH₵{p.price.toLocaleString()}</p>
-                        </div>
-                      </Link>
-                    ))}
+              <div className="flex-1 overflow-y-auto py-8 space-y-10 scrollbar-hide">
+                {isSearching ? (
+                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching inventory...</p>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Start typing to see items...</p>
-                </div>
-              )}
+                ) : suggestions.length > 0 ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top Recommendations</p>
+                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">View all matches</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {suggestions.map((p) => (
+                        <Link 
+                          key={p.id} 
+                          href={`/product/${p.id}`}
+                          onClick={() => setIsSearchOpen(false)}
+                          className="flex items-center gap-4 p-4 bg-white rounded-3xl border border-slate-100 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/5 transition-all group"
+                        >
+                          <div className="relative w-16 h-16 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shrink-0">
+                            <Image src={p.image_url} alt={p.name} fill className="object-contain p-2" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-black text-slate-900 truncate uppercase group-hover:text-blue-600 transition-colors">{p.name}</p>
+                            <p className="text-xs font-bold text-blue-600 italic">GH₵{p.price.toLocaleString()}</p>
+                            <div className="flex items-center gap-1 mt-1">
+                               <span className="text-[8px] font-black uppercase bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Verified</span>
+                               <span className="text-[8px] font-black uppercase bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded">{p.category}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : searchQuery.length >= 2 ? (
+                  <div className="text-center py-20 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
+                    <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-slate-900">No matching items</h3>
+                    <p className="text-slate-400 mt-2 max-w-xs mx-auto text-sm font-medium">We couldn't find any products matching your current search. Try checking your spelling or using more general terms.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-12">
+                     <div className="space-y-6">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quick Departments</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                           {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
+                             <Link 
+                               key={cat} 
+                               href={`/categories`} 
+                               onClick={() => setIsSearchOpen(false)}
+                               className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:bg-blue-600 hover:text-white transition-all text-center group"
+                             >
+                               <span className="text-xs font-black uppercase tracking-widest">{cat}</span>
+                             </Link>
+                           ))}
+                        </div>
+                     </div>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

@@ -229,7 +229,10 @@ export default function NewProductWizard() {
         .select()
         .single();
 
-      if (productError) throw productError;
+      if (productError) {
+        console.error("Product Table Error:", productError);
+        throw new Error(`Product Table Error: ${productError.message}`);
+      }
 
       const variantsToInsert = (isSimpleCategory ? [variants[0]] : variants).map((v, idx) => ({
         ...v,
@@ -242,16 +245,19 @@ export default function NewProductWizard() {
         .from('product_variants')
         .insert(variantsToInsert);
 
-      if (variantError) throw variantError;
+      if (variantError) {
+        console.error("Variant Table Error:", variantError);
+        throw new Error(`Variant Table Error: ${variantError.message}`);
+      }
 
       toast({ title: "Product Uploaded", description: "The item is now live in the store." });
       router.push("/admin");
     } catch (err: any) {
-      console.error("Save Error:", err);
+      console.error("Detailed Save Error:", err);
       toast({ 
         variant: "destructive", 
         title: "Upload Failed", 
-        description: err.message || "Permission error. Check database rules." 
+        description: err.message || "Database permission denied. Run the SQL script provided." 
       });
     } finally {
       setIsSaving(false);
@@ -409,7 +415,7 @@ export default function NewProductWizard() {
              <div className="flex items-center justify-between">
                 <div>
                    <h2 className="text-3xl font-black uppercase tracking-tight text-slate-900 italic">{isSimpleCategory ? "Price & Stock" : "Product Options"}</h2>
-                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">{isSimpleCategory ? "Set the price and availability" : "Set prices for different hardware versions"}</p>
+                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest">{isSimpleCategory ? "Set the price and availability" : "Set prices for different configurations"}</p>
                 </div>
                 {!isSimpleCategory && (
                   <Button onClick={addVariant} className="h-14 rounded-2xl bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-black uppercase tracking-widest text-[10px] px-8 shadow-sm gap-2">
@@ -564,7 +570,7 @@ export default function NewProductWizard() {
                    </div>
                    <div className="mt-8 pt-8 border-t border-slate-50 text-center">
                       <Layers className="w-12 h-12 text-slate-100 mx-auto mb-4" />
-                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Store Inventory System Active</p>
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Inventory System Active</p>
                    </div>
                 </Card>
              </div>

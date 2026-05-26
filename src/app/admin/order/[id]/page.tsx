@@ -130,7 +130,6 @@ export default function OrderDetailsPage() {
         toast({ title: "Status Updated", description: `Order is now ${status}.` });
         setOrder(prev => prev ? { ...prev, status } : null);
         
-        // Notify Customer of Status Update
         if (profile?.contact) {
           const customerName = profile?.full_name || "Customer";
           const mainItem = order.items[0]?.name || "Product";
@@ -172,7 +171,6 @@ export default function OrderDetailsPage() {
 
   if (!order) return null;
 
-  // Precise location link
   const mapLink = (order.latitude && order.longitude) 
     ? `https://www.google.com/maps?q=${order.latitude},${order.longitude}`
     : null;
@@ -221,7 +219,7 @@ export default function OrderDetailsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ORDER REF: #{order.id.slice(0, 8).toUpperCase()}</div>
-              <h1 className="text-3xl font-black text-slate-900 font-headline">Order <span className="text-blue-600 italic">Information</span></h1>
+              <h1 className="text-3xl font-black text-slate-900 font-headline italic">Order <span className="text-blue-600">Information</span></h1>
             </div>
 
             <div className="flex items-center gap-3">
@@ -263,7 +261,7 @@ export default function OrderDetailsPage() {
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-6 space-y-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600"><ShoppingBag className="w-5 h-5" /></div>
               <div className="space-y-1">
-                 <p className="text-[10px] font-black text-slate-300 uppercase">Order Value</p>
+                 <p className="text-[10px] font-black text-slate-300 uppercase">Order Total</p>
                  <p className="font-black text-slate-900 text-lg italic tracking-tighter">GHS {parseFloat(order.total_amount).toLocaleString()}</p>
                  <p className="text-xs text-slate-400 font-medium">{order.is_accra ? "Accra Region" : "Regional Delivery"}</p>
               </div>
@@ -272,8 +270,8 @@ export default function OrderDetailsPage() {
             <Card className="border-none shadow-sm rounded-[2rem] bg-white p-6 space-y-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600"><CreditCard className="w-5 h-5" /></div>
               <div className="space-y-1">
-                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "Cash on Delivery" : "Payment Before Delivery"}</p>
-                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `MoMo: ${order.momo_sender_name || 'N/A'}` : "Direct Payment Choice."}</p>
+                 <p className="text-xs font-bold text-slate-900">{order.payment_type === 'POD' ? "Pay on Delivery" : "Paid Before Delivery"}</p>
+                 <p className="text-[10px] text-slate-400">{order.payment_type === 'Prepayment' ? `MoMo: ${order.momo_sender_name || 'N/A'}` : "Cash Choice."}</p>
               </div>
             </Card>
 
@@ -281,7 +279,7 @@ export default function OrderDetailsPage() {
                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 blur-2xl -mr-12 -mt-12" />
                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400 relative z-10"><MapPin className="w-5 h-5" /></div>
                <div className="space-y-1 relative z-10">
-                 <p className="text-[9px] font-black uppercase text-white/40">Address Details</p>
+                 <p className="text-[9px] font-black uppercase text-white/40">Delivery Address</p>
                  <p className="text-xs font-bold leading-relaxed line-clamp-2">{shippingAddress || 'No address provided'}</p>
                </div>
             </Card>
@@ -289,7 +287,6 @@ export default function OrderDetailsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              {/* Extra Notes Highlight */}
               <Card className={cn(
                 "border-none shadow-xl rounded-[2.5rem] p-8 space-y-4 transition-all",
                 order.extra_notes ? "bg-blue-600 text-white" : "bg-white text-slate-400"
@@ -302,20 +299,20 @@ export default function OrderDetailsPage() {
                   "p-6 rounded-2xl font-bold leading-relaxed shadow-inner",
                   order.extra_notes ? "bg-white/10 border border-white/10 text-white" : "bg-slate-50 text-slate-300 italic"
                 )}>
-                  {order.extra_notes || "No special instructions from customer."}
+                  {order.extra_notes || "No special instructions provided."}
                 </div>
               </Card>
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-white overflow-hidden">
                 <CardHeader className="p-8 pb-4">
-                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight">Purchased <span className="text-blue-600 italic">Items</span></CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 uppercase tracking-tight italic">Purchased <span className="text-blue-600">Products</span></CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
                     <TableHeader className="bg-slate-50/50">
                       <TableRow className="border-slate-50">
                         <TableHead className="pl-8 font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Description</TableHead>
-                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Unit Price</TableHead>
+                        <TableHead className="font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Rate</TableHead>
                         <TableHead className="pr-8 text-right font-black text-[9px] uppercase tracking-[0.2em] text-slate-400">Qty</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -348,12 +345,12 @@ export default function OrderDetailsPage() {
 
               <Card className="border-none shadow-sm rounded-[2rem] bg-[#0F172A] text-white p-8 space-y-6">
                 <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Precise Location Tool</span></div>
+                   <div className="flex items-center gap-3 opacity-60"><Truck className="w-5 h-5" /><span className="text-[10px] font-black uppercase tracking-widest">Delivery Location Tool</span></div>
                    {order.shipping_region && <Badge className="bg-blue-600 border-none font-black text-[8px] uppercase">{order.shipping_region}</Badge>}
                 </div>
                 <div className="space-y-6">
                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase opacity-40">Delivery Address</p>
+                      <p className="text-[10px] font-black uppercase opacity-40">Full Address</p>
                       <p className="text-sm font-bold leading-relaxed">{shippingAddress}</p>
                    </div>
                    
@@ -364,7 +361,7 @@ export default function OrderDetailsPage() {
                              <Target className="w-4 h-4" /> Open Exact Location in Google Maps
                           </Button>
                         </Link>
-                        <p className="text-[9px] text-center text-white/30 uppercase mt-3 tracking-widest italic">User provided accurate GPS coordinates for delivery.</p>
+                        <p className="text-[9px] text-center text-white/30 uppercase mt-3 tracking-widest italic">The customer provided exact GPS coordinates for this delivery.</p>
                      </div>
                    )}
                 </div>
@@ -385,7 +382,7 @@ export default function OrderDetailsPage() {
                     <div className="relative aspect-[4/5] rounded-[1.5rem] overflow-hidden shadow-inner border border-slate-100 bg-slate-50">
                        <Image src={order.payment_screenshot_url} alt="Payment Proof" fill className="object-cover transition-transform hover:scale-105 duration-700 cursor-zoom-in" />
                     </div>
-                    <p className="mt-4 text-[10px] font-bold text-slate-400 uppercase text-center">Sender: {order.momo_sender_name || 'Not Provided'}</p>
+                    <p className="mt-4 text-[10px] font-bold text-slate-400 uppercase text-center">Account Name: {order.momo_sender_name || 'Not Provided'}</p>
                   </CardContent>
                 </Card>
               )}

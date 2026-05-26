@@ -86,7 +86,7 @@ export default function CheckoutPage() {
         if (profileRes.data) {
           setProfile(profileRes.data);
           if (!profileRes.data.location || !profileRes.data.contact) {
-            toast({ variant: "destructive", title: "Wait", description: "Please update your phone and address in your profile first." });
+            toast({ variant: "destructive", title: "Information Missing", description: "Please add your phone and address to your profile first." });
             router.push("/profile"); return;
           }
           const locationString = profileRes.data.location || "";
@@ -97,7 +97,6 @@ export default function CheckoutPage() {
           const initialRegion = foundRegion || (locationString.toLowerCase().includes("accra") ? "Greater Accra" : "");
           setRegion(initialRegion);
           
-          // Default payment choice based on region
           if (initialRegion === "Greater Accra") {
             setPaymentChoice("POD");
           } else {
@@ -120,7 +119,6 @@ export default function CheckoutPage() {
 
   const isAccra = region.toLowerCase() === "greater accra";
   
-  // Force Prepayment for outside Accra
   useEffect(() => {
     if (!isAccra && region !== "") {
       setPaymentChoice("Prepayment");
@@ -129,7 +127,7 @@ export default function CheckoutPage() {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      toast({ variant: "destructive", title: "Not Supported", description: "Your browser doesn't support location features." });
+      toast({ variant: "destructive", title: "Not Supported", description: "Your phone doesn't support location features." });
       return;
     }
     setIsLocating(true);
@@ -137,11 +135,11 @@ export default function CheckoutPage() {
       (position) => {
         setCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
         setIsLocating(false);
-        toast({ title: "Location Captured", description: "Your precise delivery coordinates have been saved." });
+        toast({ title: "Location Saved", description: "Your exact delivery address has been recorded." });
       },
       () => {
         setIsLocating(false);
-        toast({ variant: "destructive", title: "Error", description: "Could not find your location. Please check your settings." });
+        toast({ variant: "destructive", title: "Error", description: "Could not find your location. Please check your phone settings." });
       },
       { enableHighAccuracy: true }
     );
@@ -155,7 +153,7 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!region || !area || !community) { toast({ variant: "destructive", title: "Address Required" }); return; }
     if (paymentChoice === "Prepayment" && (!selectedFile || !momoSenderName.trim())) { 
-      toast({ variant: "destructive", title: "Payment Info Required", description: "Please upload your receipt and provide your MoMo name." }); 
+      toast({ variant: "destructive", title: "Payment Proof Required", description: "Please upload your receipt photo and enter your account name." }); 
       return; 
     }
     
@@ -206,10 +204,10 @@ export default function CheckoutPage() {
       
       if (orderError) throw orderError;
       
-      const mainItem = items[0]?.name || "Item";
+      const mainItem = items[0]?.name || "Product";
       const customerName = profile?.full_name || "Customer";
       const admin1 = "0597204494";
-      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Admin.`;
+      const adminMessage = `New order from ${customerName}. Item: ${mainItem}. Total: GHS ${total.toLocaleString()}. Check ZiCash Admin Panel.`;
       
       await sendSms(admin1, adminMessage);
       if (profile?.contact) {
@@ -217,7 +215,7 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      toast({ title: "Order Successful", description: "Thank you! We have received your order." });
+      toast({ title: "Order Placed", description: "Success! We have received your order details." });
       router.push("/orders");
     } catch (err: any) { 
       toast({ variant: "destructive", title: "Error", description: err.message }); 
@@ -272,7 +270,7 @@ export default function CheckoutPage() {
                           </div>
                           <div className="space-y-4 md:col-span-2">
                              <div className="space-y-2">
-                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">House Number / Landmark</label>
+                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">House Number / Street Name / Landmark</label>
                                <Input placeholder="e.g. Blue building near the station" className="h-12 rounded-xl bg-slate-50 border-none font-bold" value={community} onChange={(e) => setCommunity(e.target.value)} />
                              </div>
                              
@@ -287,7 +285,7 @@ export default function CheckoutPage() {
                               )}
                              >
                                {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : (coords ? <CheckCircle2 className="w-4 h-4" /> : <Navigation className="w-4 h-4" />)}
-                               {isLocating ? "Fetching..." : (coords ? "Location Captured" : "Use My Exact Location for Delivery")}
+                               {isLocating ? "Fetching..." : (coords ? "Exact Location Saved" : "Get My Precise Location for Delivery")}
                              </Button>
                           </div>
                        </div>
@@ -297,7 +295,7 @@ export default function CheckoutPage() {
                   <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
                     <CardHeader className="p-8 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-[0.2em] flex items-center gap-3 text-blue-600">
-                        <CreditCard className="w-4 h-4" /> Payment Choice
+                        <CreditCard className="w-4 h-4" /> Payment Method
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-8">
@@ -325,8 +323,8 @@ export default function CheckoutPage() {
                               >
                                 <RadioGroupItem value="Prepayment" id="pre" className="sr-only" />
                                 <Smartphone className="mb-3 h-6 w-6 text-blue-600" />
-                                <span className="text-sm font-black uppercase italic tracking-tight">Pay Now</span>
-                                <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase">MoMo Transfer</span>
+                                <span className="text-sm font-black uppercase italic tracking-tight">Pay Before Delivery</span>
+                                <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase">Mobile Money Transfer</span>
                               </Label>
                            </RadioGroup>
                         </div>
@@ -335,7 +333,7 @@ export default function CheckoutPage() {
                           <div className="p-4 bg-white rounded-2xl shadow-sm"><Smartphone className="w-8 h-8 text-blue-600" /></div>
                           <div>
                              <p className="font-black uppercase tracking-tight text-lg italic">Payment Before Delivery</p>
-                             <p className="text-xs font-bold text-slate-500 mt-1 uppercase">Required for orders outside Accra.</p>
+                             <p className="text-xs font-bold text-slate-500 mt-1 uppercase">This is required for orders outside Accra.</p>
                           </div>
                         </div>
                       )}
@@ -369,7 +367,7 @@ export default function CheckoutPage() {
                                  ) : (
                                    <>
                                      <ImageIcon className="w-8 h-8 text-slate-300 mb-2 group-hover:text-blue-600 transition-colors" />
-                                     <p className="text-[10px] font-black uppercase text-slate-400">Click to Upload</p>
+                                     <p className="text-[10px] font-black uppercase text-slate-400">Click to Upload Photo</p>
                                    </>
                                  )}
                                </div>
@@ -388,7 +386,7 @@ export default function CheckoutPage() {
                     </CardHeader>
                     <CardContent className="p-8 pt-0">
                        <Textarea 
-                        placeholder="Any extra details we should know? (e.g. delivery preferences, gate color...)" 
+                        placeholder="Any extra details we should know? (e.g. gate color, preferred delivery time...)" 
                         className="min-h-[120px] rounded-2xl bg-slate-50 border-none font-bold p-6 shadow-inner"
                         value={extraNotes}
                         onChange={(e) => setExtraNotes(e.target.value)}

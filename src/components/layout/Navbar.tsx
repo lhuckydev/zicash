@@ -249,7 +249,7 @@ export function Navbar() {
                   "text-xs font-bold truncate",
                   searchQuery ? "text-slate-900" : "text-slate-400"
                 )}>
-                  {searchQuery || "Search for items..."}
+                  {searchQuery || "Search items..."}
                 </span>
               </div>
             </div>
@@ -361,67 +361,59 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4 overflow-hidden"
+            className="fixed inset-0 z-[1000] flex items-start justify-center pt-10 sm:pt-20 px-4 overflow-hidden"
           >
-            {/* Immersive Background Backdrop */}
+            {/* Darkened/Blurred Backdrop */}
             <div 
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md cursor-pointer" 
+              className="absolute inset-0 bg-slate-950/40 backdrop-blur-md cursor-pointer" 
               onClick={() => setIsSearchOpen(false)}
             />
             
-            {/* Integrated Search Overlay Container */}
+            {/* Search Content Container - Rounded exactly as reference */}
             <motion.div 
               initial={{ scale: 0.95, y: -20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: -20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col z-[110]"
+              className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col z-[1100]"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Search Bar - Magnolia logic matched to reference */}
               <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-white">
-                <div className="relative flex-1 group flex items-center">
-                  <Search className="absolute left-4 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <div className="relative flex-1 flex items-center">
+                  <Search className="absolute left-5 w-5 h-5 text-slate-400" />
                   <form onSubmit={handleSearchSubmit} className="flex-1">
                     <Input 
                       ref={inputRef}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search items..." 
-                      className="pl-12 pr-12 h-14 bg-slate-50/50 border-none rounded-2xl text-lg font-bold placeholder:text-slate-300 focus-visible:ring-0"
+                      className="pl-14 pr-24 h-14 bg-slate-50/50 border-none rounded-full text-lg font-bold placeholder:text-slate-300 focus-visible:ring-0"
                     />
                   </form>
                   
-                  <div className="absolute right-24 flex items-center h-full mr-2">
+                  {/* Action Group inside the bar */}
+                  <div className="absolute right-2 flex items-center gap-1">
                     {searchQuery && (
                       <button onClick={clearQuery} className="p-2 text-slate-300 hover:text-slate-500 transition-colors">
                         <X className="w-5 h-5" />
                       </button>
                     )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
                     <Button 
                       onClick={handleSearchSubmit}
-                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest px-6 h-12 shadow-xl shadow-blue-600/20"
+                      className="bg-[#F97316] hover:bg-[#EA580C] text-white rounded-full font-black uppercase text-[11px] tracking-widest px-8 h-10 shadow-lg shadow-orange-500/20"
                     >
                       Search
                     </Button>
-                    <button 
-                      onClick={() => setIsSearchOpen(false)}
-                      className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors shrink-0 shadow-sm"
-                      aria-label="Close search"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Suggestions Overhaul Area */}
+              {/* Suggestions Overhaul Area - List format as per reference image */}
               <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2 bg-white">
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-10 space-y-3">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Catalog...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Analyzing Items...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
                   <div className="flex flex-col">
@@ -432,33 +424,33 @@ export function Navbar() {
                           setIsSearchOpen(false);
                           router.push(`/product/${p.id}`);
                         }}
-                        className="flex items-center justify-between px-8 py-4 hover:bg-slate-50 transition-colors group text-left border-b border-slate-50 last:border-0"
+                        className="flex items-center justify-between px-10 py-5 hover:bg-slate-50 transition-colors group text-left border-b border-slate-50 last:border-0"
                       >
-                        <div className="flex items-center gap-4">
-                           <span className="text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
+                        <div className="flex items-center gap-4 overflow-hidden">
+                           <span className="text-sm font-black text-slate-700 group-hover:text-blue-600 transition-colors truncate">
                              {p.name.toLowerCase()}
                            </span>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors shrink-0" />
                       </button>
                     ))}
                     <button 
                       onClick={handleSearchSubmit}
                       className="flex items-center justify-center p-4 text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-t border-slate-50 hover:bg-blue-50 transition-colors"
                     >
-                      Show all results for "{searchQuery}"
+                      Explore all results for "{searchQuery}"
                     </button>
                   </div>
                 ) : searchQuery.length >= 1 ? (
-                  <div className="p-10 text-center space-y-2">
-                    <p className="text-sm font-bold text-slate-400">No matching items found for "{searchQuery}"</p>
-                    <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Try another search term</p>
+                  <div className="p-16 text-center space-y-2">
+                    <p className="text-sm font-black text-slate-400">No matching items found for "{searchQuery}"</p>
+                    <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest italic">Try another search term</p>
                   </div>
                 ) : (
-                  <div className="p-8 space-y-6">
+                  <div className="p-10 space-y-6">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Trending Sections</p>
-                      <div className="grid grid-cols-2 gap-4">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 ml-2">Trending Departments</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
                           <button
                             key={cat}
@@ -466,9 +458,9 @@ export function Navbar() {
                               setIsSearchOpen(false);
                               router.push('/categories');
                             }}
-                            className="flex items-center justify-between px-6 py-5 bg-slate-50 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all group"
+                            className="flex items-center justify-between px-8 py-5 bg-slate-50 rounded-[1.5rem] hover:bg-blue-600 hover:text-white transition-all group"
                           >
-                            <span className="text-xs font-bold uppercase tracking-widest italic">{cat}</span>
+                            <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
                             <ChevronRight className="w-4 h-4 opacity-30 group-hover:opacity-100" />
                           </button>
                         ))}

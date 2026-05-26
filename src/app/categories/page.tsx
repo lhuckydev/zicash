@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { Product } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabase";
-import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, ArrowDownWideArrow, ArrowUpWideNarrow, Zap } from "lucide-react";
+import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, ArrowDownWideNarrow, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -232,7 +232,7 @@ export default function CategoriesPage() {
                           {/* Sort By */}
                           <div className="space-y-4">
                              <label className="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
-                                <ArrowDownWideArrow className="w-3 h-3" /> Sorting Preference
+                                <ArrowDownWideNarrow className="w-3 h-3" /> Sorting Preference
                              </label>
                              <Select value={sortBy} onValueChange={setSortBy}>
                                 <SelectTrigger className="h-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner">

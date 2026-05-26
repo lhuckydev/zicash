@@ -6,10 +6,12 @@ import { Product, useCartStore, getEffectivePrice, isDiscountActive } from "@/st
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Zap, Tag } from "lucide-react";
+import { Heart, Tag } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { cardHover, buttonTap } from "@/lib/animations";
 
 export function ProductCard({ 
   product, 
@@ -56,14 +58,17 @@ export function ProductCard({
   };
 
   return (
-    <div className="group bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-2xl border border-transparent hover:border-slate-100 flex flex-col h-full relative">
+    <motion.div 
+      {...cardHover}
+      className="group bg-white rounded-[2.5rem] p-4 transition-all duration-500 hover:shadow-2xl border border-transparent hover:border-slate-100 flex flex-col h-full relative"
+    >
       <Link href={`/product/${product.id}`} className="relative aspect-square rounded-[2rem] overflow-hidden bg-slate-50 mb-5">
         <Image 
           src={images[currentImageIndex]} 
           alt={product.name} 
           fill 
           sizes="(max-width: 768px) 50vw, 33vw" 
-          className="object-contain p-6 transition-all duration-1000 group-hover:scale-105" 
+          className="object-contain p-6 transition-all duration-1000 group-hover:scale-110" 
         />
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {activeDiscount && (
@@ -79,9 +84,13 @@ export function ProductCard({
         </div>
       </Link>
 
-      <button onClick={handleToggleWishlist} className={cn("absolute top-7 right-7 p-2.5 rounded-full border bg-white/90 backdrop-blur-md transition-all z-10 hover:scale-110 shadow-sm", isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-400 border-slate-100 hover:text-slate-600")}>
+      <motion.button 
+        {...buttonTap}
+        onClick={handleToggleWishlist} 
+        className={cn("absolute top-7 right-7 p-2.5 rounded-full border bg-white/90 backdrop-blur-md transition-all z-10 hover:scale-110 shadow-sm", isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-400 border-slate-100 hover:text-slate-600")}
+      >
         <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
-      </button>
+      </motion.button>
 
       <div className="flex flex-col flex-1 space-y-4 px-1">
         <div className="space-y-1.5">
@@ -94,10 +103,12 @@ export function ProductCard({
           </div>
         </div>
 
-        <Button onClick={handleAdd} disabled={product.stock <= 0} className="w-full mt-auto rounded-xl h-11 font-black bg-slate-950 text-white hover:bg-blue-600 transition-all text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/5 active:scale-95">
-          {product.stock <= 0 ? "Out of Stock" : "Add to Order"}
-        </Button>
+        <motion.div {...buttonTap}>
+          <Button onClick={handleAdd} disabled={product.stock <= 0} className="w-full mt-auto rounded-xl h-11 font-black bg-slate-950 text-white hover:bg-blue-600 transition-all text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/5 active:scale-95">
+            {product.stock <= 0 ? "Out of Stock" : "Add to Order"}
+          </Button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

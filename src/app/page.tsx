@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { Product, useCartStore } from "@/store/useCartStore";
+import { Product } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
   Laptop, Smartphone, Shirt, GraduationCap, Zap, 
@@ -16,8 +15,6 @@ import {
   Carousel, 
   CarouselContent, 
   CarouselItem, 
-  CarouselPrevious, 
-  CarouselNext, 
   type CarouselApi 
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
@@ -26,6 +23,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { slideUp, fadeIn, staggerContainer, buttonTap } from "@/lib/animations";
 
 function ProductSkeleton() {
   return (
@@ -42,21 +41,23 @@ function ProductSkeleton() {
 
 function SuggestedProductTile({ product }: { product: Product }) {
   return (
-    <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300">
-      <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-slate-200/40 mb-3 transition-transform group-hover:scale-105 shadow-sm border border-slate-100/50">
-        <Image 
-          src={product.image_url} 
-          alt={product.name} 
-          fill 
-          className="object-contain p-5" 
-          sizes="(max-width: 768px) 30vw, 15vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-      <span className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-tighter text-center line-clamp-1 px-2 group-hover:text-blue-600 transition-colors">
-        {product.name}
-      </span>
-    </Link>
+    <motion.div variants={fadeIn} whileHover={{ scale: 1.05 }} className="h-full">
+      <Link href={`/product/${product.id}`} className="flex flex-col items-center group transition-all duration-300">
+        <div className="relative aspect-square w-full rounded-[2.5rem] overflow-hidden bg-slate-200/40 mb-3 shadow-sm border border-slate-100/50">
+          <Image 
+            src={product.image_url} 
+            alt={product.name} 
+            fill 
+            className="object-contain p-5" 
+            sizes="(max-width: 768px) 30vw, 15vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+        <span className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-tighter text-center line-clamp-1 px-2 group-hover:text-blue-600 transition-colors">
+          {product.name}
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -67,7 +68,6 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -85,7 +85,7 @@ export default function CatalogPage() {
       }
     } catch (err: any) {
       console.error("Fetch Error:", err);
-      setError(err.message || "Failed to connect to the database index.");
+      setError(err.message || "Failed to connect to the database.");
     } finally {
       setIsLoading(false);
     }
@@ -97,8 +97,6 @@ export default function CatalogPage() {
 
   useEffect(() => {
     if (!api) return;
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
     api.on("select", () => {
       setCurrent(api.selectedScrollSnap());
     });
@@ -130,7 +128,12 @@ export default function CatalogPage() {
               <Skeleton className="w-full h-[350px] md:h-[480px] rounded-[3rem]" />
             </section>
           ) : category === "All" && featuredProducts.length > 0 && (
-            <section className="relative group py-8 px-2 md:px-10 overflow-hidden animate-in fade-in duration-1000">
+            <motion.section 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative group py-8 px-2 md:px-10 overflow-hidden"
+            >
               <Carousel 
                 setApi={setApi} 
                 className="w-full relative z-10" 
@@ -161,14 +164,14 @@ export default function CatalogPage() {
                   ))}
                 </CarouselContent>
               </Carousel>
-            </section>
+            </motion.section>
           )}
 
           {error && (
             <div className="max-w-4xl mx-auto px-4">
               <Alert variant="destructive" className="rounded-[2rem] bg-red-50 p-8 shadow-xl shadow-red-500/5">
                 <AlertCircle className="h-5 w-5" />
-                <AlertTitle className="text-lg font-bold uppercase tracking-tight">Database Error</AlertTitle>
+                <AlertTitle className="text-lg font-bold uppercase tracking-tight">Database Connection</AlertTitle>
                 <AlertDescription className="mt-4 space-y-4">
                   <p className="text-sm font-medium">System Response: {error}</p>
                   <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Connection</Button>
@@ -179,17 +182,28 @@ export default function CatalogPage() {
 
           {/* Categories */}
           {!error && (
-            <div className="space-y-8">
+            <motion.div 
+              variants={staggerContainer(0.05)}
+              initial="initial"
+              animate="animate"
+              className="space-y-8"
+            >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Categories</h2>
+                <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Categories</motion.h2>
                 <Link href="/categories">
-                  <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Explore Collections</button>
+                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Explore Collections</motion.button>
                 </Link>
               </div>
               
               <div className="flex gap-6 overflow-x-auto md:justify-center pb-4 scrollbar-hide px-2">
                 {categories.map((cat) => (
-                  <button key={cat.name} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-3 shrink-0 group">
+                  <motion.button 
+                    key={cat.name} 
+                    variants={slideUp}
+                    {...buttonTap}
+                    onClick={() => setCategory(cat.name)} 
+                    className="flex flex-col items-center gap-3 shrink-0 group"
+                  >
                     <div className={cn(
                       "w-16 h-16 md:w-24 md:h-24 rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
                       category === cat.name ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30 border-blue-600" : "bg-white text-slate-400 border-slate-100 hover:border-blue-200"
@@ -201,15 +215,20 @@ export default function CatalogPage() {
                       )}
                     </div>
                     <span className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]", category === cat.name ? "text-blue-600" : "text-slate-400")}>{cat.name.split(' ')[0]}</span>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
 
           <div id="marketplace" className="scroll-mt-24 space-y-12">
             {category === "All" && !isLoading && suggestedPicks.length > 0 && (
-              <div className="mx-auto max-w-[95%] md:max-w-[70%] py-12 px-8 bg-blue-50/50 rounded-[3rem] border border-blue-100/50 animate-in slide-in-from-bottom duration-700">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="mx-auto max-w-[95%] md:max-w-[70%] py-12 px-8 bg-blue-50/50 rounded-[3rem] border border-blue-100/50 animate-in slide-in-from-bottom duration-700"
+              >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-4 h-4 text-blue-500" />
@@ -225,22 +244,24 @@ export default function CatalogPage() {
                     ))}
                   </CarouselContent>
                 </Carousel>
-              </div>
+              </motion.div>
             )}
 
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-4">
                   <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Inventory" : `${category} Department`}</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={fetchProducts} 
-                    disabled={isLoading}
-                    className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors"
-                  >
-                    <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
-                  </Button>
+                  <motion.div {...buttonTap}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={fetchProducts} 
+                      disabled={isLoading}
+                      className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors"
+                    >
+                      <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
+                    </Button>
+                  </motion.div>
                 </div>
                 {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">Reset View</Button>}
               </div>
@@ -250,9 +271,18 @@ export default function CatalogPage() {
                   {Array.from({ length: 10 }).map((_, i) => <ProductSkeleton key={i} />)}
                 </div>
               ) : filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10 animate-in fade-in duration-500">
-                  {filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
-                </div>
+                <motion.div 
+                  variants={staggerContainer(0.04)}
+                  initial="initial"
+                  animate="animate"
+                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10"
+                >
+                  {filteredProducts.map((product) => (
+                    <motion.div key={product.id} variants={fadeIn}>
+                      <ProductCard product={product} />
+                    </motion.div>
+                  ))}
+                </motion.div>
               ) : (
                 <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No matching items found</p>

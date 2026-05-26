@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, Product } from "@/store/useCartStore";
-import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2 } from "lucide-react";
+import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
@@ -69,7 +69,7 @@ export function Navbar() {
 
   // Search Logic
   useEffect(() => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 1) {
       setSuggestions([]);
       return;
     }
@@ -81,7 +81,7 @@ export function Navbar() {
           .from('products')
           .select('*')
           .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
-          .limit(12);
+          .limit(8);
         
         if (!error && data) {
           setSuggestions(data);
@@ -93,7 +93,7 @@ export function Navbar() {
       }
     };
 
-    const timer = setTimeout(fetchSuggestions, 300);
+    const timer = setTimeout(fetchSuggestions, 200);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -351,103 +351,109 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-white flex flex-col pt-4 sm:pt-0 overflow-hidden"
+            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-start justify-center pt-10 sm:pt-20 px-4"
+            onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
           >
-            <div className="container mx-auto px-6 flex flex-col h-full max-w-7xl">
-              <div className="flex items-center gap-4 py-6 border-b border-blue-50 shrink-0">
+            <motion.div 
+              initial={{ scale: 0.9, y: -20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: -20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-4 border-b border-slate-100 flex items-center gap-3">
                 <div className="relative flex-1 group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-blue-600" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                   <form onSubmit={handleSearchSubmit}>
                     <Input 
                       ref={inputRef}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search items, brands, or sections..." 
-                      className="pl-12 h-14 bg-slate-50 border-none rounded-2xl text-lg font-bold placeholder:text-slate-300 focus-visible:ring-4 focus-visible:ring-blue-600/5 transition-all"
+                      placeholder="Search for items..." 
+                      className="pl-12 pr-24 h-14 bg-slate-50 border-none rounded-2xl text-lg font-bold placeholder:text-slate-300 focus-visible:ring-0"
                     />
                   </form>
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {searchQuery && (
+                      <button 
+                        onClick={() => setSearchQuery("")}
+                        className="p-2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                    <Button 
+                      onClick={handleSearchSubmit}
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest px-4 h-10"
+                    >
+                      Search
+                    </Button>
+                  </div>
                 </div>
-                <button 
-                  onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
-                  className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto py-8 space-y-10 scrollbar-hide">
+              <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2">
                 {isSearching ? (
-                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning inventory...</p>
+                  <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Suggestions</p>
-                      <button onClick={handleSearchSubmit} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">See all results</button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {suggestions.map((p) => (
-                        <Link 
-                          key={p.id} 
-                          href={`/product/${p.id}`}
-                          onClick={() => setIsSearchOpen(false)}
-                          className="flex items-center gap-5 p-5 bg-white rounded-[2rem] border border-slate-100 hover:border-blue-600 hover:shadow-2xl hover:shadow-blue-600/5 transition-all group"
-                        >
-                          <div className="relative w-20 h-20 bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shrink-0 shadow-inner flex items-center justify-center">
-                            <Image src={p.image_url} alt={p.name} fill className="object-contain p-2" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-black text-slate-900 truncate uppercase group-hover:text-blue-600 transition-colors">{p.name}</p>
-                            <p className="text-sm font-bold text-blue-600 italic mt-1">GH₵{p.price.toLocaleString()}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                               <span className="text-[8px] font-black uppercase bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded shadow-sm">Verified Unit</span>
-                               <span className="text-[8px] font-black uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">{p.category}</span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                  <div className="flex flex-col">
+                    {suggestions.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          router.push(`/product/${p.id}`);
+                        }}
+                        className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group text-left"
+                      >
+                        <div className="flex items-center gap-4">
+                           <Search className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                           <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900 truncate max-w-md">
+                             {p.name}
+                           </span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                      </button>
+                    ))}
+                    <button 
+                      onClick={handleSearchSubmit}
+                      className="flex items-center justify-center p-4 text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-t border-slate-50 hover:bg-blue-50 transition-colors"
+                    >
+                      See all matching results
+                    </button>
                   </div>
-                ) : searchQuery.length >= 2 ? (
-                  <div className="text-center py-20 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200">
-                    <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-slate-900 uppercase">No matching items</h3>
-                    <p className="text-slate-400 mt-2 max-w-xs mx-auto text-sm font-medium">We couldn't find any items matching your current search. Try checking your spelling or using more general terms.</p>
+                ) : searchQuery.length >= 1 ? (
+                  <div className="p-10 text-center space-y-2">
+                    <p className="text-sm font-bold text-slate-400">No matching items found for "{searchQuery}"</p>
+                    <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Try a different term</p>
                   </div>
                 ) : (
-                  <div className="space-y-12 animate-in fade-in duration-700">
-                     <div className="space-y-6">
-                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Store Departments</p>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                           {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
-                             <Link 
-                               key={cat} 
-                               href={`/categories`} 
-                               onClick={() => setIsSearchOpen(false)}
-                               className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:bg-blue-600 hover:text-white transition-all text-center group shadow-sm hover:shadow-xl hover:shadow-blue-600/10"
-                             >
-                               <span className="text-xs font-black uppercase tracking-widest italic">{cat}</span>
-                             </Link>
-                           ))}
-                        </div>
-                     </div>
-
-                     <div className="p-10 rounded-[3rem] bg-blue-50/50 border border-blue-100 text-center space-y-4">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
-                          <Zap className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <h4 className="text-lg font-black uppercase italic text-slate-900">Need expert help?</h4>
-                        <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">Our Assistant can help you pick the perfect hardware based on your needs and budget.</p>
-                        <Link href="/advisor" onClick={() => setIsSearchOpen(false)}>
-                          <Button className="bg-blue-600 hover:bg-blue-700 font-bold uppercase tracking-widest text-[10px] rounded-xl px-8 h-12 mt-4 shadow-lg shadow-blue-600/20">Talk to Assistant</Button>
-                        </Link>
-                     </div>
+                  <div className="p-6 space-y-6">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Popular Sections</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['Laptops', 'Phones', 'Accessories', 'Closet'].map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => {
+                              setIsSearchOpen(false);
+                              router.push('/categories');
+                            }}
+                            className="flex items-center justify-between px-5 py-4 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group"
+                          >
+                            <span className="text-xs font-bold uppercase tracking-widest italic">{cat}</span>
+                            <ChevronRight className="w-3 h-3 opacity-30 group-hover:opacity-100" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

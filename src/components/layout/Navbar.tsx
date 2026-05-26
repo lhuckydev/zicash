@@ -355,20 +355,20 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4"
+            className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4 overflow-hidden"
           >
-            {/* The Backdrop: Clicking anywhere here closes the overlay */}
+            {/* The Backdrop: Dismisses on click */}
             <div 
               className="absolute inset-0 bg-slate-900/40 backdrop-blur-md cursor-pointer" 
               onClick={() => setIsSearchOpen(false)}
             />
             
-            {/* The Search Field Area: Stop propagation to prevent accidental closing */}
+            {/* The Search UI: Stops propagation to keep interactions inside */}
             <motion.div 
               initial={{ scale: 0.95, y: -20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: -20 }}
-              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col"
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-100 flex flex-col z-[110]"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-white">
@@ -384,14 +384,6 @@ export function Navbar() {
                     />
                   </form>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    {searchQuery && (
-                      <button 
-                        onClick={() => setSearchQuery("")}
-                        className="p-2 text-slate-400 hover:text-slate-600"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    )}
                     <Button 
                       onClick={handleSearchSubmit}
                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest px-4 h-10 shadow-lg shadow-blue-600/20"
@@ -400,13 +392,22 @@ export function Navbar() {
                     </Button>
                   </div>
                 </div>
+                
+                {/* Explicit Close Button */}
+                <button 
+                  onClick={() => setIsSearchOpen(false)}
+                  className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors shrink-0 shadow-sm"
+                  aria-label="Close search"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
               <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2 bg-white">
                 {isSearching ? (
                   <div className="flex flex-col items-center justify-center py-10 space-y-3">
                     <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching...</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching Catalog...</p>
                   </div>
                 ) : suggestions.length > 0 ? (
                   <div className="flex flex-col">
@@ -420,10 +421,15 @@ export function Navbar() {
                         className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group text-left"
                       >
                         <div className="flex items-center gap-4">
-                           <Search className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
-                           <span className="text-sm font-bold text-slate-700 group-hover:text-slate-900 truncate max-w-md">
-                             {p.name}
-                           </span>
+                           <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center p-1 border border-slate-100 shrink-0">
+                             <Image src={p.image_url} alt={p.name} width={32} height={32} className="object-contain" />
+                           </div>
+                           <div className="min-w-0">
+                             <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 truncate max-w-[200px] sm:max-w-md">
+                               {p.name}
+                             </p>
+                             <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest">{p.category}</p>
+                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
                       </button>
@@ -432,13 +438,13 @@ export function Navbar() {
                       onClick={handleSearchSubmit}
                       className="flex items-center justify-center p-4 text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] border-t border-slate-50 hover:bg-blue-50 transition-colors"
                     >
-                      See all matching results
+                      View all matching results
                     </button>
                   </div>
                 ) : searchQuery.length >= 1 ? (
                   <div className="p-10 text-center space-y-2">
                     <p className="text-sm font-bold text-slate-400">No matching items found for "{searchQuery}"</p>
-                    <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Try a different term</p>
+                    <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Try a different section</p>
                   </div>
                 ) : (
                   <div className="p-6 space-y-6">

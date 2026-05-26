@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,32 +25,31 @@ import {
   type CarouselApi
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 
-function TechTableRow({ icon: Icon, label, value }: { icon: any, label: string, value: any }) {
-  if (value === undefined || value === null || value === "N/A" || value === "") return null;
+interface MiniSpecProps {
+  icon: any;
+  label: string;
+  value: any;
+  active: boolean;
+}
+
+function MiniSpec({ icon: Icon, label, value, active }: MiniSpecProps) {
+  if (value === undefined || value === null || value === "" || value === "N/A") return null;
   
   const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
-  
+
   return (
-    <TableRow className="border-slate-50 hover:bg-slate-50/50 transition-colors group">
-      <TableCell className="py-5 pl-0">
-        <div className="flex items-center gap-4">
-          <div className="p-2.5 bg-slate-100 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-            <Icon className="w-4 h-4" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
-        </div>
-      </TableCell>
-      <TableCell className="py-5 text-right pr-0">
+    <div className="flex items-center gap-2">
+      <Icon className={cn("w-3 h-3", active ? "text-blue-600" : "text-slate-300")} />
+      <div className="flex flex-col">
+        <span className="text-[7px] font-black uppercase tracking-widest text-slate-400 leading-none mb-0.5">{label}</span>
         <span className={cn(
-          "text-sm font-black italic tracking-tight",
-          typeof value === 'boolean' ? (value ? 'text-emerald-600' : 'text-slate-400') : 'text-slate-900'
+          "text-[10px] font-black italic truncate max-w-[80px] leading-none",
+          active ? "text-slate-900" : "text-slate-600"
         )}>{displayValue}</span>
-      </TableCell>
-    </TableRow>
+      </div>
+    </div>
   );
 }
 
@@ -208,7 +207,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-600">Available Options</h3>
                     <Badge variant="outline" className="text-[9px] font-bold text-slate-400 rounded-lg">{product.variants.length} Configurations</Badge>
                  </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 gap-6">
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
                       return (
@@ -216,20 +215,51 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
                           className={cn(
-                            "text-left p-5 rounded-2xl border-2 transition-all group relative overflow-hidden",
+                            "text-left p-6 rounded-[2rem] border-2 transition-all group relative overflow-hidden",
                             isActive 
                               ? "border-blue-600 bg-blue-50/30 ring-4 ring-blue-600/5 shadow-md" 
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                           )}
                         >
                           {isActive && <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 flex items-center justify-center rounded-bl-xl text-white shadow-lg"><CheckCircle2 className="w-4 h-4" /></div>}
-                          <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
-                          <h4 className="text-sm font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
-                          <div className="mt-3 flex items-center justify-between">
-                             <p className="text-xs font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                             <p className={cn("text-[8px] font-bold uppercase", v.stock > 0 ? `${v.stock} Available` : 'Sold Out', v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                               {v.stock > 0 ? `${v.stock} Available` : 'Sold Out'}
-                             </p>
+                          
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="space-y-3 flex-1">
+                              <div>
+                                <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", isActive ? "text-blue-600" : "text-slate-400")}>{v.condition || 'New'}</p>
+                                <h4 className="text-sm font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase">{v.label}</h4>
+                              </div>
+
+                              {!isSimpleCategory && (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3 pt-3 border-t border-slate-100/50">
+                                  {product.category === "Laptops" ? (
+                                    <>
+                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                      <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                      <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
+                                      <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
+                                      <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
+                                      <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                      <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                      <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                      <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="md:text-right shrink-0">
+                               <p className="text-xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                               <p className={cn("text-[9px] font-bold uppercase mt-1", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                                 {v.stock > 0 ? `${v.stock} Units In Stock` : 'Currently Sold Out'}
+                               </p>
+                            </div>
                           </div>
                         </button>
                       );
@@ -240,7 +270,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-b border-slate-100 pb-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selected Rate</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-black text-slate-900">GHS</span>
                   <span className="text-6xl font-black text-slate-900 italic tracking-tighter transition-all duration-500">
@@ -252,7 +282,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="flex flex-col items-start md:items-end gap-2">
                  <div className="flex items-center gap-2">
                     <div className={cn("w-2.5 h-2.5 rounded-full animate-pulse", inStock ? "bg-emerald-500" : "bg-red-500")} />
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'In Stock' : 'Out of Stock'}</span>
+                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{inStock ? 'Available for Dispatch' : 'Out of Stock'}</span>
                  </div>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                    <ShieldCheck className="w-3 h-3" /> Warranty: {product.warranty}
@@ -266,7 +296,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  className="w-full h-20 bg-blue-600 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-600/30 text-xl uppercase tracking-[0.2em] hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-95 gap-4"
                  disabled={!inStock || isAdding}
                >
-                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add to Cart</>}
+                 {isAdding ? <Loader2 className="w-7 h-7 animate-spin" /> : !inStock ? "Currently Sold Out" : <><ShoppingCart className="w-7 h-7" /> Add selection to Cart</>}
                </Button>
                
                <div className="flex items-center justify-center gap-8 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
@@ -282,55 +312,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             <div className="space-y-6">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Item Description</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
                  {product.description || "No detailed description provided."}
                </p>
             </div>
 
-            {!isSimpleCategory && (
-              <div className="space-y-8">
-                 <div className="flex items-center gap-4">
-                    <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
-                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Technical Specifications</h2>
-                 </div>
-                 <div className="bg-white rounded-[3.5rem] border border-slate-100 p-8 md:p-16 shadow-xl shadow-blue-600/5">
-                   <Table>
-                     <TableBody>
-                       {product.category === "Laptops" && (
-                         <>
-                           <TechTableRow icon={Cpu} label="Processor" value={selectedVariant?.cpu || product.advanced_specs?.cpu} />
-                           <TechTableRow icon={CircuitBoard} label="Memory (RAM)" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                           <TechTableRow icon={Database} label="Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                           <TechTableRow icon={Layers} label="Graphics" value={selectedVariant?.gpu || product.advanced_specs?.gpu} />
-                           <TechTableRow icon={Maximize} label="Display" value={selectedVariant?.screen || product.advanced_specs?.res} />
-                           <TechTableRow icon={MousePointer2} label="Touchscreen Interface" value={selectedVariant?.touchscreen ?? product.touchscreen} />
-                           <TechTableRow icon={Keyboard} label="Backlit Keyboard" value={selectedVariant?.keyboard_light ?? product.keyboard_light} />
-                           <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
-                           <TechTableRow icon={Zap} label="Ports & Connectivity" value={product.advanced_specs?.ports} />
-                           <TechTableRow icon={Terminal} label="Operating System" value={product.advanced_specs?.os} />
-                           <TechTableRow icon={Power} label="Battery Estimate" value={product.advanced_specs?.battery} />
-                           <TechTableRow icon={Box} label="Audio & Media" value={product.advanced_specs?.audio} />
-                         </>
-                       )}
-                       {product.category === "Phones" && (
-                         <>
-                           <TechTableRow icon={SmartphoneIcon} label="Chipset" value={selectedVariant?.chipset || product.advanced_specs?.chipset} />
-                           <TechTableRow icon={CircuitBoard} label="RAM" value={selectedVariant?.ram || product.advanced_specs?.ram} />
-                           <TechTableRow icon={Database} label="Internal Storage" value={selectedVariant?.storage || product.advanced_specs?.storage} />
-                           <TechTableRow icon={Smartphone} label="Battery Capacity" value={selectedVariant?.battery || product.advanced_specs?.charge} />
-                           <TechTableRow icon={Video} label="Camera Quality" value={product.advanced_specs?.camera} />
-                           <TechTableRow icon={Zap} label="Refresh Rate" value={product.advanced_specs?.refresh} />
-                           <TechTableRow icon={Monitor} label="Condition" value={selectedVariant?.condition || "New"} />
-                           <TechTableRow icon={ShieldCheck} label="IP Rating / Protection" value={product.advanced_specs?.rating} />
-                         </>
-                       )}
-                     </TableBody>
-                   </Table>
-                 </div>
-              </div>
-            )}
+            {/* This section reserved for future modules */}
+            <div className="min-h-[200px]" />
           </div>
 
           <div className="lg:col-span-4">

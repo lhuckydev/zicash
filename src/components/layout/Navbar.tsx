@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, Product } from "@/store/useCartStore";
-import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight, ShoppingBag } from "lucide-react";
+import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight, ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
@@ -214,20 +214,24 @@ export function Navbar() {
               </span>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <Link href="/cart" className="relative p-2 text-slate-500">
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[8px] font-black h-3.5 w-3.5 flex items-center justify-center rounded-full border border-white">{cartCount}</span>}
               </Link>
               {session ? (
                 <Link href="/profile">
-                  <Avatar className="h-8 w-8 border border-slate-100 shadow-sm">
+                  <Avatar className="h-9 w-9 border border-slate-100 shadow-sm">
                     <AvatarImage src={profile?.avatar_url} />
                     <AvatarFallback className="bg-blue-100 text-blue-600 text-[10px] font-bold">{session.user.email[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </Link>
               ) : (
-                <Link href="/auth" className="p-2 text-slate-500"><SettingsIcon className="w-5 h-5" /></Link>
+                <Link href="/auth">
+                  <Button className="h-9 px-4 rounded-full bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">
+                    Login
+                  </Button>
+                </Link>
               )}
             </div>
           </div>

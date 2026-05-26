@@ -111,9 +111,15 @@ export default function CatalogPage() {
     { name: "Educational Consult", imageUrl: "https://i.ibb.co/pB4yX4JL/high-resolution-graduation-cap-png-icon-17-removebg-preview.png", icon: GraduationCap },
   ];
 
-  const featuredProducts = products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5);
+  const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
-  const suggestedPicks = useMemo(() => products.length === 0 ? [] : [...products].sort(() => Math.random() - 0.5).slice(0, 5), [products]);
+  
+  // Robust Suggested Picks logic
+  const suggestedPicks = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    // Shuffle and pick top 10 for carousel
+    return [...products].sort(() => Math.random() - 0.5).slice(0, 10);
+  }, [products]);
 
   return (
     <div className="flex flex-col min-h-screen tech-grid">
@@ -171,10 +177,10 @@ export default function CatalogPage() {
             <div className="max-w-4xl mx-auto px-4">
               <Alert variant="destructive" className="rounded-[2rem] bg-red-50 p-8 shadow-xl shadow-red-500/5">
                 <AlertCircle className="h-5 w-5" />
-                <AlertTitle className="text-lg font-bold uppercase tracking-tight">Database Connection</AlertTitle>
+                <AlertTitle className="text-lg font-bold uppercase tracking-tight">System Message</AlertTitle>
                 <AlertDescription className="mt-4 space-y-4">
                   <p className="text-sm font-medium">System Response: {error}</p>
-                  <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Connection</Button>
+                  <Button variant="outline" className="h-10 text-[10px] font-black uppercase" onClick={fetchProducts}>Retry Update</Button>
                 </AlertDescription>
               </Alert>
             </div>
@@ -191,7 +197,7 @@ export default function CatalogPage() {
               <div className="flex items-center justify-between">
                 <motion.h2 variants={slideUp} className="text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">Popular Categories</motion.h2>
                 <Link href="/categories">
-                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Explore Collections</motion.button>
+                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Explore All</motion.button>
                 </Link>
               </div>
               
@@ -222,12 +228,13 @@ export default function CatalogPage() {
           )}
 
           <div id="marketplace" className="scroll-mt-24 space-y-12">
+            {/* Suggested Picks Carousel */}
             {category === "All" && !isLoading && suggestedPicks.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="mx-auto max-w-[95%] md:max-w-[70%] py-12 px-8 bg-blue-50/50 rounded-[3rem] border border-blue-100/50 animate-in slide-in-from-bottom duration-700"
+                className="mx-auto max-w-[95%] md:max-w-[70%] py-12 px-6 md:px-8 bg-blue-50/50 rounded-[3rem] border border-blue-100/50"
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
@@ -250,7 +257,7 @@ export default function CatalogPage() {
             <section className="space-y-8">
               <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="flex items-center gap-4">
-                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Inventory" : `${category} Department`}</h3>
+                  <h3 className="text-base md:text-xl font-bold font-headline text-slate-900 uppercase tracking-tight">{category === "All" ? "Current Items" : `${category} Section`}</h3>
                   <motion.div {...buttonTap}>
                     <Button 
                       variant="ghost" 
@@ -263,7 +270,7 @@ export default function CatalogPage() {
                     </Button>
                   </motion.div>
                 </div>
-                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">Reset View</Button>}
+                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-bold uppercase">View All</Button>}
               </div>
 
               {isLoading && products.length === 0 ? (
@@ -285,7 +292,7 @@ export default function CatalogPage() {
                 </motion.div>
               ) : (
                 <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No matching items found</p>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No items found in this section</p>
                 </div>
               )}
             </section>

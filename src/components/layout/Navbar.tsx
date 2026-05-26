@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCartStore } from "@/store/useCartStore";
-import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel } from "lucide-react";
+import { useCartStore, Product } from "@/store/useCartStore";
+import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
@@ -13,7 +13,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { buttonTap, fadeIn } from "@/lib/animations";
+import { buttonTap } from "@/lib/animations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,8 +41,11 @@ export function Navbar() {
   const [profile, setProfile] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const searchRef = useRef<HTMLDivElement>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isAdminPath = pathname?.startsWith('/admin');
 
@@ -64,6 +67,33 @@ export function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!isSearchOpen || searchQuery.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .ilike('name', `%${searchQuery}%`)
+        .limit(6);
+      
+      if (data) setSuggestions(data);
+      setIsSearching(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, isSearchOpen]);
+
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isSearchOpen]);
+
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
@@ -82,6 +112,7 @@ export function Navbar() {
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
+    setIsSearchOpen(false);
     router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
@@ -106,13 +137,13 @@ export function Navbar() {
       className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-blue-100/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-500 overflow-hidden"
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {!isAdminPath && (
             <div className="lg:hidden">
               <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-slate-500">
-                    <Menu className="w-6 h-6" />
+                  <Button variant="ghost" size="icon" className="text-slate-500 h-9 w-9">
+                    <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px] p-0 border-none rounded-r-[2rem]">
@@ -134,7 +165,7 @@ export function Navbar() {
                     </div>
                   </SheetHeader>
                   <div className="flex flex-col p-6 space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Main Menu</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-2">Menu</p>
                     {allMobileLinks.map((link) => (
                       <Link 
                         key={link.path} 
@@ -155,8 +186,8 @@ export function Navbar() {
             </div>
           )}
 
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <motion.div whileHover={{ rotate: 5 }} className="relative w-10 h-10 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <motion.div whileHover={{ rotate: 5 }} className="relative w-8 h-8 sm:w-10 sm:h-10 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
               <Image 
                 src="https://i.ibb.co/v4p0sdxs/zicash.jpg" 
                 alt="ZiCash Logo" 
@@ -166,10 +197,10 @@ export function Navbar() {
               />
             </motion.div>
             <div className="flex flex-col justify-center">
-              <span className="font-bold text-sm sm:text-lg text-slate-900 font-headline leading-none">
+              <span className="font-bold text-xs sm:text-lg text-slate-900 font-headline leading-none">
                 Zi<span className="text-blue-600">Cash</span>
               </span>
-              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
+              <span className="text-[7px] sm:text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">
                 GH Limited
               </span>
             </div>
@@ -192,7 +223,7 @@ export function Navbar() {
         )}
 
         {!isAdminPath && (
-          <div className="hidden md:flex flex-1 max-w-sm mx-4 relative" ref={searchRef}>
+          <div className="hidden md:flex flex-1 max-w-sm mx-4 relative">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input 
@@ -206,37 +237,51 @@ export function Navbar() {
           </div>
         )}
 
-        <div className="flex items-center gap-4 md:gap-6">
+        <div className="flex items-center gap-1 sm:gap-4 md:gap-6">
           {!isAdminPath && (
-            <motion.div {...buttonTap}>
-              <Link href="/cart" className="relative group p-2 transition-all duration-300">
-                <div className="relative">
-                  <ShoppingCart className="w-6 h-6 text-slate-400 group-hover:text-blue-600" />
-                  <AnimatePresence>
-                    {cartCount > 0 && (
-                      <motion.span 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] font-black h-4 min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1 shadow-sm"
-                      >
-                        {cartCount}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </Link>
-            </motion.div>
+            <>
+              {/* Mobile Search Icon */}
+              <motion.div {...buttonTap} className="md:hidden">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-slate-400 hover:text-blue-600 h-9 w-9"
+                  onClick={() => setIsSearchOpen(true)}
+                >
+                  <Search className="w-5 h-5" />
+                </Button>
+              </motion.div>
+
+              <motion.div {...buttonTap}>
+                <Link href="/cart" className="relative group p-2 transition-all duration-300">
+                  <div className="relative">
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400 group-hover:text-blue-600" />
+                    <AnimatePresence>
+                      {cartCount > 0 && (
+                        <motion.span 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[8px] sm:text-[9px] font-black h-3.5 sm:h-4 min-w-3.5 sm:min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1 shadow-sm"
+                        >
+                          {cartCount}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </Link>
+              </motion.div>
+            </>
           )}
 
           {!session ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-3">
               <Link href="/auth" className="hidden sm:block">
                 <Button variant="ghost" className="font-bold text-slate-600 p-0 hover:bg-transparent text-xs">Login</Button>
               </Link>
               <motion.div {...buttonTap}>
                 <Link href="/auth">
-                  <Button className="font-bold rounded-full px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 h-10 text-xs">
+                  <Button className="font-bold rounded-full px-3 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 h-8 sm:h-10 text-[10px] sm:text-xs">
                     Sign Up
                   </Button>
                 </Link>
@@ -247,7 +292,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <motion.div {...buttonTap}>
                   <Button variant="ghost" className="p-0 hover:bg-transparent flex items-center gap-2">
-                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm rounded-full overflow-hidden">
+                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 border-2 border-white shadow-sm rounded-full overflow-hidden">
                       <AvatarImage src={profile?.avatar_url} className="object-cover" />
                       <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold">
                         {session?.user?.email?.[0].toUpperCase()}
@@ -257,7 +302,7 @@ export function Navbar() {
                 </motion.div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 mt-2 border-blue-100 rounded-[1.5rem] p-2 shadow-2xl bg-white">
-                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 py-2">Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 
                 <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 cursor-pointer">
@@ -282,7 +327,7 @@ export function Navbar() {
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[9px] font-bold text-slate-300 uppercase tracking-widest px-3 py-2">Information</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[9px] font-bold text-slate-300 uppercase tracking-widest px-3 py-2">Info</DropdownMenuLabel>
                 
                 {secondaryLinks.map((link) => (
                   <DropdownMenuItem key={link.path} asChild className="rounded-xl px-3 py-2.5 cursor-pointer">
@@ -304,6 +349,73 @@ export function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Full Screen Search Overlay (Mobile) */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden fixed inset-0 z-[60] bg-white flex flex-col print:hidden"
+          >
+            <div className="p-6 flex items-center gap-4 border-b border-blue-100/20">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <form onSubmit={handleSearchSubmit}>
+                  <Input 
+                    ref={inputRef}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Find items..." 
+                    className="pl-10 h-12 bg-slate-50 border-none rounded-2xl focus-visible:ring-blue-600/20"
+                  />
+                </form>
+              </div>
+              <button 
+                onClick={() => { setIsSearchOpen(false); setSearchQuery(""); }}
+                className="p-2 bg-slate-50 rounded-xl text-slate-500"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {isSearching ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin opacity-20" />
+                </div>
+              ) : suggestions.length > 0 ? (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recommended items</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {suggestions.map((p) => (
+                      <Link 
+                        key={p.id} 
+                        href={`/product/${p.id}`}
+                        onClick={() => setIsSearchOpen(false)}
+                        className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100"
+                      >
+                        <div className="relative w-14 h-14 bg-white rounded-xl overflow-hidden border border-slate-100 shrink-0">
+                          <Image src={p.image_url} alt={p.name} width={56} height={56} className="object-contain p-2" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">{p.name}</p>
+                          <p className="text-xs font-bold text-blue-600">GH₵{p.price.toLocaleString()}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Start typing to see items...</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 }

@@ -72,7 +72,7 @@ export function ProductReviews({ productId }: { productId: string }) {
       }
       setReviews(data || []);
     } catch (err: any) {
-      // Silent fail for expected database sync states
+      console.error("Fetch Logic Status:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -148,70 +148,80 @@ export function ProductReviews({ productId }: { productId: string }) {
       </div>
 
       <div className="flex flex-col gap-12">
-        {/* Review Form - Full Width Stack */}
-        <div className="w-full max-w-none">
+        {/* Review Form - Visible only if authenticated, otherwise show prompt */}
+        <div className="w-full">
           <div className="p-8 md:p-12 bg-white rounded-[3rem] border border-slate-100 shadow-2xl shadow-blue-600/5 space-y-10 relative overflow-hidden">
              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/[0.03] blur-3xl -mr-32 -mt-32" />
              <div className="relative z-10 space-y-10">
-                <div className="space-y-3">
-                   <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
-                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Help the ZiCash community make informed decisions</p>
-                </div>
-
                 {!user ? (
-                   <div className="p-10 bg-blue-50 rounded-[2rem] border border-blue-100 space-y-4 text-center">
-                      <AlertCircle className="w-10 h-10 text-blue-600 mx-auto" />
-                      <p className="text-base font-bold text-blue-900">Identification Required: Please sign in to leave a verified review.</p>
+                   <div className="p-10 bg-blue-50 rounded-[2rem] border border-blue-100 space-y-6 text-center">
+                      <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                         <AlertCircle className="w-7 h-7 text-blue-600" />
+                      </div>
+                      <div className="space-y-2">
+                         <h3 className="text-xl font-black text-blue-900 uppercase italic">Authenticated Access Only</h3>
+                         <p className="text-sm font-medium text-blue-600/70 max-w-sm mx-auto">Please sign in to your ZiCash account to share your hardware performance logs.</p>
+                      </div>
+                      <Button onClick={() => window.location.href='/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] rounded-xl h-11 px-8">
+                         Sign In to Review
+                      </Button>
                    </div>
                 ) : (
-                   <form onSubmit={handleSubmit} className="space-y-10">
-                      <div className="space-y-5">
-                         <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Select Rating</label>
-                         <div className="flex gap-4">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <button
-                                key={s}
-                                type="button"
-                                onMouseEnter={() => setHoverRating(s)}
-                                onMouseLeave={() => setHoverRating(0)}
-                                onClick={() => setRating(s)}
-                                className="transition-all active:scale-90 hover:scale-110"
-                              >
-                                <Star 
-                                  className={cn(
-                                    "w-10 h-10 transition-colors duration-300",
-                                    (hoverRating || rating) >= s ? "fill-amber-400 text-amber-400" : "text-slate-100"
-                                  )} 
-                                />
-                              </button>
-                            ))}
+                   <>
+                      <div className="space-y-3">
+                         <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic">Share Your Experience</h3>
+                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Help the ZiCash community make informed decisions</p>
+                      </div>
+
+                      <form onSubmit={handleSubmit} className="space-y-10">
+                         <div className="space-y-5">
+                            <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Select Rating</label>
+                            <div className="flex gap-4">
+                               {[1, 2, 3, 4, 5].map((s) => (
+                                 <button
+                                   key={s}
+                                   type="button"
+                                   onMouseEnter={() => setHoverRating(s)}
+                                   onMouseLeave={() => setHoverRating(0)}
+                                   onClick={() => setRating(s)}
+                                   className="transition-all active:scale-90 hover:scale-110"
+                                 >
+                                   <Star 
+                                     className={cn(
+                                       "w-10 h-10 transition-colors duration-300",
+                                       (hoverRating || rating) >= s ? "fill-amber-400 text-amber-400" : "text-slate-100"
+                                     )} 
+                                   />
+                                 </button>
+                               ))}
+                            </div>
                          </div>
-                      </div>
 
-                      <div className="space-y-5">
-                         <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Your Observations</label>
-                         <Textarea 
-                            placeholder="Tell us about the quality, performance and value of this hardware unit..." 
-                            className="min-h-[180px] rounded-[2rem] bg-slate-50 border-none font-bold text-lg shadow-inner p-8 focus-visible:ring-4 focus-visible:ring-blue-600/5 placeholder:text-slate-300 leading-relaxed"
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                         />
-                      </div>
+                         <div className="space-y-5">
+                            <label className="text-[11px] font-black uppercase text-slate-500 ml-1 tracking-[0.2em]">Your Observations</label>
+                            <Textarea 
+                               placeholder="Tell us about the quality, performance and value of this hardware unit..." 
+                               className="min-h-[180px] rounded-[2rem] bg-slate-50 border-none font-bold text-lg shadow-inner p-8 focus-visible:ring-4 focus-visible:ring-blue-600/5 placeholder:text-slate-300 leading-relaxed"
+                               value={comment}
+                               onChange={(e) => setComment(e.target.value)}
+                            />
+                         </div>
 
-                      <Button 
-                        disabled={isSubmitting}
-                        className="w-full h-20 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] rounded-3xl shadow-2xl shadow-blue-600/20 gap-4 transition-all hover:scale-[1.01]"
-                      >
-                         {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />} 
-                         Post Verified Review
-                      </Button>
-                   </form>
+                         <Button 
+                           disabled={isSubmitting}
+                           className="w-full h-20 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] rounded-3xl shadow-2xl shadow-blue-600/20 gap-4 transition-all hover:scale-[1.01]"
+                         >
+                            {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />} 
+                            Post Verified Review
+                         </Button>
+                      </form>
+                   </>
                 )}
              </div>
           </div>
         </div>
 
-        {/* Reviews List - Full Width Stack */}
+        {/* Reviews List - Always Visible */}
         <div className="w-full space-y-8">
            {isLoading ? (
              <div className="flex flex-col items-center justify-center py-20">

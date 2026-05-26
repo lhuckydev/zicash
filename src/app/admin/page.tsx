@@ -131,6 +131,72 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+// Extracted Component to fix Hook Rules
+interface DiscountRowProps {
+  product: Product;
+  onSave: (product: Product, price: number, date: string) => Promise<void>;
+  isSaving: boolean;
+}
+
+const DiscountRow = ({ product, onSave, isSaving }: DiscountRowProps) => {
+  const [dPrice, setDPrice] = useState(product.discount_price || 0);
+  const [dDate, setDDate] = useState(product.discount_ends_at ? product.discount_ends_at.split('T')[0] : "");
+
+  return (
+    <TableRow className="border-white group">
+      <TableCell className="pl-8 py-5">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 bg-white rounded-lg relative border border-slate-100">
+            <Image src={product.image_url} alt={product.name} fill className="object-contain p-1" />
+          </div>
+          <span className="text-xs font-bold text-slate-900 line-clamp-1 max-w-[200px]">{product.name}</span>
+        </div>
+      </TableCell>
+      <TableCell className="text-xs font-black text-slate-400">GH₵ {product.price.toLocaleString()}</TableCell>
+      <TableCell>
+        <div className="relative max-w-[120px]">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GH₵</span>
+          <input 
+            type="number" 
+            className="pl-10 w-full h-10 rounded-xl bg-white border-slate-200 text-xs font-bold px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border" 
+            value={dPrice || ""} 
+            onChange={(e) => setDPrice(parseFloat(e.target.value))} 
+          />
+        </div>
+      </TableCell>
+      <TableCell>
+        <input 
+          type="date" 
+          className="h-10 w-full rounded-xl bg-white border-slate-200 text-xs font-bold max-w-[160px] px-3 focus:outline-none focus:ring-2 focus:ring-blue-600/10 border" 
+          value={dDate} 
+          onChange={(e) => setDDate(e.target.value)} 
+        />
+      </TableCell>
+      <TableCell className="pr-8 text-right">
+        <div className="flex items-center justify-end gap-2">
+          <Button 
+            onClick={() => onSave(product, dPrice, dDate)} 
+            disabled={isSaving}
+            className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-bold text-[10px] uppercase tracking-widest gap-2"
+          >
+            {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
+          </Button>
+          {(product.discount_price || product.discount_ends_at) && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => onSave(product, 0, "")}
+              className="h-10 w-10 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 export default function AdminPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -175,7 +241,7 @@ export default function AdminPage() {
         setMomoNumber(sRes.data.value.number || "0243708691");
       }
     } catch (err: any) {
-      console.error("Admin Update Error:", err);
+      console.error("Store Update Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -472,62 +538,14 @@ export default function AdminPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {products.map((p) => {
-                          const [dPrice, setDPrice] = useState(p.discount_price || 0);
-                          const [dDate, setDDate] = useState(p.discount_ends_at ? p.discount_ends_at.split('T')[0] : "");
-                          
-                          return (
-                            <TableRow key={p.id} className="border-white group">
-                              <TableCell className="pl-8 py-5">
-                                <div className="flex items-center gap-4">
-                                  <div className="w-10 h-10 bg-white rounded-lg relative border border-slate-100"><Image src={p.image_url} alt={p.name} fill className="object-contain p-1" /></div>
-                                  <span className="text-xs font-bold text-slate-900 line-clamp-1 max-w-[200px]">{p.name}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-xs font-black text-slate-400">GH₵ {p.price.toLocaleString()}</TableCell>
-                              <TableCell>
-                                <div className="relative max-w-[120px]">
-                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600">GH₵</span>
-                                  <Input 
-                                    type="number" 
-                                    className="pl-10 h-10 rounded-xl bg-white border-slate-200 text-xs font-bold" 
-                                    value={dPrice || ""} 
-                                    onChange={(e) => setDPrice(parseFloat(e.target.value))} 
-                                  />
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Input 
-                                  type="date" 
-                                  className="h-10 rounded-xl bg-white border-slate-200 text-xs font-bold max-w-[160px]" 
-                                  value={dDate} 
-                                  onChange={(e) => setDDate(e.target.value)} 
-                                />
-                              </TableCell>
-                              <TableCell className="pr-8 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button 
-                                    onClick={() => handleSaveDiscount(p, dPrice, dDate)} 
-                                    disabled={savingDiscountId === p.id}
-                                    className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-bold text-[10px] uppercase tracking-widest gap-2"
-                                  >
-                                    {savingDiscountId === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
-                                  </Button>
-                                  {(p.discount_price || p.discount_ends_at) && (
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      onClick={() => handleSaveDiscount(p, 0, "")}
-                                      className="h-10 w-10 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </Button>
-                                  )}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
+                        {products.map((p) => (
+                          <DiscountRow 
+                            key={p.id} 
+                            product={p} 
+                            onSave={handleSaveDiscount} 
+                            isSaving={savingDiscountId === p.id} 
+                          />
+                        ))}
                       </TableBody>
                     </Table>
                  </div>

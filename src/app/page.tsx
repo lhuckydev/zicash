@@ -114,10 +114,8 @@ export default function CatalogPage() {
   const featuredProducts = useMemo(() => products.filter(p => p.category === "Laptops" || p.category === "Phones").slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
-  // Suggested Picks logic with randomization
   const suggestedPicks = useMemo(() => {
     if (!products || products.length === 0) return [];
-    // Shuffle and pick top 10 for carousel
     return [...products].sort(() => Math.random() - 0.5).slice(0, 10);
   }, [products]);
 
@@ -128,7 +126,6 @@ export default function CatalogPage() {
       <main className="flex-1 pb-32 md:pb-12 text-slate-900">
         <div className="container mx-auto px-5 pt-6 space-y-16">
           
-          {/* Hero Slider Section */}
           {isLoading && products.length === 0 ? (
             <section className="py-8 px-2 md:px-10">
               <Skeleton className="w-full h-[350px] md:h-[480px] rounded-[3rem]" />
@@ -186,7 +183,6 @@ export default function CatalogPage() {
             </div>
           )}
 
-          {/* Categories */}
           {!error && (
             <motion.div 
               variants={staggerContainer(0.05)}
@@ -228,7 +224,6 @@ export default function CatalogPage() {
           )}
 
           <div id="marketplace" className="scroll-mt-24 space-y-12">
-            {/* Suggested Picks Carousel */}
             {category === "All" && !isLoading && suggestedPicks.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}

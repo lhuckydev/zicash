@@ -67,7 +67,6 @@ export function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Search Logic
   useEffect(() => {
     if (searchQuery.length < 1) {
       setSuggestions([]);
@@ -356,15 +355,21 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-start justify-center pt-10 sm:pt-20 px-4"
-            onClick={() => setIsSearchOpen(false)}
+            className="fixed inset-0 z-[100] flex items-start justify-center pt-10 sm:pt-20 px-4"
           >
+            {/* Backdrop Layer */}
+            <div 
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" 
+              onClick={() => setIsSearchOpen(false)}
+            />
+            
+            {/* Modal Content */}
             <motion.div 
               initial={{ scale: 0.9, y: -20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: -20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden"
             >
               <div className="p-4 border-b border-slate-100 flex items-center gap-3">
                 <div className="relative flex-1 group">

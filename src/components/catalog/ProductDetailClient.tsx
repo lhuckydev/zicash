@@ -152,7 +152,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   useEffect(() => {
     if (!api) return;
-    setCurrent(api.selectedScrollSnap());
     api.on("select", () => {
       setCurrent(api.selectedScrollSnap());
     });
@@ -214,7 +213,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </h1>
            </div>
 
-           {/* Ratings Integration */}
+           {/* Ratings Summary Bar */}
            {ratingInfo && (
              <div className="flex items-center gap-6 px-1">
                 <div className="flex text-amber-400">
@@ -236,25 +235,31 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
               <div className="flex flex-col lg:flex-row gap-12 items-center">
                  <div className="flex-1 w-full order-1 lg:order-2">
-                    <div className="relative aspect-square md:aspect-[4/3] max-h-[650px] mx-auto w-full">
-                       <Carousel setApi={setApi} className="w-full h-full">
-                          <CarouselContent className="h-full ml-0">
-                             {productImages.map((url, idx) => (
-                               <CarouselItem key={idx} className="relative h-full w-full pl-0">
-                                 <div className="relative w-full h-full flex items-center justify-center">
-                                   <Image 
-                                     src={url as string} 
-                                     alt={`${product?.name} ${idx + 1}`} 
-                                     fill 
-                                     className="object-contain transition-all duration-1000 group-hover:scale-105" 
-                                     priority={idx === 0} 
-                                     sizes="(max-width: 768px) 100vw, 60vw"
-                                   />
-                                 </div>
-                               </CarouselItem>
-                             ))}
-                          </CarouselContent>
-                       </Carousel>
+                    <div className="relative w-full mx-auto">
+                       {productImages.length > 0 ? (
+                          <Carousel setApi={setApi} className="w-full">
+                             <CarouselContent className="ml-0">
+                                {productImages.map((url, idx) => (
+                                  <CarouselItem key={idx} className="relative aspect-square md:aspect-[4/3] pl-0">
+                                    <div className="relative w-full h-full flex items-center justify-center">
+                                      <Image 
+                                        src={url as string} 
+                                        alt={`${product?.name} ${idx + 1}`} 
+                                        fill 
+                                        className="object-contain transition-all duration-1000 group-hover:scale-105" 
+                                        priority={idx === 0} 
+                                        sizes="(max-width: 768px) 100vw, 60vw"
+                                      />
+                                    </div>
+                                  </CarouselItem>
+                                ))}
+                             </CarouselContent>
+                          </Carousel>
+                       ) : (
+                          <div className="aspect-square md:aspect-[4/3] bg-slate-50 rounded-3xl flex items-center justify-center">
+                            <Box className="w-12 h-12 text-slate-200" />
+                          </div>
+                       )}
                     </div>
                  </div>
                  
@@ -276,7 +281,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </div>
         </div>
 
-        {/* 3. OTHERS (Pricing, Options, Description, Specs) */}
+        {/* 3. HARDWARE CONFIGURATIONS & SPECS */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
            {/* Left Side: Pricing & Options */}
            <div className="lg:col-span-7 space-y-12">
@@ -392,7 +397,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
            </div>
 
-           {/* Right Side: Description & Info */}
+           {/* Right Side: Description & Verified Info */}
            <div className="lg:col-span-5 space-y-12">
               <div className="space-y-8">
                  <div className="flex items-center gap-4">
@@ -404,7 +409,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  </p>
               </div>
 
-              {/* Badges/Info */}
               <div className="grid grid-cols-2 gap-4">
                  <div className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-blue-100 transition-colors">
                     <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform"><ShieldCheck className="w-8 h-8" /></div>

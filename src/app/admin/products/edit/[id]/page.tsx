@@ -137,8 +137,8 @@ export default function EditProductPage() {
       if (data.variants) {
         setVariants(data.variants.map((v: any) => ({
           ...v,
-          price: v.price.toString(),
-          stock: v.stock.toString()
+          price: v.price?.toString() || "",
+          stock: v.stock?.toString() || ""
         })));
       }
     } catch (err: any) {
@@ -458,7 +458,7 @@ export default function EditProductPage() {
                                  type="text"
                                  inputMode="decimal"
                                  className="w-full pl-14 h-14 bg-blue-50/50 border-none rounded-2xl font-black text-2xl text-blue-900 px-4 focus:outline-none focus:ring-4 focus:ring-blue-600/5 transition-all shadow-inner italic" 
-                                 value={v.price} 
+                                 value={v.price || ""} 
                                  onChange={e => updateVariant(idx, 'price', e.target.value)} 
                                />
                              </div>
@@ -469,7 +469,7 @@ export default function EditProductPage() {
                                type="text"
                                inputMode="numeric"
                                className="w-full h-14 bg-slate-50 border-none rounded-2xl font-black text-lg px-4 focus:outline-none shadow-inner" 
-                               value={v.stock} 
+                               value={v.stock || ""} 
                                onChange={e => updateVariant(idx, 'stock', e.target.value)} 
                              />
                            </div>

@@ -91,6 +91,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Product, ProductVariant } from "@/store/useCartStore";
 import Link from "next/link";
 import Image from "next/image";
+import { SymbolIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -127,7 +128,7 @@ const SESSION_TIMEOUT = 7200000;
 
 interface DiscountRowProps {
   product: Product;
-  onSaveVariant: (variantId: string, price: number, date: string) => Promise<void>;
+  onSaveVariant: (variantId: string, price: number | null, date: string) => Promise<void>;
   isSaving: string | null;
 }
 
@@ -188,15 +189,15 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
 
 const VariantDiscountSubRow = ({ variant, onSave, isSaving }: { 
   variant: ProductVariant, 
-  onSave: (vId: string, p: number, d: string) => Promise<void>,
+  onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  const [dPrice, setDPrice] = useState(variant.discount?.discount_price || 0);
+  const [dPrice, setDPrice] = useState<number | null>(variant.discount?.discount_price || null);
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
   const handlePriceChange = (val: string) => {
     if (val === "") {
-      setDPrice(0);
+      setDPrice(null);
     } else {
       const parsed = parseFloat(val);
       if (!isNaN(parsed)) setDPrice(parsed);
@@ -205,66 +206,61 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
 
   return (
     <TableRow className="bg-slate-50/50 border-l-4 border-l-blue-600">
-      <TableCell className="pl-12 py-8" colSpan={4}>
-        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-10 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+      <TableCell className="pl-12 py-6" colSpan={4}>
+        <div className="max-w-3xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
           
-          {/* Label and Normal Rate */}
-          <div className="flex items-center gap-6 min-w-[200px]">
-            <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shrink-0"><Settings2 className="w-6 h-6" /></div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Banknote className="w-3 h-3" /> Normal Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
+          <div className="flex items-center gap-4 min-w-[180px]">
+            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
+            <div className="space-y-0.5">
+              <h4 className="text-xs font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          {/* Pricing Input */}
-          <div className="flex flex-col gap-2 flex-1 max-w-[220px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
              <div className="relative group">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none uppercase tracking-widest transition-opacity group-focus-within:opacity-30">Sale GHS</span>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none">GHS</div>
                 <input 
                   type="number" 
-                  className="pl-24 w-full h-14 rounded-2xl bg-slate-50 border-transparent text-lg font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
-                  value={dPrice || ""} 
+                  step="0.01"
+                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  value={dPrice ?? ""} 
                   onChange={(e) => handlePriceChange(e.target.value)} 
                   placeholder="0.00"
                 />
              </div>
           </div>
 
-          {/* Date Picker */}
-          <div className="flex flex-col gap-2 flex-1 max-w-[220px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
-             <div className="relative">
-                <input 
-                  type="date" 
-                  className="h-14 w-full rounded-2xl bg-slate-50 border-transparent text-sm font-black uppercase tracking-tight px-6 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
-                  value={dDate} 
-                  onChange={(e) => setDDate(e.target.value)} 
-                />
-             </div>
+             <input 
+               type="date" 
+               className="h-12 w-full rounded-xl bg-slate-50 border-transparent text-xs font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+               value={dDate} 
+               onChange={(e) => setDDate(e.target.value)} 
+             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button 
-              size="lg"
+              size="sm"
               onClick={() => onSave(variant.id, dPrice, dDate)} 
               disabled={isSaving}
-              className="h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 px-8 font-black text-[11px] uppercase tracking-widest gap-3 shadow-xl shadow-blue-600/20 transition-all active:scale-95"
+              className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
             >
-              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />} Activate Offer
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Activate
             </Button>
             {variant.discount && (
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => onSave(variant.id, 0, "")}
-                className="h-14 w-14 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+                onClick={() => onSave(variant.id, null, "")}
+                className="h-12 w-12 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4 h-4" />
               </Button>
             )}
           </div>
@@ -369,10 +365,10 @@ export default function AdminPage() {
     }
   };
 
-  const handleSaveVariantDiscount = async (variantId: string, dPrice: number, dDate: string) => {
+  const handleSaveVariantDiscount = async (variantId: string, dPrice: number | null, dDate: string) => {
     setSavingDiscountId(variantId);
     try {
-      if (dPrice === 0 || !dDate) {
+      if (dPrice === null || dPrice === 0 || !dDate) {
         const { error } = await supabase
           .from('discounts')
           .delete()

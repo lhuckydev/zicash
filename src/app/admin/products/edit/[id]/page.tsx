@@ -233,6 +233,24 @@ export default function EditProductPage() {
     }
   };
 
+  const handlePriceInput = (val: string) => {
+    if (val === "") {
+      setProduct({ ...product, price: undefined });
+    } else {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) setProduct({ ...product, price: parsed });
+    }
+  };
+
+  const handleStockInput = (val: string) => {
+    if (val === "") {
+      setProduct({ ...product, stock: undefined });
+    } else {
+      const parsed = parseInt(val);
+      if (!isNaN(parsed)) setProduct({ ...product, stock: parsed });
+    }
+  };
+
   if (isLoading) return <div className="flex min-h-screen items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-blue-600 opacity-20" /></div>;
 
   if (!isAuthenticated) {
@@ -330,8 +348,8 @@ export default function EditProductPage() {
                       <Input 
                         type="number" 
                         className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" 
-                        value={product.price ?? 0} 
-                        onChange={(e) => setProduct({...product, price: e.target.value === "" ? 0 : parseFloat(e.target.value)})} 
+                        value={product.price ?? ""} 
+                        onChange={(e) => handlePriceInput(e.target.value)} 
                       />
                     </div>
                   </div>
@@ -340,8 +358,8 @@ export default function EditProductPage() {
                     <Input 
                       type="number" 
                       className="h-12 rounded-xl bg-slate-50 border-none font-black text-lg" 
-                      value={product.stock ?? 0} 
-                      onChange={(e) => setProduct({...product, stock: e.target.value === "" ? 0 : parseInt(e.target.value)})} 
+                      value={product.stock ?? ""} 
+                      onChange={(e) => handleStockInput(e.target.value)} 
                     />
                   </div>
                 </div>

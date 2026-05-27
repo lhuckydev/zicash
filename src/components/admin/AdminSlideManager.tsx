@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,7 +14,9 @@ import {
   Link as LinkIcon,
   Loader2,
   RefreshCcw,
-  Zap
+  Zap,
+  Edit,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,7 @@ import { SlideUploadModal } from "./SlideUploadModal";
 import Image from "next/image";
 import { motion, Reorder, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export interface Slide {
   id: string;

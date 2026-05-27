@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -56,21 +57,15 @@ export function ProductCard({
   showCategory?: boolean;
 }) {
   const { toggleItem, hasItem } = useWishlistStore();
-
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
   
-  const images = product.image_urls && product.image_urls.length > 0 
-    ? product.image_urls 
-    : [product.image_url];
-
+  const images = product.image_urls && product.image_urls.length > 0 ? product.image_urls : [product.image_url];
   const isFavorite = hasItem(product.id);
   
-  // Strictly check the discounts table link
   const discountActive = product.variants?.some(v => !!v.discount);
-  const hasVariants = (product.variants?.length || 0) > 1;
+  const hasMultipleChoices = (product.variants?.length || 0) > 1;
 
-  // Find the earliest expiry date for the timer from the discounts table data
   const earliestExpiry = product.variants
     ? product.variants
         .filter(v => v.discount?.ends_at)
@@ -78,14 +73,10 @@ export function ProductCard({
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
     : undefined;
 
-  // Price calculations strictly using variant.discount data
-  const displayPrice = product.variants && product.variants.length > 0 
-    ? Math.min(...product.variants.map(v => v.discount ? v.discount.discount_price : v.price))
-    : product.price;
-
-  const originalPrice = product.variants && product.variants.length > 0
-    ? Math.min(...product.variants.map(v => v.price))
-    : product.price;
+  // Single option price calculation
+  const singleVariant = product.variants?.[0];
+  const displayPrice = singleVariant?.discount?.discount_price || singleVariant?.price || product.price;
+  const originalPrice = singleVariant?.price || product.price;
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -97,11 +88,7 @@ export function ProductCard({
 
   useEffect(() => {
     async function fetchRatings() {
-      const { data } = await supabase
-        .from('reviews')
-        .select('rating')
-        .eq('product_id', product.id);
-      
+      const { data } = await supabase.from('reviews').select('rating').eq('product_id', product.id);
       if (data && data.length > 0) {
         const average = data.reduce((acc, r) => acc + r.rating, 0) / data.length;
         setRatingInfo({ average, count: data.length });
@@ -138,8 +125,8 @@ export function ProductCard({
               <Zap className="w-2.5 h-2.5 md:w-3 h-3 fill-current" /> Hot Deal
             </Badge>
           )}
-          {hasVariants && (
-            <Badge className="bg-blue-600 text-white border-none text-[7px] md:text-[8px] font-black uppercase flex items-center gap-1 py-1 px-2 md:py-1.5 md:px-3 shadow-lg shadow-blue-500/20">
+          {hasMultipleChoices && (
+            <Badge className="bg-blue-600 text-white border-none text-[7px] md:text-[8px] font-black uppercase py-1 px-2 md:py-1.5 md:px-3 shadow-lg">
               More Choices
             </Badge>
           )}
@@ -162,7 +149,9 @@ export function ProductCard({
           {product.brand && (
             <p className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-widest", discountActive ? "text-red-600" : "text-blue-600")}>{product.brand}</p>
           )}
-          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">{product.name}</h3>
+          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">
+            {product.name}
+          </h3>
           
           <div className="flex items-center gap-2 md:gap-3">
              <div className="flex text-amber-400">
@@ -170,20 +159,24 @@ export function ProductCard({
                   <Star key={s} className={cn("w-2.5 h-2.5 md:w-3 h-3", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
                 ))}
              </div>
-             {ratingInfo && (
-               <span className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest">({ratingInfo.count})</span>
-             )}
+             {ratingInfo && <span className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest">({ratingInfo.count})</span>}
           </div>
 
-          <div className="flex flex-col pt-1 min-h-[45px] md:min-h-[50px] justify-center">
-             {!hasVariants ? (
+          <div className="flex flex-col pt-1 min-h-[50px] justify-center">
+             {!hasMultipleChoices ? (
                <div className="space-y-0.5">
                  {discountActive && (
-                   <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60">GHS {originalPrice.toLocaleString()}</p>
+                   <div className="flex flex-col">
+                     <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Standard Rate</span>
+                     <p className="text-[10px] md:text-[11px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60">GHS {originalPrice.toLocaleString()}</p>
+                   </div>
                  )}
-                 <p className={cn("text-lg md:text-xl font-black font-headline italic tracking-tighter", discountActive ? "text-red-600" : "text-blue-600")}>
-                   GH₵ {displayPrice.toLocaleString()}
-                 </p>
+                 <div className="flex flex-col">
+                    {discountActive && <span className="text-[9px] font-black text-red-600 uppercase tracking-widest">New Price</span>}
+                    <p className={cn("text-lg md:text-xl font-black font-headline italic tracking-tighter", discountActive ? "text-red-600" : "text-blue-600")}>
+                      GH₵ {displayPrice.toLocaleString()}
+                    </p>
+                 </div>
                </div>
              ) : (
                <div className="py-1">
@@ -197,10 +190,10 @@ export function ProductCard({
         <motion.div {...buttonTap} className="mt-auto">
           <Link href={`/product/${product.id}`} className="block">
             <Button className={cn(
-              "w-full rounded-xl h-10 md:h-11 font-black text-white transition-all text-[9px] md:text-[10px] uppercase tracking-widest shadow-xl active:scale-95 gap-2",
-              discountActive ? "bg-red-600 hover:bg-red-700 shadow-red-900/5" : "bg-slate-950 hover:bg-blue-600 shadow-slate-900/5"
+              "w-full rounded-xl h-10 md:h-11 font-black text-white transition-all text-[9px] md:text-[10px] uppercase tracking-widest shadow-xl gap-2",
+              discountActive ? "bg-red-600 hover:bg-red-700" : "bg-slate-950 hover:bg-blue-600"
             )}>
-              {hasVariants ? "Explore Choices" : "View Item"} <ChevronRight className="w-3 h-3" />
+              {hasMultipleChoices ? "Explore Choices" : "View Item"} <ChevronRight className="w-3 h-3" />
             </Button>
           </Link>
         </motion.div>

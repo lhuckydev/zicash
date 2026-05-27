@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { Product } from "@/store/useCartStore";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
-import { staggerContainer, fadeIn, slideUp } from "@/lib/animations";
+import { staggerContainer, fadeIn } from "@/lib/animations";
 
 export function HotDeals() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,7 +25,7 @@ export function HotDeals() {
           .order('created_at', { ascending: false });
 
         if (!error && data) {
-          // Filter products that have at least one discount in the dedicated discounts table
+          // Identify products with active discounts in the specialized table
           const discounted = data.filter(p => 
             p.variants?.some(v => !!v.discount)
           ).slice(0, 5);
@@ -33,7 +33,7 @@ export function HotDeals() {
           setProducts(discounted);
         }
       } catch (err) {
-        console.error("Hot Deals Update Error:", err);
+        console.warn("Hot Deals fetch fallback active:", err);
       } finally {
         setIsLoading(false);
       }
@@ -56,12 +56,12 @@ export function HotDeals() {
             </div>
             <h2 className="text-4xl md:text-6xl font-black font-headline uppercase italic">Hot <span className="text-red-600">Deals</span></h2>
             <p className="text-slate-500 font-medium max-w-xl">
-              Exclusive discounts on our premium products. Pick your favorite version before the sale ends.
+              Limited-time discounts on our premium configurations. Grab yours before the sale ends.
             </p>
           </div>
           
           <Link href="/categories?filter=discounted">
-            <Button className="h-14 px-8 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-xl shadow-red-600/20 transition-all hover:scale-105">
+            <Button className="h-14 px-8 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-xl transition-all hover:scale-105">
               View All Offers <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

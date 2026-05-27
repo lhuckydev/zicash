@@ -23,7 +23,6 @@ import Autoplay from "embla-carousel-autoplay";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { slideUp, fadeIn, staggerContainer, buttonTap } from "@/lib/animations";
@@ -83,20 +82,29 @@ export default function CatalogPage() {
     setIsLoading(true);
     setError(null);
     try {
+      // Primary fetch attempt with deep join for discounts
       const { data, error: supabaseError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
 
-      if (supabaseError) {
-        setError(supabaseError.message);
-      } else {
-        setProducts(data || []);
-        setSeed(Math.random());
-      }
+      if (supabaseError) throw supabaseError;
+      setProducts(data || []);
+      setSeed(Math.random());
     } catch (err: any) {
-      console.error("Update Error:", err);
-      setError(err.message || "Failed to connect to the shop.");
+      console.warn("Primary fetch failed, using safe fallback:", err.message);
+      // Fallback: Fetch without discount join to ensure items always show up
+      const { data: fallbackData } = await supabase
+        .from('products')
+        .select('*, variants:product_variants(*)')
+        .order('created_at', { ascending: false });
+      
+      if (fallbackData) {
+        setProducts(fallbackData);
+        setSeed(Math.random());
+      } else {
+        setError("Catalog connection temporary interrupted. Refresh to retry.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -122,9 +130,7 @@ export default function CatalogPage() {
     { name: "Educational Consult", imageUrl: "https://i.ibb.co/pB4yX4JL/high-resolution-graduation-cap-png-icon-17-removebg-preview.png", icon: GraduationCap },
   ];
 
-  // Logic: Show up to 5 products marked as featured in the slider
   const featuredProducts = useMemo(() => products.filter(p => p.featured).slice(0, 5), [products]);
-  
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
   const suggestedPicks = useMemo(() => {

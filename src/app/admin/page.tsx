@@ -87,7 +87,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
               <Image src={product.image_url} alt={product.name} fill className="object-contain p-2" />
             </div>
             <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-sm font-black text-slate-900 leading-tight uppercase truncate max-w-[300px]">{product.name}</span>
+              <span className="text-sm font-black text-slate-900 leading-tight uppercase truncate max-w-[300px] italic">{product.name}</span>
               <span className="text-[10px] text-blue-600 font-black uppercase tracking-[0.2em]">{product.brand || 'Premium Brand'}</span>
             </div>
           </div>
@@ -135,7 +135,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  // Use strings for raw input to allow free typing/deleting without jitter
+  // Local string state ensures the user can type decimal points and delete values without jitter
   const [dPriceInput, setDPriceInput] = useState<string>(variant.discount?.discount_price?.toString() ?? "");
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
@@ -151,26 +151,26 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   return (
     <TableRow className="bg-slate-50/30 border-l-4 border-l-blue-600">
       <TableCell className="pl-12 py-6" colSpan={4}>
-        <div className="max-w-3xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="max-w-4xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mx-auto">
           
-          <div className="flex items-center gap-4 min-w-[200px]">
+          <div className="flex items-center gap-4 min-w-[220px]">
             <div className="p-3 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
-            <div className="space-y-0.5">
-              <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
+            <div className="space-y-0.5 min-w-0">
+              <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight truncate">{variant.label}</h4>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                Base Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
+                Regular Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[200px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
-             <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none select-none">GHS</div>
+             <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none select-none z-10">GHS</div>
                 <input 
                   type="text"
                   inputMode="decimal"
-                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner relative" 
                   value={dPriceInput} 
                   onChange={(e) => setDPriceInput(e.target.value)} 
                   placeholder="0.00"
@@ -178,7 +178,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
              </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[200px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
              <input 
                type="date" 
@@ -188,7 +188,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
              />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button 
               size="sm"
               onClick={handleSave} 
@@ -235,14 +235,14 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch with discount join
+      // Primary fetch with discount join
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.warn("Security Gateway: Discounts restricted or missing. Checking standard access.");
+        console.warn("Security Check: Standard view active. Ensure RLS is disabled if specific write errors occur.");
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -262,7 +262,7 @@ export default function AdminPage() {
       if (cRes.data) setCustomers(cRes.data);
       
     } catch (err: any) {
-      console.error("Management Sync Error:", err);
+      console.error("Hub Sync Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +294,7 @@ export default function AdminPage() {
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || !session.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
-      toast({ variant: "destructive", title: "Access Denied", description: "Your credentials lack manager clearance." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Manager clearance required." });
       return;
     }
 
@@ -303,13 +303,14 @@ export default function AdminPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Access Denied", description: "Incorrect clearance passkey." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Incorrect passkey." });
     }
   };
 
   const handleSaveVariantDiscount = async (variantId: string, dPrice: number | null, dDate: string) => {
     setSavingDiscountId(variantId);
     try {
+      // Remove offer if price is cleared
       if (dPrice === null || dPrice === 0 || !dDate) {
         const { error } = await supabase
           .from('discounts')
@@ -317,6 +318,7 @@ export default function AdminPage() {
           .eq('variant_id', variantId);
         if (error) throw error;
       } else {
+        // Direct upsert - ensure RLS is disabled if this fails
         const { error } = await supabase
           .from('discounts')
           .upsert({
@@ -328,13 +330,13 @@ export default function AdminPage() {
         if (error) throw error;
       }
       
-      toast({ title: "Pricing Updated", description: `Hardware offer has been successfully activated.` });
+      toast({ title: "Pricing Updated", description: `Offer successfully activated.` });
       fetchAllData();
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
-        title: "Update Restricted", 
-        description: err.message || "Permission error. Ensure security protocols are active in the SQL editor." 
+        title: "Action Restricted", 
+        description: err.message || "Ensure the 'discounts' table allows writes in Supabase." 
       });
     } finally {
       setSavingDiscountId(null);
@@ -342,16 +344,16 @@ export default function AdminPage() {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Permanently remove this hardware item from the marketplace?")) return;
+    if (!confirm("Permanently remove this item from the catalog?")) return;
     
     setIsLoading(true);
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Item Removed", description: "The product has been cleared from the catalog." });
+      toast({ title: "Item Removed", description: "The product has been cleared." });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Action Restricted", description: err.message });
+      toast({ variant: "destructive", title: "Sync Restricted", description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -363,7 +365,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     await supabase.auth.signOut();
     router.push('/');
-    toast({ title: "Logged Out", description: "Management session terminated." });
+    toast({ title: "Session Closed", description: "Management hub locked." });
   };
 
   const totalRevenue = useMemo(() => 

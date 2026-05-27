@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -5,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { HotDeals } from "@/components/home/HotDeals";
+import { HeroSlider } from "@/components/home/HeroSlider";
 import { Product } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,13 +14,6 @@ import {
   LayoutGrid, Sparkles, ArrowRight, AlertCircle, RefreshCcw
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  type CarouselApi 
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -73,15 +68,12 @@ export default function CatalogPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
   const [seed, setSeed] = useState(0);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Primary fetch attempt with deep join for discounts (Publicly accessible)
       const { data, error: supabaseError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
@@ -112,13 +104,6 @@ export default function CatalogPage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  useEffect(() => {
-    if (!api) return;
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
-
   const categories = [
     { name: "All", icon: LayoutGrid },
     { name: "Laptops", imageUrl: "https://i.ibb.co/fGBPB9y4/laptop-586-removebg-preview.png", icon: Laptop },
@@ -128,7 +113,6 @@ export default function CatalogPage() {
     { name: "Educational Consult", imageUrl: "https://i.ibb.co/pB4yX4JL/high-resolution-graduation-cap-png-icon-17-removebg-preview.png", icon: GraduationCap },
   ];
 
-  const featuredProducts = useMemo(() => products.filter(p => p.featured).slice(0, 5), [products]);
   const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
   
   const suggestedPicks = useMemo(() => {
@@ -141,140 +125,99 @@ export default function CatalogPage() {
       <Navbar />
 
       <main className="flex-1 pb-32 md:pb-12 text-slate-900">
-        <div className="container mx-auto px-5 pt-6 space-y-16">
+        <div className="container mx-auto space-y-16">
           
-          {isLoading && products.length === 0 ? (
-            <section className="py-8 px-2 md:px-10">
-              <Skeleton className="w-full h-[350px] md:h-[480px] rounded-[3rem]" />
-            </section>
-          ) : category === "All" && featuredProducts.length > 0 && (
-            <motion.section 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="relative group py-8 px-2 md:px-10 overflow-hidden"
-            >
-              <Carousel 
-                setApi={setApi} 
-                className="w-full relative z-10" 
-                opts={{ loop: true, align: 'center' }}
-                plugins={[Autoplay({ delay: 5000 })]}
+          {/* Customizable Promotional Slideshow */}
+          {category === "All" && <HeroSlider />}
+
+          <div className="px-5 space-y-16">
+            {category === "All" && <HotDeals />}
+
+            {!isLoading && category === "All" && suggestedPicks.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
               >
-                <CarouselContent className="-ml-4 flex items-center h-[350px] md:h-[480px]">
-                  {featuredProducts.map((product, index) => (
-                    <CarouselItem key={product.id} className="pl-4 basis-[90%] md:basis-[60%] lg:basis-[45%] transition-all duration-500 ease-out">
-                      <Link href={`/product/${product.id}`} className="block">
-                        <div className={cn(
-                          "relative h-[280px] md:h-[400px] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden transition-all duration-700 shadow-xl group/item",
-                          current === index ? "scale-100 opacity-100 ring-2 ring-blue-500/20" : "scale-85 md:scale-90 opacity-40"
-                        )}>
-                          <div className="absolute inset-0 z-0 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/40 shadow-inner flex items-center justify-center">
-                             <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 md:p-14 transition-transform duration-1000 group-hover/item:scale-105 z-10" priority />
-                          </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-20" />
-                          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-10 z-30">
-                             <div className="space-y-1">
-                                <h2 className="text-xl md:text-2xl font-black text-white font-headline tracking-tight line-clamp-1 drop-shadow-xl uppercase">{product.name}</h2>
-                                <p className="text-blue-300 font-black text-lg md:text-xl italic tracking-tighter drop-shadow-md">GH₵ {product.price.toLocaleString()}</p>
-                             </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-            </motion.section>
-          )}
-
-          {category === "All" && <HotDeals />}
-
-          {!isLoading && category === "All" && suggestedPicks.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-8 px-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Our <span className="text-blue-600">Picks</span></h3>
-                </div>
-              </div>
-              <Carousel opts={{ align: "start", dragFree: true }} className="w-full">
-                <CarouselContent className="-ml-1">
-                  {suggestedPicks.map((product) => (
-                    <CarouselItem key={`suggested-${product.id}`} className="pl-1 basis-[48%] sm:basis-[33%] md:basis-[25%] lg:basis-[20%]">
-                      <SuggestedProductTile product={product} />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-            </motion.div>
-          )}
-
-          {!error && (
-            <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
-              <div className="flex items-center justify-between">
-                <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Product Categories</motion.h2>
-                <Link href="/categories">
-                  <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
-                </Link>
-              </div>
-              <div className="flex gap-6 overflow-x-auto md:justify-center pb-4 scrollbar-hide px-2">
-                {categories.map((cat) => (
-                  <motion.button key={cat.name} variants={slideUp} {...buttonTap} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-3 shrink-0 group">
-                    <div className={cn(
-                      "w-16 h-16 md:w-24 md:h-24 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
-                      category === cat.name ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30 border-blue-600" : "bg-white text-slate-400 border-slate-100 hover:border-blue-200"
-                    )}>
-                      {cat.imageUrl ? (
-                        <div className="relative w-full h-full"><Image src={cat.imageUrl} alt={cat.name} fill className="object-contain" /></div>
-                      ) : (
-                        <cat.icon className={cn("w-6 h-6 md:w-8 md:h-8", category === cat.name ? "text-white" : "text-slate-400")} />
-                      )}
+                <div className="flex items-center justify-between mb-8 px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
+                      <Sparkles className="w-5 h-5" />
                     </div>
-                    <span className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]", category === cat.name ? "text-blue-600" : "text-slate-400")}>{cat.name.split(' ')[0]}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          <div id="marketplace" className="scroll-mt-24 space-y-12">
-            <section className="space-y-8">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Our Items" : `${category} Section`}</h3>
-                  <motion.div {...buttonTap}>
-                    <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors">
-                      <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
-                    </Button>
-                  </motion.div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Our <span className="text-blue-600">Picks</span></h3>
+                  </div>
                 </div>
-                {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-black uppercase">View All Items</Button>}
-              </div>
-
-              {isLoading && products.length === 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
-                  {Array.from({ length: 10 }).map((_, i) => <ProductSkeleton key={i} />)}
-                </div>
-              ) : filteredProducts.length > 0 ? (
-                <motion.div variants={staggerContainer(0.04)} initial="initial" animate="animate" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
-                  {filteredProducts.map((product) => (
-                    <motion.div key={product.id} variants={fadeIn}>
-                      <ProductCard product={product} />
-                    </motion.div>
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {suggestedPicks.map((product) => (
+                    <div key={`suggested-${product.id}`} className="min-w-[150px] md:min-w-[200px]">
+                      <SuggestedProductTile product={product} />
+                    </div>
                   ))}
-                </motion.div>
-              ) : (
-                <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
-                  <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No items found in this section</p>
                 </div>
-              )}
-            </section>
+              </motion.div>
+            )}
+
+            {!error && (
+              <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Product Categories</motion.h2>
+                  <Link href="/categories">
+                    <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
+                  </Link>
+                </div>
+                <div className="flex gap-6 overflow-x-auto md:justify-center pb-4 scrollbar-hide px-2">
+                  {categories.map((cat) => (
+                    <motion.button key={cat.name} variants={slideUp} {...buttonTap} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-3 shrink-0 group">
+                      <div className={cn(
+                        "w-16 h-16 md:w-24 md:h-24 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center transition-all duration-300 shadow-sm overflow-hidden border p-4",
+                        category === cat.name ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30 border-blue-600" : "bg-white text-slate-400 border-slate-100 hover:border-blue-200"
+                      )}>
+                        {cat.imageUrl ? (
+                          <div className="relative w-full h-full"><Image src={cat.imageUrl} alt={cat.name} fill className="object-contain" /></div>
+                        ) : (
+                          <cat.icon className={cn("w-6 h-6 md:w-8 md:h-8", category === cat.name ? "text-white" : "text-slate-400")} />
+                        )}
+                      </div>
+                      <span className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]", category === cat.name ? "text-blue-600" : "text-slate-400")}>{cat.name.split(' ')[0]}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            <div id="marketplace" className="scroll-mt-24 space-y-12">
+              <section className="space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Our Items" : `${category} Section`}</h3>
+                    <motion.div {...buttonTap}>
+                      <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600 transition-colors">
+                        <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
+                      </Button>
+                    </motion.div>
+                  </div>
+                  {category !== "All" && <Button variant="ghost" size="sm" onClick={() => setCategory("All")} className="text-[10px] font-black uppercase">View All Items</Button>}
+                </div>
+
+                {isLoading && products.length === 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
+                    {Array.from({ length: 10 }).map((_, i) => <ProductSkeleton key={i} />)}
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  <motion.div variants={staggerContainer(0.04)} initial="initial" animate="animate" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
+                    {filteredProducts.map((product) => (
+                      <motion.div key={product.id} variants={fadeIn}>
+                        <ProductCard product={product} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No items found in this section</p>
+                  </div>
+                )}
+              </section>
+            </div>
           </div>
         </div>
       </main>

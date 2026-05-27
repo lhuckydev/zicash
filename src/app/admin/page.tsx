@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -25,7 +26,8 @@ import {
   CheckCircle2,
   Settings2,
   X,
-  Zap
+  Zap,
+  Image as ImageIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,8 +48,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { AdminSlideManager } from "@/components/admin/AdminSlideManager";
 
-type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Customers" | "Settings";
+type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Slideshow" | "Customers" | "Settings";
 
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 const SESSION_TIMEOUT = 7200000; 
@@ -220,7 +223,6 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState<AdminTab>("Overview");
-  const [isStoreOpen, setIsStoreOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [products, setProducts] = useState<Product[]>([]);
@@ -375,6 +377,7 @@ export default function AdminPage() {
              <button onClick={() => setActiveTab("Orders")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Orders" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><ShoppingCart className="w-4 h-4" /> Orders</button>
              <button onClick={() => setActiveTab("Products")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Products" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Package className="w-4 h-4" /> Products</button>
              <button onClick={() => setActiveTab("Special Offers")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Special Offers" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Zap className="w-4 h-4" /> Special Offers</button>
+             <button onClick={() => setActiveTab("Slideshow")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Slideshow" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><ImageIcon className="w-4 h-4" /> Slideshow Settings</button>
            </div>
         </nav>
       </div>
@@ -441,6 +444,8 @@ export default function AdminPage() {
               ))}
             </div>
           )}
+
+          {activeTab === "Slideshow" && <AdminSlideManager />}
 
           {activeTab === "Special Offers" && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">

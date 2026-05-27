@@ -93,7 +93,7 @@ const CountdownTimer = ({ expiryDate }: { expiryDate: string }) => {
     <div className="flex items-center gap-2 mt-4 text-red-600 animate-pulse bg-red-50 px-3 py-1.5 rounded-full w-fit">
       <Clock className="w-3.5 h-3.5" />
       <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-        Offer Ends in: {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
+        Ends: {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
       </span>
     </div>
   );
@@ -115,8 +115,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const [current, setCurrent] = useState(0);
   const [openSpecs, setOpenSpecs] = useState<Record<string, boolean>>({});
   const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
-
-  const isSimpleCategory = ["Accessories", "Educational Consult"].includes(product.category);
 
   useEffect(() => {
     async function fetchFullData() {
@@ -196,10 +194,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
-      <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 animate-in fade-in duration-700">
+      <div className="max-w-7xl mx-auto space-y-12 md:y-16 animate-in fade-in duration-700">
+        
+        {/* Navigation & Favorite */}
         <div className="flex items-center justify-between">
            <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
-             <ArrowLeft className="w-3 h-3" /> Back To Catalog
+             <ArrowLeft className="w-3 h-3" /> Catalog Index
            </Link>
            <button 
              onClick={() => toggleItem(product)}
@@ -214,7 +214,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
         {/* 1. NAME & IDENTITY (FIRST) */}
         <div className="space-y-8">
-           <div className="space-y-6">
+           <div className="space-y-4">
               <div className="flex items-center gap-3">
                  {product.brand && (
                    <Badge className="bg-blue-600 text-white border-none px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">{product.brand}</Badge>
@@ -243,54 +243,49 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </div>
 
         {/* 2. GALLERY (SECOND) */}
-        <div className="relative group">
-           <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
-              <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
-                 <div className="flex-1 w-full order-1 lg:order-2">
-                    <div className="relative w-full mx-auto aspect-square md:aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white flex items-center justify-center">
-                       {productImages.length > 0 ? (
-                          <Carousel setApi={setApi} className="w-full h-full">
-                             <CarouselContent className="h-full ml-0">
-                                {productImages.map((url, idx) => (
-                                  <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                      <Image 
-                                        src={url as string} 
-                                        alt={`${product?.name} ${idx + 1}`} 
-                                        fill 
-                                        className="object-contain transition-all duration-1000 group-hover:scale-105" 
-                                        priority={idx === 0} 
-                                        sizes="(max-width: 1024px) 100vw, 800px"
-                                      />
-                                    </div>
-                                  </CarouselItem>
-                                ))}
-                             </CarouselContent>
-                          </Carousel>
-                       ) : (
-                          <div className="w-full h-full bg-slate-50 flex items-center justify-center min-h-[300px]">
-                            <Box className="w-12 h-12 text-slate-200" />
-                          </div>
-                       )}
-                    </div>
-                 </div>
-                 
-                 <div className="lg:w-24 shrink-0 order-2 lg:order-1 flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto scrollbar-hide py-2 w-full lg:h-[450px]">
+        <div className="space-y-8">
+          <div className="relative aspect-square md:aspect-video w-full max-w-5xl mx-auto rounded-[3rem] md:rounded-[4rem] bg-white border border-slate-100 shadow-2xl overflow-hidden flex items-center justify-center p-6 md:p-12">
+             {productImages.length > 0 ? (
+               <Carousel setApi={setApi} className="w-full h-full flex items-center justify-center">
+                 <CarouselContent className="h-full ml-0">
                     {productImages.map((url, idx) => (
-                      <div 
-                        key={idx} 
-                        onClick={() => handleThumbnailClick(idx)}
-                        className={cn(
-                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white overflow-hidden",
-                          current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
-                        )}
-                      >
-                        <Image src={url as string} alt="Thumbnail" fill className="object-contain p-1.5" />
-                      </div>
+                      <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <Image 
+                            src={url as string} 
+                            alt={`${product?.name} ${idx + 1}`} 
+                            fill 
+                            className="object-contain transition-all duration-1000" 
+                            priority={idx === 0} 
+                            sizes="(max-width: 1024px) 100vw, 800px"
+                          />
+                        </div>
+                      </CarouselItem>
                     ))}
-                 </div>
-              </div>
-           </div>
+                 </CarouselContent>
+               </Carousel>
+             ) : (
+               <div className="flex flex-col items-center gap-4 text-slate-200">
+                 <Box className="w-16 h-16" />
+                 <p className="text-[10px] font-black uppercase tracking-widest">Gallery Offline</p>
+               </div>
+             )}
+          </div>
+          
+          <div className="flex justify-center gap-4 px-4 overflow-x-auto scrollbar-hide py-2">
+             {productImages.map((url, idx) => (
+               <div 
+                 key={idx} 
+                 onClick={() => handleThumbnailClick(idx)}
+                 className={cn(
+                   "relative aspect-square w-16 md:w-24 rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white overflow-hidden",
+                   current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
+                 )}
+               >
+                 <Image src={url as string} alt="Thumbnail" fill className="object-contain p-2" />
+               </div>
+             ))}
+          </div>
         </div>
 
         {/* 3. DETAILS & ACTIONS */}
@@ -299,8 +294,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="space-y-8 bg-white p-6 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-8">
                     <div className="space-y-1">
-                       <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">Config <span className="text-blue-600">Select</span></h3>
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select your hardware configuration</p>
+                       <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">Option <span className="text-blue-600">Select</span></h3>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available hardware configurations</p>
                     </div>
                     <Badge variant="outline" className="h-10 rounded-xl px-4 font-black text-[10px] text-slate-400 border-slate-100 uppercase">{product.variants?.length || 0} Models</Badge>
                  </div>
@@ -328,10 +323,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                  <div className="flex items-center gap-3">
                                    <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'Factory New'}</p>
                                    {hasDiscount && (
-                                     <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest px-2 py-0.5">Hot Offer</Badge>
+                                     <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest px-2 py-0.5">Special Offer</Badge>
                                    )}
                                  </div>
-                                 <h4 className="text-xl md:text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words font-headline italic tracking-tighter">{v.label}</h4>
+                                 <h4 className="text-xl md:text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase font-headline italic tracking-tighter">{v.label}</h4>
                                  {hasDiscount && v.discount?.ends_at && isActive && <CountdownTimer expiryDate={v.discount.ends_at} />}
                                </div>
                                <div className="md:text-right">
@@ -350,25 +345,21 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                  <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
-                                     {/* CORE SPECS AS DEFINED DURING UPLOAD */}
-                                     <MiniSpec icon={Cpu} label="System Processor" value={v.cpu} active={isActive} />
-                                     <MiniSpec icon={SmartphoneIcon} label="Chipset Node" value={v.chipset} active={isActive} />
-                                     <MiniSpec icon={CircuitBoard} label="RAM Memory" value={v.ram} active={isActive} />
-                                     <MiniSpec icon={HardDrive} label="Storage Bank" value={v.storage} active={isActive} />
-                                     <MiniSpec icon={Layers} label="Graphics Core" value={v.gpu} active={isActive} />
-                                     <MiniSpec icon={Monitor} label="Visual Display" value={v.screen} active={isActive} />
-                                     
-                                     {/* PHYSICAL FEATURES */}
+                                     <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                     <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                     <MiniSpec icon={CircuitBoard} label="Memory (RAM)" value={v.ram} active={isActive} />
+                                     <MiniSpec icon={HardDrive} label="Storage" value={v.storage} active={isActive} />
+                                     <MiniSpec icon={Layers} label="Graphics (GPU)" value={v.gpu} active={isActive} />
+                                     <MiniSpec icon={Monitor} label="Screen" value={v.screen} active={isActive} />
                                      <MiniSpec icon={MousePointer2} label="Touch Interface" value={v.touchscreen} active={isActive} />
                                      <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
                                      <MiniSpec icon={Fingerprint} label="Biometric ID" value={v.fingerprint} active={isActive} />
-                                     <MiniSpec icon={Palette} label="Body Color" value={v.color} active={isActive} />
+                                     <MiniSpec icon={Palette} label="Device Color" value={v.color} active={isActive} />
                                      <MiniSpec icon={Battery} label="Energy Cell" value={v.battery} active={isActive} />
-                                     <MiniSpec icon={Zap} label="Network Support" value={v.network} active={isActive} />
-                                     <MiniSpec icon={ShieldCheck} label="Hardware Warranty" value={product.warranty} active={isActive} />
-                                     <MiniSpec icon={Shield} label="Condition Status" value={v.condition} active={isActive} />
+                                     <MiniSpec icon={Zap} label="Network Link" value={v.network} active={isActive} />
+                                     <MiniSpec icon={ShieldCheck} label="Coverage" value={product.warranty} active={isActive} />
+                                     <MiniSpec icon={Shield} label="Verified Condition" value={v.condition} active={isActive} />
 
-                                     {/* ADVANCED DETAILS (Dynamic from admin input) */}
                                      {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
                                        const labelData = advancedLabels[key] || { label: key.toUpperCase().replace(/_/g, ' '), icon: Info };
                                        return (
@@ -389,7 +380,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                    className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
                                  >
                                    {isExpanded ? (
-                                     <><ChevronUp className="w-3 h-3" /> Close Full Specs</>
+                                     <><ChevronUp className="w-3 h-3" /> Hide Details</>
                                    ) : (
                                      <><ChevronDown className="w-3 h-3" /> View Full Specifications</>
                                    )}
@@ -423,10 +414,10 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               <div className="space-y-8">
                  <div className="flex items-center gap-4">
                     <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic font-headline">Item Story</h2>
+                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic font-headline">Product Vision</h2>
                  </div>
                  <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                   {product.description || "Premium quality item curated for Ghana's hardware market. Contact support for expert advice."}
+                   {product.description || "Premium hardware curated for efficiency and style. Every unit undergoes strict quality control."}
                  </p>
               </div>
 
@@ -437,18 +428,18 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  </div>
                  <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-emerald-100 transition-colors">
                     <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform"><Truck className="w-8 h-8" /></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Accra Priority</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Regional Delivery</span>
                  </div>
               </div>
 
               <div className="p-10 bg-slate-900 rounded-[3rem] text-white space-y-6 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-                 <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-40 relative z-10">Hardware Assurance</h4>
+                 <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-40 relative z-10">Quality Assurance</h4>
                  <p className="text-sm font-medium leading-relaxed relative z-10">
-                   {product.warranty}. All hardware configurations undergo a 24-point technical check before being verified for sale.
+                   {product.warranty}. Each hardware unit is technically verified by our expert team before shipping.
                  </p>
                  <div className="pt-4 border-t border-white/5 relative z-10">
-                    <Link href="/terms" className="text-[10px] font-black uppercase text-blue-400 hover:text-white transition-colors">Review Full Policy &rarr;</Link>
+                    <Link href="/terms" className="text-[10px] font-black uppercase text-blue-400 hover:text-white transition-colors">Full Protection Policy &rarr;</Link>
                  </div>
               </div>
            </div>

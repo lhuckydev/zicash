@@ -149,7 +149,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
       }
     }
     fetchFullData();
-  }, [initialProduct.id]);
+  }, [initialProduct.id, selectedVariant]);
 
   useEffect(() => {
     if (!api) return;
@@ -250,13 +250,13 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
               <div className="flex flex-col lg:flex-row gap-12 items-center">
                  <div className="flex-1 w-full order-1 lg:order-2">
-                    <div className="relative w-full mx-auto aspect-square md:aspect-[4/3]">
+                    <div className="relative w-full mx-auto aspect-square md:aspect-[4/3] overflow-hidden rounded-[2rem] bg-slate-50">
                        {productImages.length > 0 ? (
                           <Carousel setApi={setApi} className="w-full h-full">
-                             <CarouselContent className="ml-0 h-full">
+                             <CarouselContent className="ml-0 h-full flex">
                                 {productImages.map((url, idx) => (
-                                  <CarouselItem key={idx} className="relative w-full h-full pl-0">
-                                    <div className="relative w-full h-full flex items-center justify-center">
+                                  <CarouselItem key={idx} className="relative basis-full h-full pl-0 shrink-0">
+                                    <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8">
                                       <Image 
                                         src={url as string} 
                                         alt={`${product?.name} ${idx + 1}`} 
@@ -271,7 +271,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                              </CarouselContent>
                           </Carousel>
                        ) : (
-                          <div className="w-full h-full bg-slate-50 rounded-3xl flex items-center justify-center">
+                          <div className="w-full h-full bg-slate-50 flex items-center justify-center">
                             <Box className="w-12 h-12 text-slate-200" />
                           </div>
                        )}
@@ -284,7 +284,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                         key={idx} 
                         onClick={() => handleThumbnailClick(idx)}
                         className={cn(
-                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-slate-50",
+                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white",
                           current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
                         )}
                       >
@@ -298,7 +298,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
         {/* 3. HARDWARE CONFIGURATIONS & SPECS */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-           {/* Left Side: Pricing & Options */}
            <div className="lg:col-span-7 space-y-12">
               <div className="space-y-8 bg-white p-6 md:p-12 rounded-[3rem] border border-slate-100 shadow-xl shadow-blue-600/5">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-8">
@@ -355,29 +354,23 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                  <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                    <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100/50">
-                                       {/* Core Specs */}
                                        <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
                                        <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
                                        <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
                                        <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                        <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
                                        <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
-                                       
-                                       {/* Physical Features */}
                                        <MiniSpec icon={MousePointer2} label="Touchscreen" value={v.touchscreen} active={isActive} />
                                        <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
                                        <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint} active={isActive} />
                                        <MiniSpec icon={Palette} label="Hardware Color" value={v.color} active={isActive} />
-                                       
-                                       {/* Power & Connectivity */}
                                        <MiniSpec icon={Battery} label="Battery Unit" value={v.battery} active={isActive} />
                                        <MiniSpec icon={Zap} label="Network/WiFi" value={v.network} active={isActive} />
                                        <MiniSpec icon={ShieldCheck} label="ZiCash Warranty" value={product.warranty} active={isActive} />
                                        <MiniSpec icon={Shield} label="Unit Condition" value={v.condition} active={isActive} />
 
-                                       {/* Advanced Specs Mapping */}
                                        {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
-                                         const labelData = advancedLabels[key] || { label: key.toUpperCase(), icon: Settings2 };
+                                         const labelData = advancedLabels[key] || { label: key.toUpperCase().replace('_', ' '), icon: Settings2 };
                                          return (
                                            <MiniSpec 
                                              key={key} 
@@ -427,7 +420,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
            </div>
 
-           {/* Right Side: Description & Verified Info */}
            <div className="lg:col-span-5 space-y-12">
               <div className="space-y-8">
                  <div className="flex items-center gap-4">
@@ -463,7 +455,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </div>
         </div>
 
-        {/* Reviews Section */}
         <div className="pt-20 border-t border-slate-200">
            <ProductReviews productId={product.id} />
         </div>

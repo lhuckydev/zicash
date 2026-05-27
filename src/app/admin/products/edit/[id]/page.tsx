@@ -27,7 +27,12 @@ import {
   Trash2,
   Plus,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  CircuitBoard,
+  SmartphoneIcon,
+  Palette,
+  Battery,
+  Wifi
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -421,10 +426,22 @@ export default function EditProductPage() {
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             {basicInfo.category === "Laptops" ? (
                               <>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">CPU</label><Input placeholder="e.g. Core i7" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input placeholder="e.g. 16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input placeholder="e.g. 512GB" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics</label><Input placeholder="Optional" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Cpu className="w-3 h-3" /> CPU</label>
+                                  <Input placeholder="e.g. Core i7" className="h-12 bg-slate-50 border-none font-bold" value={v.cpu || ""} onChange={e => updateVariant(idx, 'cpu', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><CircuitBoard className="w-3 h-3" /> RAM</label>
+                                  <Input placeholder="e.g. 16GB" className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Database className="w-3 h-3" /> Storage</label>
+                                  <Input placeholder="e.g. 512GB SSD" className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Layers className="w-3 h-3" /> Graphics</label>
+                                  <Input placeholder="Optional GPU" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} />
+                                </div>
                                 
                                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                                    <div className="flex items-center gap-3"><MousePointer2 className="w-4 h-4 text-blue-600" /><span className="text-[10px] font-black uppercase text-slate-600">Touch</span></div>
@@ -435,7 +452,7 @@ export default function EditProductPage() {
                                    <Switch checked={v.keyboard_light} onCheckedChange={val => updateVariant(idx, 'keyboard_light', val)} />
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 md:col-span-2">
-                                   <div className="flex items-center gap-3"><Fingerprint className="w-4 h-4 text-blue-600" /><span className="text-[10px] font-black uppercase text-slate-600">Fingerprint</span></div>
+                                   <div className="flex items-center gap-3"><Fingerprint className="w-4 h-4 text-blue-600" /><span className="text-[10px] font-black uppercase text-slate-600">Biometrics</span></div>
                                    <Switch checked={v.fingerprint} onCheckedChange={val => updateVariant(idx, 'fingerprint', val)} />
                                 </div>
                               </>
@@ -443,10 +460,30 @@ export default function EditProductPage() {
                               <>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">RAM</label><Input className="h-12 bg-slate-50 border-none font-bold" value={v.ram || ""} onChange={e => updateVariant(idx, 'ram', e.target.value)} /></div>
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Storage</label><Input className="h-12 bg-slate-50 border-none font-bold" value={v.storage || ""} onChange={e => updateVariant(idx, 'storage', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Color</label><Input className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chipset</label><Input className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Palette className="w-3 h-3" /> Color</label>
+                                  <Input className="h-12 bg-slate-50 border-none font-bold" value={v.color || ""} onChange={e => updateVariant(idx, 'color', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><SmartphoneIcon className="w-3 h-3" /> Chipset</label>
+                                  <Input className="h-12 bg-slate-50 border-none font-bold" value={v.chipset || ""} onChange={e => updateVariant(idx, 'chipset', e.target.value)} />
+                                </div>
                               </>
                             )}
+                            
+                            {/* Common Detail Fields */}
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Monitor className="w-3 h-3" /> Screen</label>
+                              <Input placeholder="e.g. 14-inch FHD" className="h-12 bg-slate-50 border-none font-bold" value={v.screen || ""} onChange={e => updateVariant(idx, 'screen', e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Battery className="w-3 h-3" /> Battery</label>
+                              <Input placeholder="e.g. 3-Cell 50Wh" className="h-12 bg-slate-50 border-none font-bold" value={v.battery || ""} onChange={e => updateVariant(idx, 'battery', e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Wifi className="w-3 h-3" /> Network</label>
+                              <Input placeholder="e.g. Wi-Fi 6 + BT" className="h-12 bg-slate-50 border-none font-bold" value={v.network || ""} onChange={e => updateVariant(idx, 'network', e.target.value)} />
+                            </div>
                           </div>
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-8 border-t border-slate-50">
@@ -503,7 +540,7 @@ export default function EditProductPage() {
                            {[
                              { id: 'res', label: 'Screen Resolution', placeholder: 'e.g. 1920x1080' },
                              { id: 'ports', label: 'I/O Ports', placeholder: 'e.g. 3x USB, 1x HDMI' },
-                             { id: 'battery', label: 'Battery Life', placeholder: 'e.g. 8-10 Hours' },
+                             { id: 'battery_life', label: 'Battery Life', placeholder: 'e.g. 8-10 Hours' },
                              { id: 'os', label: 'Operating System', placeholder: 'e.g. Windows 11 Pro' },
                              { id: 'audio', label: 'Speakers/Audio', placeholder: 'e.g. Stereo Speakers' }
                            ].map(f => (

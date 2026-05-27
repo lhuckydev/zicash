@@ -3,7 +3,29 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore, Product } from "@/store/useCartStore";
-import { ShoppingCart, Heart, Settings as SettingsIcon, Package, Menu, Search, LogOut, LayoutGrid, Zap, BrainCircuit, Info, Phone, Gavel, X, Loader2, ChevronRight, ShoppingBag, User } from "lucide-react";
+import { 
+  ShoppingCart, 
+  Heart, 
+  Settings as SettingsIcon, 
+  Package, 
+  Menu, 
+  Search, 
+  LogOut, 
+  LayoutGrid, 
+  Zap, 
+  BrainCircuit, 
+  Info, 
+  Phone, 
+  Gavel, 
+  X, 
+  Loader2, 
+  ChevronRight, 
+  ShoppingBag, 
+  User,
+  ShieldCheck,
+  CreditCard,
+  Settings2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
@@ -11,8 +33,18 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+
+const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 
 export function Navbar() {
   const router = useRouter();
@@ -115,6 +147,8 @@ export function Navbar() {
     inputRef.current?.focus();
   };
 
+  const isAdmin = session?.user?.email && ADMIN_EMAILS.includes(session.user.email);
+
   const mainNavLinks = [
     { name: "Shop", path: "/", icon: LayoutGrid },
     { name: "Categories", path: "/categories", icon: Zap },
@@ -184,13 +218,44 @@ export function Navbar() {
                 <ShoppingCart className="w-6 h-6" />
                 {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[9px] font-black h-4 min-w-4 flex items-center justify-center rounded-full border-2 border-white px-1">{cartCount}</span>}
               </Link>
+              
               {session ? (
-                <Avatar className="h-9 w-9 border-2 border-white shadow-sm cursor-pointer" onClick={() => router.push('/profile')}>
-                  <AvatarImage src={profile?.avatar_url} />
-                  <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold">{session.user.email[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm cursor-pointer hover:ring-4 hover:ring-blue-500/10 transition-all">
+                      <AvatarImage src={profile?.avatar_url} className="object-cover" />
+                      <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold uppercase">{session.user.email[0]}</AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64 rounded-[2rem] p-2 border-slate-100 shadow-2xl mt-2 animate-in fade-in zoom-in-95 duration-200">
+                    <DropdownMenuLabel className="p-4 flex flex-col gap-0.5">
+                       <p className="text-xs font-black text-slate-900 uppercase italic truncate">{profile?.full_name || 'Premium Shopper'}</p>
+                       <p className="text-[9px] font-bold text-slate-400 uppercase truncate">{session.user.email}</p>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-slate-50" />
+                    <DropdownMenuItem onClick={() => router.push('/profile')} className="rounded-xl py-3 px-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50">
+                      <User className="w-4 h-4 text-slate-400" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Account Identity</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/orders')} className="rounded-xl py-3 px-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50">
+                      <ShoppingBag className="w-4 h-4 text-slate-400" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Order History</span>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => router.push('/admin')} className="rounded-xl py-3 px-4 flex items-center gap-3 cursor-pointer bg-blue-50 text-blue-600 hover:bg-blue-100">
+                        <Settings2 className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Store Manager</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator className="bg-slate-50" />
+                    <DropdownMenuItem onClick={handleLogout} className="rounded-xl py-3 px-4 flex items-center gap-3 cursor-pointer text-red-500 hover:bg-red-50">
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Safe Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <Link href="/auth"><Button className="rounded-full bg-blue-600 text-white font-bold h-10 px-5 text-xs">Login</Button></Link>
+                <Link href="/auth"><Button className="rounded-full bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] h-10 px-6 shadow-xl shadow-blue-600/20">Sign In</Button></Link>
               )}
             </div>
           </div>

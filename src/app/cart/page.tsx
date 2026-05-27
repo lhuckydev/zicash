@@ -4,11 +4,11 @@ import { useCartStore } from "@/store/useCartStore";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ArrowLeft, ShoppingCart, Lock, ShieldCheck, AlertCircle, ArrowRight, Tag, Settings2 } from "lucide-react";
+import { Trash2, Plus, Minus, ArrowLeft, ShoppingCart, Lock, ShieldCheck, AlertCircle, ArrowRight, Tag, Settings2, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -59,6 +59,18 @@ export default function CartPage() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const totalSavings = useMemo(() => {
+    return items.reduce((acc, item) => {
+      const v = item.selectedVariant;
+      const original = v ? v.price : item.price;
+      const discountPrice = v?.discount?.discount_price;
+      if (discountPrice && discountPrice > 0) {
+        return acc + ((original - discountPrice) * item.quantity);
+      }
+      return acc;
+    }, 0);
+  }, [items]);
 
   const isProfileIncomplete = session && (!profile?.contact || !profile?.location);
 
@@ -142,9 +154,9 @@ export default function CartPage() {
             <div className="space-y-4">
               {items.map((item) => {
                 const originalPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
-                const discountPrice = item.selectedVariant ? item.selectedVariant.discount_price : item.discount_price;
+                const discountPrice = item.selectedVariant?.discount?.discount_price;
                 const finalPrice = (discountPrice && discountPrice > 0) ? discountPrice : originalPrice;
-                const hasDiscount = discountPrice && discountPrice > 0;
+                const hasDiscount = !!(discountPrice && discountPrice > 0);
                 
                 const cartId = item.selectedVariant ? `${item.id}-${item.selectedVariant.id}` : item.id;
 
@@ -164,7 +176,14 @@ export default function CartPage() {
                     <div className="flex-1 space-y-3 text-center sm:text-left min-w-0">
                       <div className="space-y-1">
                         <h3 className="text-xl font-black text-slate-900 truncate uppercase leading-tight group-hover:text-blue-600 transition-colors">{item.name}</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.brand} / {item.category}</p>
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.brand} / {item.category}</p>
+                           {hasDiscount && (
+                             <Badge className="bg-red-600 text-white border-none text-[8px] font-black uppercase px-2 py-0.5 animate-pulse">
+                               <Zap className="w-2 h-2 fill-current mr-1" /> Deal Applied
+                             </Badge>
+                           )}
+                        </div>
                       </div>
                       
                       {item.selectedVariant && (
@@ -222,12 +241,21 @@ export default function CartPage() {
               <div className="space-y-6 relative z-10">
                 <div className="flex justify-between text-[11px] text-slate-400 font-black uppercase tracking-widest">
                   <span>Unit Total</span>
-                  <span className="text-slate-900">GH₵ {total.toLocaleString()}</span>
+                  <span className="text-slate-900">GH₵ {(total + totalSavings).toLocaleString()}</span>
                 </div>
+                
+                {totalSavings > 0 && (
+                  <div className="flex justify-between text-[11px] text-red-600 font-black uppercase tracking-widest">
+                    <span>Total Savings</span>
+                    <span>- GH₵ {totalSavings.toLocaleString()}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-[11px] text-slate-400 font-black uppercase tracking-widest">
                   <span>Delivery</span>
                   <span className="text-emerald-600">INCLUDED</span>
                 </div>
+                
                 <div className="pt-8 border-t-2 border-dashed border-slate-100 flex justify-between items-end">
                   <span className="font-black text-xs text-slate-400 uppercase tracking-[0.2em]">Grand Total</span>
                   <div className="text-right">

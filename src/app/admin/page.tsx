@@ -27,7 +27,11 @@ import {
   Settings2,
   X,
   Zap,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Smartphone,
+  User as UserIcon,
+  MapPin,
+  Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +53,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { AdminSlideManager } from "@/components/admin/AdminSlideManager";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Slideshow" | "Customers" | "Settings";
 
@@ -70,7 +75,10 @@ interface Customer {
   id: string;
   full_name: string;
   email: string;
-  created_at?: string;
+  created_at: string;
+  avatar_url?: string;
+  location?: string;
+  contact?: string;
 }
 
 interface DiscountRowProps {
@@ -231,8 +239,13 @@ export default function AdminPage() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
   const [discountSearch, setDiscountSearch] = useState("");
   const [savingDiscountId, setSavingDiscountId] = useState<string | null>(null);
+
+  // Settings State
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [momoDetails, setMomoDetails] = useState({ name: "", number: "" });
 
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
@@ -243,7 +256,6 @@ export default function AdminPage() {
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.warn("Primary catalog fetch failed, trying safe fallback...");
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -253,13 +265,15 @@ export default function AdminPage() {
         setProducts(pData);
       }
 
-      const [oRes, cRes] = await Promise.all([
+      const [oRes, cRes, sRes] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('settings').select('*').eq('key', 'momo_payment_details').maybeSingle()
       ]);
       
       if (oRes.data) setOrders(oRes.data);
       if (cRes.data) setCustomers(cRes.data);
+      if (sRes.data && sRes.data.value) setMomoDetails(sRes.data.value);
       
     } catch (err: any) {
       console.error("Management Hub sync error:", err);
@@ -302,6 +316,27 @@ export default function AdminPage() {
       setIsAuthenticated(true);
     } else {
       toast({ variant: "destructive", title: "Access Denied", description: "Incorrect passkey." });
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .upsert({
+          key: 'momo_payment_details',
+          value: momoDetails,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+
+      if (error) throw error;
+      toast({ title: "Settings Updated", description: "Store payment credentials are now active." });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Update Failed", description: err.message });
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -356,6 +391,13 @@ export default function AdminPage() {
       .reduce((acc, o) => acc + (parseFloat(o.total_amount?.toString() || "0") || 0), 0), 
   [orders]);
 
+  const filteredCustomers = useMemo(() => {
+    return customers.filter(c => 
+      c.full_name?.toLowerCase().includes(customerSearch.toLowerCase()) ||
+      c.email?.toLowerCase().includes(customerSearch.toLowerCase())
+    );
+  }, [customers, customerSearch]);
+
   const AdminSidebarContent = () => (
     <>
       <div className="p-8 border-b border-white/5 flex items-center gap-3">
@@ -373,11 +415,16 @@ export default function AdminPage() {
              <LayoutDashboard className="w-4 h-4" /> Overview
            </button>
            <div className="space-y-1">
-             <div className="px-4 py-2 text-[9px] font-black text-white/20 uppercase tracking-widest">Inventory</div>
+             <div className="px-4 py-2 text-[9px] font-black text-white/20 uppercase tracking-widest">Store Node</div>
              <button onClick={() => setActiveTab("Orders")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Orders" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><ShoppingCart className="w-4 h-4" /> Orders</button>
              <button onClick={() => setActiveTab("Products")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Products" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Package className="w-4 h-4" /> Products</button>
              <button onClick={() => setActiveTab("Special Offers")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Special Offers" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Zap className="w-4 h-4" /> Special Offers</button>
-             <button onClick={() => setActiveTab("Slideshow")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Slideshow" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><ImageIcon className="w-4 h-4" /> Slideshow Settings</button>
+             <button onClick={() => setActiveTab("Slideshow")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Slideshow" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><ImageIcon className="w-4 h-4" /> Banners</button>
+           </div>
+           <div className="space-y-1">
+             <div className="px-4 py-2 text-[9px] font-black text-white/20 uppercase tracking-widest">Relationships</div>
+             <button onClick={() => setActiveTab("Customers")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Customers" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Users className="w-4 h-4" /> Customers</button>
+             <button onClick={() => setActiveTab("Settings")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Settings" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Settings className="w-4 h-4" /> Settings</button>
            </div>
         </nav>
       </div>
@@ -415,7 +462,7 @@ export default function AdminPage() {
                <SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden"><Menu className="w-5 h-5" /></Button></SheetTrigger>
                <SheetContent side="left" className="p-0 bg-slate-950 border-none w-[300px] flex flex-col"><AdminSidebarContent /></SheetContent>
              </Sheet>
-             <div className="relative w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search catalog..." className="bg-slate-50 border-none rounded-xl h-11 pl-12 text-xs font-bold" /></div>
+             <div className="relative w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search records..." className="bg-slate-50 border-none rounded-xl h-11 pl-12 text-xs font-bold" /></div>
           </div>
           <div className="flex items-center gap-6">
             <Button variant="ghost" size="icon" onClick={fetchAllData} disabled={isLoading}><RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} /></Button>
@@ -445,6 +492,59 @@ export default function AdminPage() {
             </div>
           )}
 
+          {activeTab === "Orders" && (
+            <Card className="rounded-[3rem] border-none shadow-xl bg-white overflow-hidden">
+               <Table>
+                 <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-100 h-16"><TableHead className="pl-10 text-[10px] uppercase font-black text-slate-400">Order Ref</TableHead><TableHead className="text-[10px] uppercase font-black text-slate-400">Customer</TableHead><TableHead className="text-[10px] uppercase font-black text-slate-400">Total</TableHead><TableHead className="text-[10px] uppercase font-black text-slate-400">Status</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase text-slate-400">Action</TableHead></TableRow></TableHeader>
+                 <TableBody>
+                   {orders.map((o) => (
+                     <TableRow key={o.id} className="h-20 hover:bg-slate-50 transition-colors">
+                       <TableCell className="pl-10 font-black text-xs text-blue-600">#{o.id.slice(0, 8).toUpperCase()}</TableCell>
+                       <TableCell><div className="flex flex-col"><span className="text-sm font-bold text-slate-900">{o.customer_name}</span><span className="text-[9px] text-slate-400 font-bold uppercase">{o.customer_email}</span></div></TableCell>
+                       <TableCell className="text-sm font-black italic">GH₵ {parseFloat(o.total_amount).toLocaleString()}</TableCell>
+                       <TableCell><Badge className={cn("text-[8px] font-black uppercase px-2 py-0.5 rounded-md border-none", o.status === "Delivered" ? "bg-emerald-50 text-emerald-600" : "bg-blue-50 text-blue-600")}>{o.status}</Badge></TableCell>
+                       <TableCell className="pr-10 text-right"><Link href={`/admin/order/${o.id}`}><Button variant="outline" size="sm" className="rounded-xl font-black uppercase text-[9px] h-9 gap-2">View Detail <ChevronRight className="w-3 h-3" /></Button></Link></TableCell>
+                     </TableRow>
+                   ))}
+                   {orders.length === 0 && <TableRow><TableCell colSpan={5} className="py-20 text-center text-slate-300 font-black uppercase text-[10px]">No orders processed yet.</TableCell></TableRow>}
+                 </TableBody>
+               </Table>
+            </Card>
+          )}
+
+          {activeTab === "Customers" && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="relative w-full max-w-md"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Find verified shoppers..." className="h-14 pl-12 rounded-2xl bg-white border-none shadow-sm font-bold" value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} /></div>
+              <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+                 <Table>
+                   <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black text-slate-400">Customer Identity</TableHead><TableHead className="text-[10px] uppercase font-black text-slate-400">Contact</TableHead><TableHead className="text-[10px] uppercase font-black text-slate-400">Location</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase text-slate-400">Manage</TableHead></TableRow></TableHeader>
+                   <TableBody>
+                     {filteredCustomers.map((c) => (
+                       <TableRow key={c.id} className="h-24 hover:bg-slate-50 transition-colors group">
+                         <TableCell className="pl-10 py-4">
+                           <div className="flex items-center gap-4">
+                             <Avatar className="h-12 w-12 border-2 border-white shadow-md">
+                               <AvatarImage src={c.avatar_url} />
+                               <AvatarFallback className="bg-blue-50 text-blue-600 font-black">{c.full_name?.[0] || 'U'}</AvatarFallback>
+                             </Avatar>
+                             <div className="flex flex-col min-w-0">
+                               <span className="text-sm font-black text-slate-900 uppercase italic truncate">{c.full_name || 'Anonymous User'}</span>
+                               <span className="text-[9px] text-slate-400 font-bold uppercase truncate">{c.email}</span>
+                             </div>
+                           </div>
+                         </TableCell>
+                         <TableCell><span className="text-xs font-bold text-slate-600">{c.contact || 'N/A'}</span></TableCell>
+                         <TableCell><div className="flex items-center gap-2 text-xs text-slate-400 italic max-w-[200px] truncate"><MapPin className="w-3 h-3 shrink-0" /> {c.location || 'Not Specified'}</div></TableCell>
+                         <TableCell className="pr-10 text-right"><Link href={`/admin/customer/${c.id}`}><Button variant="ghost" size="icon" className="rounded-xl text-slate-300 hover:text-blue-600 group-hover:bg-white shadow-sm transition-all"><Eye className="w-4 h-4" /></Button></Link></TableCell>
+                       </TableRow>
+                     ))}
+                     {filteredCustomers.length === 0 && <TableRow><TableCell colSpan={4} className="py-20 text-center text-slate-300 font-black uppercase text-[10px]">No matches in records.</TableCell></TableRow>}
+                   </TableBody>
+                 </Table>
+              </div>
+            </div>
+          )}
+
           {activeTab === "Slideshow" && <AdminSlideManager />}
 
           {activeTab === "Special Offers" && (
@@ -467,6 +567,52 @@ export default function AdminPage() {
                       </TableBody>
                     </Table>
                  </div>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "Settings" && (
+            <div className="max-w-2xl animate-in fade-in slide-in-from-left-4 duration-700">
+              <Card className="rounded-[3rem] border-none shadow-xl bg-white overflow-hidden">
+                 <div className="p-10 bg-slate-950 text-white flex items-center justify-between">
+                    <div>
+                       <h2 className="text-2xl font-black uppercase italic tracking-tight">Store <span className="text-blue-500">Configuration</span></h2>
+                       <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Global payment credentials</p>
+                    </div>
+                    <Settings2 className="w-10 h-10 text-blue-500 opacity-50" />
+                 </div>
+                 <CardContent className="p-10 space-y-10">
+                    <form onSubmit={handleSaveSettings} className="space-y-8">
+                       <div className="space-y-6">
+                          <div className="space-y-2">
+                             <label className="text-[11px] font-black uppercase text-slate-400 ml-1 tracking-widest">Mobile Money Recipient Name</label>
+                             <div className="relative">
+                               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                               <Input placeholder="Account Holder Name" className="h-14 pl-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" value={momoDetails.name} onChange={e => setMomoDetails({...momoDetails, name: e.target.value})} />
+                             </div>
+                          </div>
+                          <div className="space-y-2">
+                             <label className="text-[11px] font-black uppercase text-slate-400 ml-1 tracking-widest">Mobile Money Number</label>
+                             <div className="relative">
+                               <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                               <Input placeholder="e.g. 024XXXXXXX" className="h-14 pl-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" value={momoDetails.number} onChange={e => setMomoDetails({...momoDetails, number: e.target.value})} />
+                             </div>
+                          </div>
+                       </div>
+                       
+                       <div className="p-6 rounded-3xl bg-blue-50 border border-blue-100 flex items-start gap-4">
+                          <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                          <p className="text-[10px] font-medium text-blue-800 uppercase leading-relaxed tracking-tight">
+                            These details will be displayed to customers on the checkout page when choosing "Pay Before Delivery." 
+                            Verification is performed manually via screenshot verification.
+                          </p>
+                       </div>
+
+                       <Button disabled={isSavingSettings} className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20">
+                          {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} Update Store Credentials
+                       </Button>
+                    </form>
+                 </CardContent>
               </Card>
             </div>
           )}

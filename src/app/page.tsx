@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -82,7 +81,7 @@ export default function CatalogPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Primary fetch attempt with deep join for discounts
+      // Primary fetch attempt with deep join for discounts (Publicly accessible)
       const { data, error: supabaseError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
@@ -93,7 +92,6 @@ export default function CatalogPage() {
       setSeed(Math.random());
     } catch (err: any) {
       console.warn("Primary fetch failed, using safe fallback:", err.message);
-      // Fallback: Fetch without discount join to ensure items always show up
       const { data: fallbackData } = await supabase
         .from('products')
         .select('*, variants:product_variants(*)')

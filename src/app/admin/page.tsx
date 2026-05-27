@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -25,7 +24,8 @@ import {
   LogOut,
   CheckCircle2,
   Settings2,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,7 +136,6 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  // Use string state for smooth typing experience
   const [dPriceInput, setDPriceInput] = useState<string>(variant.discount?.discount_price?.toString() ?? "");
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
@@ -236,7 +235,6 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Primary fetch with discounts table join
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')

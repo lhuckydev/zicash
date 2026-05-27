@@ -169,7 +169,6 @@ export function Navbar() {
       )}>
         <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
-          {/* Mobile Centered Branding (Row 1) */}
           <div className="flex lg:hidden justify-center items-center pt-1 pb-2">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm shrink-0">
@@ -179,7 +178,6 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -260,7 +258,6 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Unified Mobile Toolbar Lane (Row 2) */}
           <div className="flex lg:hidden items-center gap-2 w-full">
             <button 
               onClick={() => setIsMenuOpen(true)}
@@ -303,7 +300,6 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Side Menu */}
       <AnimatePresence>
         {isMenuOpen && (
           <div className="fixed inset-0 z-[3000] lg:hidden">
@@ -366,7 +362,6 @@ export function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Full-Screen Search Overlay */}
       <AnimatePresence>
         {isSearchOpen && (
           <div className="fixed inset-0 z-[3000] flex flex-col">

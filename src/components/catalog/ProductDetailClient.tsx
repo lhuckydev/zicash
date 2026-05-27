@@ -212,7 +212,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </button>
         </div>
 
-        {/* 1. NAME & IDENTITY */}
+        {/* 1. NAME & IDENTITY (FIRST) */}
         <div className="space-y-8">
            <div className="space-y-6">
               <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            )}
         </div>
 
-        {/* 2. GALLERY */}
+        {/* 2. GALLERY (SECOND) */}
         <div className="relative group">
            <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
               <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
@@ -252,8 +252,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                           <Carousel setApi={setApi} className="w-full h-full">
                              <CarouselContent className="h-full ml-0">
                                 {productImages.map((url, idx) => (
-                                  <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center">
-                                    <div className="relative w-full h-full">
+                                  <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
+                                    <div className="relative w-full h-full flex items-center justify-center">
                                       <Image 
                                         src={url as string} 
                                         alt={`${product?.name} ${idx + 1}`} 
@@ -268,7 +268,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                              </CarouselContent>
                           </Carousel>
                        ) : (
-                          <div className="w-full h-full bg-slate-50 flex items-center justify-center">
+                          <div className="w-full h-full bg-slate-50 flex items-center justify-center min-h-[300px]">
                             <Box className="w-12 h-12 text-slate-200" />
                           </div>
                        )}
@@ -350,7 +350,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                <Collapsible open={isExpanded} onOpenChange={() => {}}>
                                  <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
-                                     {/* Core Components */}
+                                     {/* CORE SPECS AS DEFINED DURING UPLOAD */}
                                      <MiniSpec icon={Cpu} label="System Processor" value={v.cpu} active={isActive} />
                                      <MiniSpec icon={SmartphoneIcon} label="Chipset Node" value={v.chipset} active={isActive} />
                                      <MiniSpec icon={CircuitBoard} label="RAM Memory" value={v.ram} active={isActive} />
@@ -358,19 +358,19 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                      <MiniSpec icon={Layers} label="Graphics Core" value={v.gpu} active={isActive} />
                                      <MiniSpec icon={Monitor} label="Visual Display" value={v.screen} active={isActive} />
                                      
-                                     {/* Features */}
+                                     {/* PHYSICAL FEATURES */}
                                      <MiniSpec icon={MousePointer2} label="Touch Interface" value={v.touchscreen} active={isActive} />
                                      <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
                                      <MiniSpec icon={Fingerprint} label="Biometric ID" value={v.fingerprint} active={isActive} />
                                      <MiniSpec icon={Palette} label="Body Color" value={v.color} active={isActive} />
                                      <MiniSpec icon={Battery} label="Energy Cell" value={v.battery} active={isActive} />
-                                     <MiniSpec icon={Zap} label="Connectivity" value={v.network} active={isActive} />
-                                     <MiniSpec icon={ShieldCheck} label="Limited Warranty" value={product.warranty} active={isActive} />
-                                     <MiniSpec icon={Shield} label="Model Condition" value={v.condition} active={isActive} />
+                                     <MiniSpec icon={Zap} label="Network Support" value={v.network} active={isActive} />
+                                     <MiniSpec icon={ShieldCheck} label="Hardware Warranty" value={product.warranty} active={isActive} />
+                                     <MiniSpec icon={Shield} label="Condition Status" value={v.condition} active={isActive} />
 
-                                     {/* Map all extra metadata from admin input */}
+                                     {/* ADVANCED DETAILS (Dynamic from admin input) */}
                                      {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
-                                       const labelData = advancedLabels[key] || { label: key.toUpperCase().replace('_', ' '), icon: Info };
+                                       const labelData = advancedLabels[key] || { label: key.toUpperCase().replace(/_/g, ' '), icon: Info };
                                        return (
                                          <MiniSpec 
                                            key={key} 

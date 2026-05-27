@@ -46,7 +46,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Invoices" | "Customers" | "Settings";
+type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Customers" | "Settings";
 
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 const SESSION_TIMEOUT = 7200000; 
@@ -94,7 +94,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
         </TableCell>
         <TableCell>
            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Base Price</span>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Standard Rate</span>
               <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString()}</span>
            </div>
         </TableCell>
@@ -110,7 +110,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
             onClick={() => setExpanded(!expanded)}
             className={cn(
               "h-11 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 transition-all",
-              expanded ? "bg-slate-900 text-white border-slate-900" : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
+              expanded ? "bg-slate-950 text-white border-slate-950" : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
             )}
           >
             {expanded ? "Close Offers" : "Edit Offers"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -135,53 +135,54 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  const [dPrice, setDPrice] = useState<number | null>(variant.discount?.discount_price ?? null);
+  // Use strings for raw input to allow free typing/deleting without jitter
+  const [dPriceInput, setDPriceInput] = useState<string>(variant.discount?.discount_price?.toString() ?? "");
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
-  const handlePriceChange = (val: string) => {
-    if (val === "") {
-      setDPrice(null);
+  const handleSave = () => {
+    const parsedPrice = parseFloat(dPriceInput);
+    if (dPriceInput === "" || isNaN(parsedPrice)) {
+      onSave(variant.id, null, "");
     } else {
-      const parsed = parseFloat(val);
-      if (!isNaN(parsed)) setDPrice(parsed);
+      onSave(variant.id, parsedPrice, dDate);
     }
   };
 
   return (
-    <TableRow className="bg-slate-50/50 border-l-4 border-l-blue-600">
-      <TableCell className="pl-12 py-4" colSpan={4}>
-        <div className="max-w-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+    <TableRow className="bg-slate-50/30 border-l-4 border-l-blue-600">
+      <TableCell className="pl-12 py-6" colSpan={4}>
+        <div className="max-w-3xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
           
-          <div className="flex items-center gap-4 min-w-[150px]">
-            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
+          <div className="flex items-center gap-4 min-w-[200px]">
+            <div className="p-3 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
             <div className="space-y-0.5">
               <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
+                Base Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1 flex-1 max-w-[140px]">
-             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">New Sale Price</label>
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
              <div className="relative group">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none">GHS</div>
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none select-none">GHS</div>
                 <input 
-                  type="number" 
-                  step="0.01"
-                  className="pl-11 w-full h-11 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
-                  value={dPrice ?? ""} 
-                  onChange={(e) => handlePriceChange(e.target.value)} 
+                  type="text"
+                  inputMode="decimal"
+                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  value={dPriceInput} 
+                  onChange={(e) => setDPriceInput(e.target.value)} 
                   placeholder="0.00"
                 />
              </div>
           </div>
 
-          <div className="flex flex-col gap-1 flex-1 max-w-[140px]">
-             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">Offer Expiry</label>
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
              <input 
                type="date" 
-               className="h-11 w-full rounded-xl bg-slate-50 border-transparent text-[10px] font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+               className="h-12 w-full rounded-xl bg-slate-50 border-transparent text-[10px] font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                value={dDate} 
                onChange={(e) => setDDate(e.target.value)} 
              />
@@ -190,9 +191,9 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
           <div className="flex items-center gap-2">
             <Button 
               size="sm"
-              onClick={() => onSave(variant.id, dPrice, dDate)} 
+              onClick={handleSave} 
               disabled={isSaving}
-              className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 px-5 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
+              className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Activate
             </Button>
@@ -201,7 +202,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onSave(variant.id, null, "")}
-                className="h-11 w-11 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
+                className="h-12 w-12 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -234,15 +235,14 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Strictly use explicit join for discount logic
+      // Fetch with discount join
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.warn("Pricing Table Sync Required. Check RLS or existence of 'discounts' table.");
-        // Fallback fetch
+        console.warn("Security Gateway: Discounts restricted or missing. Checking standard access.");
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -262,7 +262,7 @@ export default function AdminPage() {
       if (cRes.data) setCustomers(cRes.data);
       
     } catch (err: any) {
-      console.error("Manager Hub Sync Error:", err);
+      console.error("Management Sync Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -294,7 +294,7 @@ export default function AdminPage() {
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || !session.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
-      toast({ variant: "destructive", title: "Access Denied", description: "This account is not authorized for management." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Your credentials lack manager clearance." });
       return;
     }
 
@@ -303,7 +303,7 @@ export default function AdminPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect passkey." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Incorrect clearance passkey." });
     }
   };
 
@@ -328,26 +328,30 @@ export default function AdminPage() {
         if (error) throw error;
       }
       
-      toast({ title: "Pricing Updated", description: `Special offer applied successfully.` });
+      toast({ title: "Pricing Updated", description: `Hardware offer has been successfully activated.` });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Update Failed", description: err.message || "Permission error. Ensure SQL RLS policies are active." });
+      toast({ 
+        variant: "destructive", 
+        title: "Update Restricted", 
+        description: err.message || "Permission error. Ensure security protocols are active in the SQL editor." 
+      });
     } finally {
       setSavingDiscountId(null);
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Permanently remove this hardware unit from the catalog?")) return;
+    if (!confirm("Permanently remove this hardware item from the marketplace?")) return;
     
     setIsLoading(true);
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Item Removed", description: "The product has been deleted." });
+      toast({ title: "Item Removed", description: "The product has been cleared from the catalog." });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Action Failed", description: err.message });
+      toast({ variant: "destructive", title: "Action Restricted", description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -359,7 +363,7 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     await supabase.auth.signOut();
     router.push('/');
-    toast({ title: "Logged Out", description: "Manager session ended." });
+    toast({ title: "Logged Out", description: "Management session terminated." });
   };
 
   const totalRevenue = useMemo(() => 
@@ -392,7 +396,7 @@ export default function AdminPage() {
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-lg tracking-tight text-white leading-none">ZiCash GH</span>
-          <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-1">Manager Hub</span>
+          <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-1">Management Hub</span>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-8 scrollbar-hide">
@@ -463,7 +467,7 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-6">
             <Button variant="ghost" size="icon" onClick={fetchAllData} disabled={isLoading} className="h-10 w-10 rounded-xl"><RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} /></Button>
-            <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest"><Eye className="w-4 h-4" /> Storefront</Link>
+            <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest"><Eye className="w-4 h-4" /> Visit Storefront</Link>
           </div>
         </header>
 
@@ -479,9 +483,9 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                {[
                 { label: "Sales Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-blue-600", bg: "bg-blue-50" },
-                { label: "Catalog Size", value: products.length, icon: Box, color: "text-indigo-600", bg: "bg-indigo-50" },
-                { label: "Active Orders", value: orders.filter(o => o.status === "Pending").length, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
-                { label: "Total Users", value: customers.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
+                { label: "Catalog Items", value: products.length, icon: Box, color: "text-indigo-600", bg: "bg-indigo-50" },
+                { label: "Pending Orders", value: orders.filter(o => o.status === "Pending").length, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
+                { label: "Verified Users", value: customers.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
               ].map((stat, i) => (
                 <Card key={i} className="border-none shadow-sm rounded-3xl p-8 flex items-center justify-between bg-white">
                   <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><h3 className="text-3xl font-black text-slate-900 mt-2 italic">{stat.value}</h3></div>
@@ -497,7 +501,7 @@ export default function AdminPage() {
                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-8">
                     <div>
                        <h2 className="text-2xl font-black uppercase italic">Hardware Promotions</h2>
-                       <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Set specific sale prices for your premium configurations.</p>
+                       <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Activate special rates for your high-performance configurations.</p>
                     </div>
                     <div className="relative w-full max-w-sm">
                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -515,7 +519,7 @@ export default function AdminPage() {
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100 h-20">
                           <TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead>
-                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Regular Rate</TableHead>
+                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Regular Price</TableHead>
                           <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Availability</TableHead>
                           <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Controls</TableHead>
                         </TableRow>
@@ -539,7 +543,7 @@ export default function AdminPage() {
               </div>
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                 <Table>
-                  <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Catalog Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
+                  <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Catalog Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory Status</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map((p) => (
                       <TableRow key={p.id} className="h-24">
@@ -549,6 +553,9 @@ export default function AdminPage() {
                         <TableCell className="pr-10 text-right space-x-3"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="text-slate-300 hover:text-blue-600"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-600" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
+                    {products.length === 0 && (
+                      <TableRow><TableCell colSpan={4} className="h-32 text-center text-slate-400 font-black uppercase text-[10px] tracking-widest">No items found in catalog.</TableCell></TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

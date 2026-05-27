@@ -112,7 +112,7 @@ export default function EditProductPage() {
       setIsAuthenticated(true);
       fetchProduct();
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect key." });
+      toast({ variant: "destructive", title: "Denied", description: "Incorrect clearance key." });
     }
   };
 
@@ -126,7 +126,7 @@ export default function EditProductPage() {
   };
 
   const isFormValid = () => {
-    return product.name?.trim().length > 0 && (product.price || 0) > 0;
+    return product.name?.trim().length > 0 && (product.price !== undefined && !isNaN(product.price));
   };
 
   const handleSave = async () => {
@@ -157,7 +157,7 @@ export default function EditProductPage() {
         .eq('id', id);
 
       if (error) throw error;
-      toast({ title: "Updated Successfully", description: "Changes saved to catalog." });
+      toast({ title: "Updated Successfully", description: "Changes saved to the marketplace catalog." });
       router.push("/admin");
     } catch (err: any) {
       toast({ variant: "destructive", title: "Save Failed", description: err.message });
@@ -206,7 +206,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 pb-24 text-slate-900">
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 pb-24 text-slate-900 font-body">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <Link href="/admin">
@@ -240,7 +240,7 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2 pt-2">
-                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Gallery</label>
+                    <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Hardware Gallery</label>
                     <div onClick={() => fileInputRef.current?.click()} className="relative aspect-square rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-blue-600 transition-all mb-4">
                       <Upload className="w-8 h-8 text-slate-300 mb-2" />
                       <p className="text-[10px] font-black uppercase text-slate-400">Add Media</p>
@@ -249,10 +249,15 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[12px] font-black uppercase tracking-widest text-blue-600 ml-1">Base Price (GHS)</label>
+                    <label className="text-[12px] font-black uppercase tracking-widest text-blue-600 ml-1">Base Rate (GHS)</label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600">GHS</div>
-                      <Input type="number" className="pl-14 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-xl" value={product.price ?? ""} onChange={(e) => handlePriceInput(e.target.value)} />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 pointer-events-none">GHS</div>
+                      <Input 
+                        type="number" 
+                        className="pl-14 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-xl" 
+                        value={product.price === undefined || isNaN(product.price as number) ? "" : product.price} 
+                        onChange={(e) => handlePriceInput(e.target.value)} 
+                      />
                     </div>
                   </div>
                 </div>
@@ -262,7 +267,7 @@ export default function EditProductPage() {
           <div className="lg:col-span-2 space-y-8">
              <Card className="border-none shadow-xl rounded-[3rem] bg-white overflow-hidden">
                 <CardHeader className="p-10 bg-slate-900 text-white flex justify-between items-center">
-                   <CardTitle className="text-2xl uppercase tracking-tighter italic">Basic <span className="text-blue-500">Info</span></CardTitle>
+                   <CardTitle className="text-2xl uppercase tracking-tighter italic">Basic <span className="text-blue-500">Specs</span></CardTitle>
                    <div className="p-3 bg-blue-600 rounded-2xl">
                      {product.category === "Laptops" && <Monitor className="w-6 h-6" />}
                      {product.category === "Phones" && <Smartphone className="w-6 h-6" />}
@@ -282,7 +287,7 @@ export default function EditProductPage() {
                       <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100">
                          <div>
                             <p className="font-black text-slate-900 uppercase text-xs">Featured Item</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Show on homepage</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Showcase on homepage</p>
                          </div>
                          <Switch checked={product.featured ?? false} onCheckedChange={(val) => setProduct({...product, featured: val})} />
                       </div>
@@ -294,7 +299,7 @@ export default function EditProductPage() {
                    </div>
 
                    <Button onClick={handleSave} disabled={isSaving || !isFormValid()} className="w-full h-16 font-black rounded-2xl bg-blue-600 hover:bg-blue-700 text-white uppercase tracking-widest text-lg shadow-2xl shadow-blue-600/20 gap-3">
-                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Save All Changes
+                      {isSaving ? <Loader2 className="animate-spin w-6 h-6" /> : <Save className="w-6 h-6" />} Commit All Changes
                    </Button>
                 </CardContent>
              </Card>

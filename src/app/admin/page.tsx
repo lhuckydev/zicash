@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -31,7 +30,8 @@ import {
   Smartphone,
   User as UserIcon,
   MapPin,
-  Save
+  Save,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -555,7 +555,7 @@ export default function AdminPage() {
                        <h2 className="text-2xl font-black uppercase italic">Hardware Promotions</h2>
                        <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Manage special pricing for different configurations.</p>
                     </div>
-                    <div className="relative w-full max-w-sm"><Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Find hardware..." className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold" value={discountSearch} onChange={(e) => setDiscountSearch(e.target.value)} /></div>
+                    <div className="relative w-full max-sm"><Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Find hardware..." className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold" value={discountSearch} onChange={(e) => setDiscountSearch(e.target.value)} /></div>
                  </div>
                  <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
                     <Table>

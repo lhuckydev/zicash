@@ -16,7 +16,8 @@ import {
   Layers, 
   ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
-  Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock
+  Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock,
+  Globe, Palette, HardDrive, Settings2
 } from "lucide-react";
 import { 
   Carousel, 
@@ -180,6 +181,20 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   const isFavorite = hasItem(product.id);
   const productImages = (product.image_urls?.length ? product.image_urls : [product.image_url]).filter(Boolean);
 
+  // Helper for advanced specs mapping
+  const advancedLabels: Record<string, { label: string, icon: any }> = {
+    res: { label: 'Screen Resolution', icon: Monitor },
+    ports: { label: 'I/O Ports', icon: Usb },
+    battery: { label: 'Battery Life', icon: Battery },
+    os: { label: 'Operating System', icon: Terminal },
+    audio: { label: 'Speakers/Audio', icon: Speaker },
+    camera: { label: 'Camera Quality', icon: Camera },
+    refresh: { label: 'Refresh Rate', icon: Zap },
+    charge: { label: 'Charging Speed', icon: Power },
+    rating: { label: 'IP Rating', icon: ShieldCheck },
+    biometrics: { label: 'Security', icon: Fingerprint }
+  };
+
   return (
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
       <div className="max-w-7xl mx-auto space-y-12 md:space-y-20 animate-in fade-in duration-700">
@@ -235,12 +250,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
               <div className="flex flex-col lg:flex-row gap-12 items-center">
                  <div className="flex-1 w-full order-1 lg:order-2">
-                    <div className="relative w-full mx-auto">
+                    <div className="relative w-full mx-auto aspect-square md:aspect-[4/3]">
                        {productImages.length > 0 ? (
-                          <Carousel setApi={setApi} className="w-full">
-                             <CarouselContent className="ml-0">
+                          <Carousel setApi={setApi} className="w-full h-full">
+                             <CarouselContent className="ml-0 h-full">
                                 {productImages.map((url, idx) => (
-                                  <CarouselItem key={idx} className="relative aspect-square md:aspect-[4/3] pl-0">
+                                  <CarouselItem key={idx} className="relative w-full h-full pl-0">
                                     <div className="relative w-full h-full flex items-center justify-center">
                                       <Image 
                                         src={url as string} 
@@ -256,7 +271,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                              </CarouselContent>
                           </Carousel>
                        ) : (
-                          <div className="aspect-square md:aspect-[4/3] bg-slate-50 rounded-3xl flex items-center justify-center">
+                          <div className="w-full h-full bg-slate-50 rounded-3xl flex items-center justify-center">
                             <Box className="w-12 h-12 text-slate-200" />
                           </div>
                        )}
@@ -338,37 +353,52 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                              {!isSimpleCategory && (
                                <div className="space-y-4">
                                  <Collapsible open={isExpanded} onOpenChange={() => {}}>
-                                   <CollapsibleContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
-                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 pt-8 border-t border-slate-100/50">
-                                       {product.category === "Laptops" ? (
-                                         <>
-                                           <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                           <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                           <MiniSpec icon={Layers} label="GPU" value={v.gpu} active={isActive} />
-                                           <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
-                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
-                                         </>
-                                       ) : (
-                                         <>
-                                           <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                           <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                           <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
-                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
-                                         </>
-                                       )}
+                                   <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100/50">
+                                       {/* Core Specs */}
+                                       <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                       <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                       <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                       <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                       <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
+                                       <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
+                                       
+                                       {/* Physical Features */}
+                                       <MiniSpec icon={MousePointer2} label="Touchscreen" value={v.touchscreen} active={isActive} />
+                                       <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
+                                       <MiniSpec icon={Fingerprint} label="Biometrics" value={v.fingerprint} active={isActive} />
+                                       <MiniSpec icon={Palette} label="Hardware Color" value={v.color} active={isActive} />
+                                       
+                                       {/* Power & Connectivity */}
+                                       <MiniSpec icon={Battery} label="Battery Unit" value={v.battery} active={isActive} />
+                                       <MiniSpec icon={Zap} label="Network/WiFi" value={v.network} active={isActive} />
+                                       <MiniSpec icon={ShieldCheck} label="ZiCash Warranty" value={product.warranty} active={isActive} />
+                                       <MiniSpec icon={Shield} label="Unit Condition" value={v.condition} active={isActive} />
+
+                                       {/* Advanced Specs Mapping */}
+                                       {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
+                                         const labelData = advancedLabels[key] || { label: key.toUpperCase(), icon: Settings2 };
+                                         return (
+                                           <MiniSpec 
+                                             key={key} 
+                                             icon={labelData.icon} 
+                                             label={labelData.label} 
+                                             value={val} 
+                                             active={isActive} 
+                                           />
+                                         );
+                                       })}
                                      </div>
                                    </CollapsibleContent>
 
                                    <button
                                      onClick={(e) => toggleSpec(v.id, e)}
-                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
+                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
                                    >
                                      {isExpanded ? (
-                                       <><ChevronUp className="w-3 h-3" /> Less Info</>
+                                       <><ChevronUp className="w-3 h-3" /> Show Less</>
                                      ) : (
-                                       <><ChevronDown className="w-3 h-3" /> Full Specifications</>
+                                       <><ChevronDown className="w-3 h-3" /> View Full Specifications</>
                                      )}
                                    </button>
                                  </Collapsible>

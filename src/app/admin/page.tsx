@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -94,7 +95,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
         </TableCell>
         <TableCell>
            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Standard Rate</span>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Regular Price</span>
               <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString()}</span>
            </div>
         </TableCell>
@@ -113,7 +114,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
               expanded ? "bg-slate-950 text-white border-slate-950" : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
             )}
           >
-            {expanded ? "Close Offers" : "Edit Offers"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expanded ? "Close Module" : "Manage Offers"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </TableCell>
       </TableRow>
@@ -135,7 +136,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  // Local string state ensures the user can type decimal points and delete values without jitter
+  // Using string state for smooth typing and empty value handling
   const [dPriceInput, setDPriceInput] = useState<string>(variant.discount?.discount_price?.toString() ?? "");
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
@@ -153,24 +154,24 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
       <TableCell className="pl-12 py-6" colSpan={4}>
         <div className="max-w-4xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mx-auto">
           
-          <div className="flex items-center gap-4 min-w-[220px]">
+          <div className="flex items-center gap-4 min-w-[200px]">
             <div className="p-3 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
             <div className="space-y-0.5 min-w-0">
               <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight truncate">{variant.label}</h4>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                Regular Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
+                Normal Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[200px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
              <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none select-none z-10">GHS</div>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none z-10">GHS</span>
                 <input 
                   type="text"
                   inputMode="decimal"
-                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner relative" 
+                  className="pl-11 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                   value={dPriceInput} 
                   onChange={(e) => setDPriceInput(e.target.value)} 
                   placeholder="0.00"
@@ -178,7 +179,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
              </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[200px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
              <input 
                type="date" 
@@ -242,7 +243,7 @@ export default function AdminPage() {
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.warn("Security Check: Standard view active. Ensure RLS is disabled if specific write errors occur.");
+        console.warn("Catalog Access Alert: Using standard view. Ensure permissions are set for special offers.");
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -262,7 +263,7 @@ export default function AdminPage() {
       if (cRes.data) setCustomers(cRes.data);
       
     } catch (err: any) {
-      console.error("Hub Sync Error:", err);
+      console.error("Hub Update Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -310,7 +311,6 @@ export default function AdminPage() {
   const handleSaveVariantDiscount = async (variantId: string, dPrice: number | null, dDate: string) => {
     setSavingDiscountId(variantId);
     try {
-      // Remove offer if price is cleared
       if (dPrice === null || dPrice === 0 || !dDate) {
         const { error } = await supabase
           .from('discounts')
@@ -318,7 +318,6 @@ export default function AdminPage() {
           .eq('variant_id', variantId);
         if (error) throw error;
       } else {
-        // Direct upsert - ensure RLS is disabled if this fails
         const { error } = await supabase
           .from('discounts')
           .upsert({
@@ -336,7 +335,7 @@ export default function AdminPage() {
       toast({ 
         variant: "destructive", 
         title: "Action Restricted", 
-        description: err.message || "Ensure the 'discounts' table allows writes in Supabase." 
+        description: err.message || "Ensure database permissions allow writing to the offers table." 
       });
     } finally {
       setSavingDiscountId(null);
@@ -353,7 +352,7 @@ export default function AdminPage() {
       toast({ title: "Item Removed", description: "The product has been cleared." });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Sync Restricted", description: err.message });
+      toast({ variant: "destructive", title: "Action Restricted", description: err.message });
     } finally {
       setIsLoading(false);
     }
@@ -508,7 +507,7 @@ export default function AdminPage() {
                     <div className="relative w-full max-w-sm">
                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                        <Input 
-                          placeholder="Search items..." 
+                          placeholder="Find hardware..." 
                           className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold text-lg" 
                           value={discountSearch} 
                           onChange={(e) => setDiscountSearch(e.target.value)} 
@@ -522,8 +521,8 @@ export default function AdminPage() {
                         <TableRow className="border-slate-100 h-20">
                           <TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead>
                           <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Regular Price</TableHead>
-                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Availability</TableHead>
-                          <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Controls</TableHead>
+                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory Status</TableHead>
+                          <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Manage</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

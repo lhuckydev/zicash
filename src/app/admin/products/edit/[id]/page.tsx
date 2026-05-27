@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -253,7 +254,8 @@ export default function EditProductPage() {
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 pointer-events-none">GHS</div>
                       <Input 
-                        type="number" 
+                        type="text" 
+                        inputMode="decimal"
                         className="pl-14 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-xl" 
                         value={product.price === undefined || isNaN(product.price as number) ? "" : product.price} 
                         onChange={(e) => handlePriceInput(e.target.value)} 

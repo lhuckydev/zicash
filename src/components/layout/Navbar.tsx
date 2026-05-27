@@ -170,23 +170,26 @@ export function Navbar() {
         <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
           <div className="flex lg:hidden justify-center items-center pt-1 pb-2">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm shrink-0">
-                <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={32} height={32} className="object-cover" />
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative w-9 h-9 overflow-hidden rounded-full border border-slate-100 bg-white shadow-sm shrink-0">
+                <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={36} height={36} className="object-cover" />
               </div>
-              <span className="font-bold text-lg text-slate-900 font-headline uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
+              <div className="flex flex-col leading-none">
+                <span className="font-bold text-lg text-slate-900 font-headline uppercase tracking-tight italic">Zi<span className="text-blue-600">Cash</span></span>
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-0.5">GH LIMITED</span>
+              </div>
             </Link>
           </div>
 
           <div className="hidden lg:flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2 shrink-0">
-                <div className="relative w-10 h-10 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
-                  <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} className="object-cover" />
+              <Link href="/" className="flex items-center gap-3 shrink-0">
+                <div className="relative w-11 h-11 overflow-hidden rounded-full shadow-sm bg-white border border-slate-100">
+                  <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={44} height={44} className="object-cover" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-bold text-lg text-slate-900 font-headline leading-none uppercase tracking-tight">Zi<span className="text-blue-600">Cash GH</span></span>
-                  <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-0.5">Premium Marketplace</span>
+                <div className="flex flex-col leading-none">
+                  <span className="font-bold text-xl text-slate-900 font-headline uppercase tracking-tight italic">Zi<span className="text-blue-600">Cash</span></span>
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">GH LIMITED</span>
                 </div>
               </Link>
             </div>
@@ -319,10 +322,13 @@ export function Navbar() {
             >
               <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full border bg-white overflow-hidden shadow-sm">
-                    <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={40} height={40} />
+                  <div className="w-12 h-12 rounded-full border bg-white overflow-hidden shadow-sm shrink-0">
+                    <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="Logo" width={48} height={48} />
                   </div>
-                  <span className="text-xl font-black text-slate-900 font-headline uppercase">ZiCash <span className="text-blue-600">GH</span></span>
+                  <div className="flex flex-col leading-none">
+                    <span className="text-xl font-black text-slate-900 font-headline uppercase tracking-tight italic">Zi<span className="text-blue-600">Cash</span></span>
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">GH LIMITED</span>
+                  </div>
                 </div>
                 <button onClick={() => setIsMenuOpen(false)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors"><X className="w-6 h-6" /></button>
               </div>
@@ -370,7 +376,7 @@ export function Navbar() {
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
               transition={{ duration: 0.2 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
               onClick={() => setIsSearchOpen(false)} 
             />
             <motion.div 

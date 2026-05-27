@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -84,7 +85,7 @@ export default function CatalogPage() {
     try {
       const { data, error: supabaseError } = await supabase
         .from('products')
-        .select('*, variants:product_variants(*)')
+        .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
 
       if (supabaseError) {

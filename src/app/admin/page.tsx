@@ -96,7 +96,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
         <TableCell>
            <div className="flex flex-col">
               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Regular Price</span>
-              <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString()}</span>
+              <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString() ?? "0"}</span>
            </div>
         </TableCell>
         <TableCell>
@@ -136,7 +136,6 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  // Using string state for smooth typing and empty value handling
   const [dPriceInput, setDPriceInput] = useState<string>(variant.discount?.discount_price?.toString() ?? "");
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
@@ -152,26 +151,26 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   return (
     <TableRow className="bg-slate-50/30 border-l-4 border-l-blue-600">
       <TableCell className="pl-12 py-6" colSpan={4}>
-        <div className="max-w-4xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mx-auto">
+        <div className="max-w-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mx-auto">
           
-          <div className="flex items-center gap-4 min-w-[200px]">
+          <div className="flex items-center gap-4 min-w-[180px]">
             <div className="p-3 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
             <div className="space-y-0.5 min-w-0">
               <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight truncate">{variant.label}</h4>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                Normal Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
+                Normal Rate: <span className="text-slate-600 font-black">GH₵ {(variant.price ?? 0).toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
              <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none z-10">GHS</span>
                 <input 
                   type="text"
                   inputMode="decimal"
-                  className="pl-11 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  className="pl-11 w-full h-11 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                   value={dPriceInput} 
                   onChange={(e) => setDPriceInput(e.target.value)} 
                   placeholder="0.00"
@@ -179,11 +178,11 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
              </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[180px]">
+          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
              <input 
                type="date" 
-               className="h-12 w-full rounded-xl bg-slate-50 border-transparent text-[10px] font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+               className="h-11 w-full rounded-xl bg-slate-50 border-transparent text-[10px] font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                value={dDate} 
                onChange={(e) => setDDate(e.target.value)} 
              />
@@ -194,7 +193,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
               size="sm"
               onClick={handleSave} 
               disabled={isSaving}
-              className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
+              className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Activate
             </Button>
@@ -203,7 +202,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onSave(variant.id, null, "")}
-                className="h-12 w-12 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
+                className="h-11 w-11 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -236,7 +235,6 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Primary fetch with discount join
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
@@ -549,7 +547,7 @@ export default function AdminPage() {
                     {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map((p) => (
                       <TableRow key={p.id} className="h-24">
                         <TableCell className="pl-10 py-4"><div className="flex items-center gap-6"><div className="w-14 h-14 bg-slate-50 rounded-xl relative overflow-hidden border border-slate-100"><Image src={p.image_url} alt={p.name} fill className="object-contain p-2" /></div><span className="text-sm font-black text-slate-900 uppercase italic">{p.name}</span></div></TableCell>
-                        <TableCell className="text-sm font-black italic">GH₵ {p.price.toLocaleString()}</TableCell>
+                        <TableCell className="text-sm font-black italic">GH₵ {(p.price ?? 0).toLocaleString()}</TableCell>
                         <TableCell><Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[9px] uppercase px-3 py-1">In Stock</Badge></TableCell>
                         <TableCell className="pr-10 text-right space-x-3"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="text-slate-300 hover:text-blue-600"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-600" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>

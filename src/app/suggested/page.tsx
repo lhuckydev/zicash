@@ -21,7 +21,7 @@ export default function SuggestedPage() {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('products')
-        .select('*');
+        .select('*, variants:product_variants(*, discount:discounts(*))');
 
       if (!error) setProducts(data || []);
       setIsLoading(false);

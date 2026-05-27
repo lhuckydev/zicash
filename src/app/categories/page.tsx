@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
@@ -106,7 +107,7 @@ function CategoriesContent() {
       .from('products')
       .select(`
         *,
-        variants:product_variants(*)
+        variants:product_variants(*, discount:discounts(*))
       `)
       .order('created_at', { ascending: false });
 
@@ -138,8 +139,7 @@ function CategoriesContent() {
 
     if (showHotDeals) {
       filtered = filtered.filter(p => 
-        p.variants?.some(v => v.discount_price && v.discount_price > 0) || 
-        (p.discount_price && p.discount_price > 0)
+        p.variants?.some(v => !!v.discount)
       );
     }
 

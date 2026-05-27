@@ -24,13 +24,13 @@ function SearchResults() {
       setIsLoading(true);
       const { data } = await supabase
         .from('products')
-        .select('*');
+        .select('*, variants:product_variants(*, discount:discounts(*))');
 
       if (data) {
         const filtered = data.filter((p: Product) => 
           p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.category.toLowerCase().includes(query.toLowerCase()) ||
-          p.specs.toLowerCase().includes(query.toLowerCase())
+          (p.brand && p.brand.toLowerCase().includes(query.toLowerCase()))
         );
         setProducts(filtered);
       }

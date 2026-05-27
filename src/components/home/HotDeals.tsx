@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
@@ -20,14 +21,13 @@ export function HotDeals() {
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*, variants:product_variants(*)')
+          .select('*, variants:product_variants(*, discount:discounts(*))')
           .order('created_at', { ascending: false });
 
         if (!error && data) {
-          // Filter products that have at least one discounted variant
+          // Filter products that have at least one discount in the dedicated discounts table
           const discounted = data.filter(p => 
-            p.variants?.some(v => v.discount_price && v.discount_price > 0) || 
-            (p.discount_price && p.discount_price > 0)
+            p.variants?.some(v => !!v.discount)
           ).slice(0, 5);
           
           setProducts(discounted);

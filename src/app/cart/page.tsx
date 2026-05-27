@@ -125,10 +125,10 @@ export default function CartPage() {
             {isProfileIncomplete && !isAuthLoading && (
               <Alert className="rounded-[2.5rem] border-blue-200 bg-blue-50 p-8 shadow-xl shadow-blue-500/5 mb-8">
                 <AlertCircle className="h-6 w-6 text-blue-600" />
-                <AlertTitle className="font-black uppercase tracking-tight text-blue-900 text-lg">Identity Verification Required</AlertTitle>
+                <AlertTitle className="font-black uppercase tracking-tight text-blue-900 text-lg">Identity Required</AlertTitle>
                 <AlertDescription className="flex flex-col md:flex-row md:items-center justify-between gap-6 mt-4">
                   <span className="text-sm font-medium text-blue-700 leading-relaxed">
-                    You cannot finalize this transaction until your contact number and delivery address are updated.
+                    You cannot finalize this order until your phone and delivery address are updated.
                   </span>
                   <Link href="/profile">
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl gap-2 h-11 px-6 shrink-0 shadow-lg shadow-blue-600/20">

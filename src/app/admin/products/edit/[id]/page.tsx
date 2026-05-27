@@ -136,7 +136,7 @@ export default function EditProductPage() {
         warranty: data.warranty || "1 Year ZiCash Warranty",
       });
 
-      setExistingImages(data.image_urls || [data.image_url]);
+      setExistingImages(data.image_urls || (data.image_url ? [data.image_url] : []));
       setAdvancedSpecs(data.advanced_specs || {});
 
       if (data.variants) {
@@ -333,7 +333,15 @@ export default function EditProductPage() {
                       {existingImages.concat(previewUrls).map((url, idx) => (
                         <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-slate-100 shadow-sm group">
                           <Image src={url} alt="Gallery" fill className="object-cover" />
-                          <button onClick={() => setExistingImages(prev => prev.filter((_, i) => i !== idx))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                          <button onClick={() => {
+                            if (idx < existingImages.length) {
+                              setExistingImages(prev => prev.filter((_, i) => i !== idx));
+                            } else {
+                              const previewIdx = idx - existingImages.length;
+                              setPreviewUrls(prev => prev.filter((_, i) => i !== previewIdx));
+                              setSelectedFiles(prev => prev.filter((_, i) => i !== previewIdx));
+                            }
+                          }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
                         </div>
                       ))}
                     </div>
@@ -471,7 +479,6 @@ export default function EditProductPage() {
                               </>
                             )}
                             
-                            {/* Common Detail Fields */}
                             <div className="space-y-2">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Monitor className="w-3 h-3" /> Screen</label>
                               <Input placeholder="e.g. 14-inch FHD" className="h-12 bg-slate-50 border-none font-bold" value={v.screen || ""} onChange={e => updateVariant(idx, 'screen', e.target.value)} />
@@ -495,7 +502,7 @@ export default function EditProductPage() {
                                  type="text"
                                  inputMode="decimal"
                                  className="w-full pl-14 h-14 bg-blue-50/50 border-none rounded-2xl font-black text-2xl text-blue-900 px-4 focus:outline-none focus:ring-4 focus:ring-blue-600/5 transition-all shadow-inner italic" 
-                                 value={v.price || ""} 
+                                 value={v.price === "0" ? "" : v.price} 
                                  onChange={e => updateVariant(idx, 'price', e.target.value)} 
                                />
                              </div>

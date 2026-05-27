@@ -17,7 +17,7 @@ import {
   ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
   Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock,
-  Globe, Palette, HardDrive, Settings2
+  Globe, Palette, HardDrive, Settings2, Info
 } from "lucide-react";
 import { 
   Carousel, 
@@ -244,15 +244,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
         {/* 2. GALLERY */}
         <div className="relative group">
-           <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-4 md:p-12">
+           <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
               <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                  <div className="flex-1 w-full order-1 lg:order-2">
                     <div className="relative w-full mx-auto aspect-square md:aspect-[16/10] overflow-hidden rounded-[2.5rem] bg-white flex items-center justify-center">
                        {productImages.length > 0 ? (
                           <Carousel setApi={setApi} className="w-full h-full">
-                             <CarouselContent className="ml-0 h-full">
+                             <CarouselContent className="h-full ml-0">
                                 {productImages.map((url, idx) => (
-                                  <CarouselItem key={idx} className="relative basis-full h-full pl-0 flex items-center justify-center bg-white">
+                                  <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center">
                                     <div className="relative w-full h-full">
                                       <Image 
                                         src={url as string} 
@@ -275,17 +275,17 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     </div>
                  </div>
                  
-                 <div className="lg:w-24 shrink-0 order-2 lg:order-1 flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto scrollbar-hide py-2 w-full lg:h-[500px]">
+                 <div className="lg:w-24 shrink-0 order-2 lg:order-1 flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto scrollbar-hide py-2 w-full lg:h-[450px]">
                     {productImages.map((url, idx) => (
                       <div 
                         key={idx} 
                         onClick={() => handleThumbnailClick(idx)}
                         className={cn(
-                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white",
+                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white overflow-hidden",
                           current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
                         )}
                       >
-                        <Image src={url as string} alt="Thumbnail" fill className="object-contain p-2" />
+                        <Image src={url as string} alt="Thumbnail" fill className="object-contain p-1.5" />
                       </div>
                     ))}
                  </div>
@@ -346,54 +346,56 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                </div>
                              </div>
 
-                             {!isSimpleCategory && (
-                               <div className="space-y-4">
-                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
-                                   <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
-                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
-                                       <MiniSpec icon={Cpu} label="System Processor" value={v.cpu} active={isActive} />
-                                       <MiniSpec icon={SmartphoneIcon} label="Chipset Node" value={v.chipset} active={isActive} />
-                                       <MiniSpec icon={CircuitBoard} label="RAM Memory" value={v.ram} active={isActive} />
-                                       <MiniSpec icon={HardDrive} label="Storage Bank" value={v.storage} active={isActive} />
-                                       <MiniSpec icon={Layers} label="Graphics Core" value={v.gpu} active={isActive} />
-                                       <MiniSpec icon={Monitor} label="Visual Display" value={v.screen} active={isActive} />
-                                       <MiniSpec icon={MousePointer2} label="Touch Interface" value={v.touchscreen} active={isActive} />
-                                       <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
-                                       <MiniSpec icon={Fingerprint} label="Biometric ID" value={v.fingerprint} active={isActive} />
-                                       <MiniSpec icon={Palette} label="Body Color" value={v.color} active={isActive} />
-                                       <MiniSpec icon={Battery} label="Energy Cell" value={v.battery} active={isActive} />
-                                       <MiniSpec icon={Zap} label="Connectivity" value={v.network} active={isActive} />
-                                       <MiniSpec icon={ShieldCheck} label="Limited Warranty" value={product.warranty} active={isActive} />
-                                       <MiniSpec icon={Shield} label="Model Condition" value={v.condition} active={isActive} />
+                             <div className="space-y-4">
+                               <Collapsible open={isExpanded} onOpenChange={() => {}}>
+                                 <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
+                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
+                                     {/* Core Components */}
+                                     <MiniSpec icon={Cpu} label="System Processor" value={v.cpu} active={isActive} />
+                                     <MiniSpec icon={SmartphoneIcon} label="Chipset Node" value={v.chipset} active={isActive} />
+                                     <MiniSpec icon={CircuitBoard} label="RAM Memory" value={v.ram} active={isActive} />
+                                     <MiniSpec icon={HardDrive} label="Storage Bank" value={v.storage} active={isActive} />
+                                     <MiniSpec icon={Layers} label="Graphics Core" value={v.gpu} active={isActive} />
+                                     <MiniSpec icon={Monitor} label="Visual Display" value={v.screen} active={isActive} />
+                                     
+                                     {/* Features */}
+                                     <MiniSpec icon={MousePointer2} label="Touch Interface" value={v.touchscreen} active={isActive} />
+                                     <MiniSpec icon={Keyboard} label="Backlit Keys" value={v.keyboard_light} active={isActive} />
+                                     <MiniSpec icon={Fingerprint} label="Biometric ID" value={v.fingerprint} active={isActive} />
+                                     <MiniSpec icon={Palette} label="Body Color" value={v.color} active={isActive} />
+                                     <MiniSpec icon={Battery} label="Energy Cell" value={v.battery} active={isActive} />
+                                     <MiniSpec icon={Zap} label="Connectivity" value={v.network} active={isActive} />
+                                     <MiniSpec icon={ShieldCheck} label="Limited Warranty" value={product.warranty} active={isActive} />
+                                     <MiniSpec icon={Shield} label="Model Condition" value={v.condition} active={isActive} />
 
-                                       {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
-                                         const labelData = advancedLabels[key] || { label: key.toUpperCase().replace('_', ' '), icon: Settings2 };
-                                         return (
-                                           <MiniSpec 
-                                             key={key} 
-                                             icon={labelData.icon} 
-                                             label={labelData.label} 
-                                             value={val} 
-                                             active={isActive} 
-                                           />
-                                         );
-                                       })}
-                                     </div>
-                                   </CollapsibleContent>
+                                     {/* Map all extra metadata from admin input */}
+                                     {product.advanced_specs && Object.entries(product.advanced_specs).map(([key, val]) => {
+                                       const labelData = advancedLabels[key] || { label: key.toUpperCase().replace('_', ' '), icon: Info };
+                                       return (
+                                         <MiniSpec 
+                                           key={key} 
+                                           icon={labelData.icon} 
+                                           label={labelData.label} 
+                                           value={val} 
+                                           active={isActive} 
+                                         />
+                                       );
+                                     })}
+                                   </div>
+                                 </CollapsibleContent>
 
-                                   <button
-                                     onClick={(e) => toggleSpec(v.id, e)}
-                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
-                                   >
-                                     {isExpanded ? (
-                                       <><ChevronUp className="w-3 h-3" /> Close Full Listing</>
-                                     ) : (
-                                       <><ChevronDown className="w-3 h-3" /> View Every Specification</>
-                                     )}
-                                   </button>
-                                 </Collapsible>
-                               </div>
-                             )}
+                                 <button
+                                   onClick={(e) => toggleSpec(v.id, e)}
+                                   className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
+                                 >
+                                   {isExpanded ? (
+                                     <><ChevronUp className="w-3 h-3" /> Close Full Specs</>
+                                   ) : (
+                                     <><ChevronDown className="w-3 h-3" /> View Full Specifications</>
+                                   )}
+                                 </button>
+                               </Collapsible>
+                             </div>
 
                              <div className="pt-6 border-t border-slate-50">
                                 <Button 

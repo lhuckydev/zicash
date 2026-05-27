@@ -199,18 +199,35 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </button>
         </div>
 
-        {/* 1. PRODUCT NAME SECTION */}
-        <div className="space-y-6">
-           <div className="flex items-center gap-3">
-              {product.brand && (
-                <Badge className="bg-blue-600 text-white border-none px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">{product.brand}</Badge>
-              )}
-              <div className="h-4 w-px bg-slate-200" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{product.category}</span>
+        {/* 1. PRODUCT NAME & RATINGS SECTION */}
+        <div className="space-y-8">
+           <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                 {product.brand && (
+                   <Badge className="bg-blue-600 text-white border-none px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">{product.brand}</Badge>
+                 )}
+                 <div className="h-4 w-px bg-slate-200" />
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{product.category}</span>
+              </div>
+              <h1 className="text-4xl md:text-8xl font-black text-slate-900 font-headline tracking-tighter leading-[0.95] uppercase italic">
+                {product.name}
+              </h1>
            </div>
-           <h1 className="text-4xl md:text-8xl font-black text-slate-900 font-headline tracking-tighter leading-[0.95] uppercase italic">
-             {product.name}
-           </h1>
+
+           {/* Ratings Integration */}
+           {ratingInfo && (
+             <div className="flex items-center gap-6 px-1">
+                <div className="flex text-amber-400">
+                   {[1, 2, 3, 4, 5].map((s) => (
+                     <Star key={s} className={cn("w-5 h-5 md:w-6 md:h-6", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
+                   ))}
+                </div>
+                <div className="flex items-baseline gap-2">
+                   <span className="text-lg md:text-xl font-black text-slate-900">{(ratingInfo?.average || 0).toFixed(1)}</span>
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">({ratingInfo.count} Verified Reviews)</span>
+                </div>
+             </div>
+           )}
         </div>
 
         {/* 2. PRODUCT PICTURE SECTION */}

@@ -131,32 +131,8 @@ export default function CatalogPage() {
           {category === "All" && <HeroSlider />}
 
           <div className="px-5 space-y-16">
-            {category === "All" && <HotDeals />}
-
-            {!isLoading && category === "All" && suggestedPicks.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
-              >
-                <div className="flex items-center justify-between mb-8 px-2">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Our <span className="text-blue-600">Picks</span></h3>
-                  </div>
-                </div>
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                  {suggestedPicks.map((product) => (
-                    <div key={`suggested-${product.id}`} className="min-w-[150px] md:min-w-[200px]">
-                      <SuggestedProductTile product={product} />
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
+            
+            {/* 1. Category Quick Links (Now right after slideshow) */}
             {!error && (
               <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
                 <div className="flex items-center justify-between">
@@ -180,6 +156,32 @@ export default function CatalogPage() {
                       </div>
                       <span className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]", category === cat.name ? "text-blue-600" : "text-slate-400")}>{cat.name.split(' ')[0]}</span>
                     </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {category === "All" && <HotDeals />}
+
+            {!isLoading && category === "All" && suggestedPicks.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-8 px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">Our <span className="text-blue-600">Picks</span></h3>
+                  </div>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {suggestedPicks.map((product) => (
+                    <div key={`suggested-${product.id}`} className="min-w-[150px] md:min-w-[200px]">
+                      <SuggestedProductTile product={product} />
+                    </div>
                   ))}
                 </div>
               </motion.div>

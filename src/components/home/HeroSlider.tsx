@@ -65,7 +65,7 @@ export function HeroSlider() {
 
   if (isLoading) return (
     <div className="container mx-auto px-5 pt-6">
-       <Skeleton className="w-full h-[350px] md:h-[550px] rounded-[3rem] animate-pulse" />
+       <Skeleton className="w-full h-[350px] md:h-[450px] rounded-[3rem] animate-pulse" />
     </div>
   );
 
@@ -79,14 +79,14 @@ export function HeroSlider() {
         opts={{ loop: true, align: 'center' }}
         plugins={[Autoplay({ delay: 6000, stopOnInteraction: false })]}
       >
-        <CarouselContent className="-ml-4 h-[350px] md:h-[550px] items-center">
+        <CarouselContent className="-ml-4 h-[350px] md:h-[450px] items-center">
           {slides.map((slide, index) => {
             const isInternal = slide.link_type === 'internal';
             const isActive = current === index;
 
             const SlideContent = (
               <div className={cn(
-                "relative h-[300px] md:h-[500px] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden transition-all duration-1000 ease-out shadow-2xl group/item",
+                "relative h-[300px] md:h-[400px] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden transition-all duration-1000 ease-out shadow-2xl group/item",
                 isActive ? "scale-100 opacity-100 ring-2 ring-blue-500/10" : "scale-90 opacity-40 blur-[1px]"
               )}>
                 {/* Background Image */}
@@ -102,7 +102,7 @@ export function HeroSlider() {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-transparent z-20" />
                 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-20 z-30">
+                <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-14 z-30">
                   <motion.div 
                     initial={{ opacity: 0, y: 30 }}
                     animate={isActive ? { opacity: 1, y: 0 } : {}}
@@ -110,21 +110,21 @@ export function HeroSlider() {
                     className="max-w-2xl space-y-4"
                   >
                     {slide.title && (
-                      <h2 className="text-3xl md:text-6xl font-black text-white font-headline tracking-tighter uppercase italic leading-none drop-shadow-2xl">
+                      <h2 className="text-3xl md:text-5xl font-black text-white font-headline tracking-tighter uppercase italic leading-none drop-shadow-2xl">
                         {slide.title}
                       </h2>
                     )}
                     {slide.subtitle && (
-                      <p className="text-blue-100/80 font-bold text-sm md:text-xl uppercase tracking-widest drop-shadow-md">
+                      <p className="text-blue-100/80 font-bold text-sm md:text-lg uppercase tracking-widest drop-shadow-md">
                         {slide.subtitle}
                       </p>
                     )}
                     
                     {slide.link && (
-                      <div className="pt-4 flex gap-4">
+                      <div className="pt-2 flex gap-4">
                          <Button 
                            className={cn(
-                             "h-12 md:h-16 px-8 md:px-12 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-[10px] md:text-[12px] shadow-2xl transition-all hover:scale-105 gap-3",
+                             "h-11 md:h-14 px-8 md:px-10 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-2xl transition-all hover:scale-105 gap-3",
                              slide.link_type === 'whatsapp' ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"
                            )}
                            onClick={(e) => {

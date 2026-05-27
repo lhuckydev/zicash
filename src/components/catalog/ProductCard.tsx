@@ -66,10 +66,11 @@ export function ProductCard({
 
   const isFavorite = hasItem(product.id);
   
+  // Strictly check the discounts table link
   const discountActive = product.variants?.some(v => !!v.discount);
   const hasVariants = (product.variants?.length || 0) > 1;
 
-  // Find the earliest expiry date for the timer
+  // Find the earliest expiry date for the timer from the discounts table data
   const earliestExpiry = product.variants
     ? product.variants
         .filter(v => v.discount?.ends_at)
@@ -77,6 +78,7 @@ export function ProductCard({
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
     : undefined;
 
+  // Price calculations strictly using variant.discount data
   const displayPrice = product.variants && product.variants.length > 0 
     ? Math.min(...product.variants.map(v => v.discount ? v.discount.discount_price : v.price))
     : product.price;

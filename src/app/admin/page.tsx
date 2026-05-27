@@ -182,6 +182,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
+  // Strictly read from variant.discount object
   const [dPrice, setDPrice] = useState(variant.discount?.discount_price || 0);
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
@@ -195,11 +196,11 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
       </TableCell>
       <TableCell className="text-xs font-bold text-slate-400 italic">Reg: GH₵ {variant.price.toLocaleString()}</TableCell>
       <TableCell>
-        <div className="relative w-full max-w-[200px]">
+        <div className="relative w-full max-w-[250px]">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-blue-600 pointer-events-none">GHS</span>
           <input 
             type="number" 
-            className="pl-14 w-full h-12 rounded-xl bg-white border-slate-200 text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 transition-all shadow-sm" 
+            className="pl-14 w-full h-14 rounded-xl bg-white border-slate-200 text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 transition-all shadow-sm" 
             value={dPrice || ""} 
             onChange={(e) => setDPrice(parseFloat(e.target.value))} 
             placeholder="Sale Price"
@@ -209,7 +210,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
       <TableCell>
         <input 
           type="date" 
-          className="h-12 w-full rounded-xl bg-white border-slate-200 text-xs font-black max-w-[180px] px-4 focus:outline-none border-2 focus:border-blue-600 transition-all shadow-sm" 
+          className="h-14 w-full rounded-xl bg-white border-slate-200 text-xs font-black max-w-[220px] px-4 focus:outline-none border-2 focus:border-blue-600 transition-all shadow-sm" 
           value={dDate} 
           onChange={(e) => setDDate(e.target.value)} 
         />
@@ -220,7 +221,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
             size="sm"
             onClick={() => onSave(variant.id, dPrice, dDate)} 
             disabled={isSaving}
-            className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/20"
+            className="h-14 rounded-xl bg-blue-600 hover:bg-blue-700 px-8 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/20"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Apply Deal
           </Button>
@@ -229,7 +230,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
               variant="ghost" 
               size="icon" 
               onClick={() => onSave(variant.id, 0, "")}
-              className="h-12 w-12 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
+              className="h-14 w-14 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
             >
               <Trash2 className="w-5 h-5" />
             </Button>
@@ -264,15 +265,15 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Primary fetch for products with variants and discounts
+      // Primary fetch for products with variants and strict discount join
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.error("Initial fetch failed, trying fallback:", pError.message);
-        // Fallback if the discounts table join fails (e.g. table doesn't exist yet)
+        console.warn("Pricing Join unavailable. Checking Catalog access:", pError.message);
+        // Robust fallback for the catalog even if the discounts table is restrictive
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -283,7 +284,7 @@ export default function AdminPage() {
         setProducts(pData);
       }
 
-      // Fetch other data in parallel
+      // Parallel fetch for operational data
       const [oRes, cRes] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
@@ -293,7 +294,7 @@ export default function AdminPage() {
       if (cRes.data) setCustomers(cRes.data);
       
     } catch (err: any) {
-      console.error("Manager Hub Update Error:", err);
+      console.error("Manager Hub Sync Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -369,13 +370,13 @@ export default function AdminPage() {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Permanently remove this hardware from the catalog?")) return;
+    if (!confirm("Permanently remove this item from the catalog?")) return;
     
     setIsLoading(true);
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Item Removed", description: "The hardware record has been deleted." });
+      toast({ title: "Item Removed", description: "The product record has been deleted." });
       fetchAllData();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Action Failed", description: err.message });
@@ -557,7 +558,7 @@ export default function AdminPage() {
                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-8">
                     <div>
                        <h2 className="text-2xl font-black uppercase tracking-tight italic">Active Promotions</h2>
-                       <p className="text-[11px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Set specific sale prices for hardware configurations.</p>
+                       <p className="text-[11px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Set specific sale prices for product options.</p>
                     </div>
                     <div className="flex items-center gap-6">
                        <div className="relative w-full max-w-sm">
@@ -637,7 +638,7 @@ export default function AdminPage() {
                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                    <Input placeholder="Search Catalog..." className="h-14 pl-12 rounded-2xl bg-white border-slate-100 shadow-sm font-bold text-lg" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
                 </div>
-                <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20"><Plus className="w-5 h-5" /> New Hardware</Button></Link>
+                <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20"><Plus className="w-5 h-5" /> New Product</Button></Link>
               </div>
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                 <Table>

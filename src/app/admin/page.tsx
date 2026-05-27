@@ -84,8 +84,6 @@ import {
   SheetTitle, 
   SheetTrigger 
 } from "@/components/ui/sheet";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Product, ProductVariant } from "@/store/useCartStore";
@@ -266,18 +264,36 @@ export default function AdminPage() {
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [pRes, oRes, cRes] = await Promise.all([
-        supabase.from('products').select('*, variants:product_variants(*, discount:discounts(*))').order('created_at', { ascending: false }),
+      // Primary fetch for products with variants and discounts
+      const { data: pData, error: pError } = await supabase
+        .from('products')
+        .select('*, variants:product_variants(*, discount:discounts(*))')
+        .order('created_at', { ascending: false });
+      
+      if (pError) {
+        console.error("Initial fetch failed, trying fallback:", pError.message);
+        // Fallback if the discounts table join fails (e.g. table doesn't exist yet)
+        const { data: fallbackData } = await supabase
+          .from('products')
+          .select('*, variants:product_variants(*)')
+          .order('created_at', { ascending: false });
+        
+        if (fallbackData) setProducts(fallbackData);
+      } else if (pData) {
+        setProducts(pData);
+      }
+
+      // Fetch other data in parallel
+      const [oRes, cRes] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       ]);
       
-      if (pRes.data) setProducts(pRes.data);
       if (oRes.data) setOrders(oRes.data);
       if (cRes.data) setCustomers(cRes.data);
       
     } catch (err: any) {
-      console.error("Store Update Error:", err);
+      console.error("Manager Hub Update Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -326,14 +342,12 @@ export default function AdminPage() {
     setSavingDiscountId(variantId);
     try {
       if (dPrice === 0 || !dDate) {
-        // Remove existing discount
         const { error } = await supabase
           .from('discounts')
           .delete()
           .eq('variant_id', variantId);
         if (error) throw error;
       } else {
-        // Upsert new discount record
         const { error } = await supabase
           .from('discounts')
           .upsert({
@@ -351,6 +365,22 @@ export default function AdminPage() {
       toast({ variant: "destructive", title: "Update Failed", description: err.message });
     } finally {
       setSavingDiscountId(null);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Permanently remove this hardware from the catalog?")) return;
+    
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: "Item Removed", description: "The hardware record has been deleted." });
+      fetchAllData();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Action Failed", description: err.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -590,6 +620,11 @@ export default function AdminPage() {
                       <TableCell className="pr-10 text-right"><ChevronRight className="w-5 h-5 ml-auto text-slate-200 group-hover:text-blue-600 transition-colors" /></TableCell>
                     </TableRow>
                   ))}
+                  {orders.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-20 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[10px]">No orders found.</TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -597,7 +632,13 @@ export default function AdminPage() {
 
           {activeTab === "Products" && (
             <div className="space-y-8 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6"><Input placeholder="Search Catalog..." className="max-w-md h-14 rounded-2xl bg-white border-slate-100 shadow-sm font-bold text-lg" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} /><Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20"><Plus className="w-5 h-5" /> New Hardware</Button></Link></div>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="relative w-full max-w-md">
+                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                   <Input placeholder="Search Catalog..." className="h-14 pl-12 rounded-2xl bg-white border-slate-100 shadow-sm font-bold text-lg" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
+                </div>
+                <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20"><Plus className="w-5 h-5" /> New Hardware</Button></Link>
+              </div>
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                 <Table>
                   <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Regular Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory</TableHead><TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
@@ -610,6 +651,11 @@ export default function AdminPage() {
                         <TableCell className="pr-10 text-right space-x-3"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl text-slate-300 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
+                    {filteredProducts.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-20 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[10px]">No hardware found matching your criteria.</TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </div>

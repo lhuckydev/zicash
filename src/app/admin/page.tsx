@@ -150,7 +150,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
         </TableCell>
         <TableCell>
            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Catalog Base</span>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Regular Rate</span>
               <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString()}</span>
            </div>
         </TableCell>
@@ -169,7 +169,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
               expanded ? "bg-slate-900 text-white border-slate-900" : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
             )}
           >
-            {expanded ? "Close Configurations" : "Manage Pricing"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expanded ? "Close Offers" : "Edit Offers"} {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </TableCell>
       </TableRow>
@@ -194,13 +194,22 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   const [dPrice, setDPrice] = useState(variant.discount?.discount_price || 0);
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
+  const handlePriceChange = (val: string) => {
+    if (val === "") {
+      setDPrice(0);
+    } else {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) setDPrice(parsed);
+    }
+  };
+
   return (
     <TableRow className="bg-slate-50/50 border-l-4 border-l-blue-600">
       <TableCell className="pl-12 py-8" colSpan={4}>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-10 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
           
           {/* Label and Normal Rate */}
-          <div className="flex items-center gap-6 min-w-[240px]">
+          <div className="flex items-center gap-6 min-w-[200px]">
             <div className="p-3 bg-blue-50 rounded-2xl text-blue-600 shrink-0"><Settings2 className="w-6 h-6" /></div>
             <div className="space-y-1">
               <h4 className="text-sm font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
@@ -211,22 +220,22 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
           </div>
 
           {/* Pricing Input */}
-          <div className="flex flex-col gap-2 flex-1 max-w-[300px]">
+          <div className="flex flex-col gap-2 flex-1 max-w-[220px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
              <div className="relative group">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none uppercase tracking-widest transition-opacity group-focus-within:opacity-30">Sale GHS</span>
                 <input 
                   type="number" 
-                  className="pl-28 w-full h-14 rounded-2xl bg-slate-50 border-transparent text-lg font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  className="pl-24 w-full h-14 rounded-2xl bg-slate-50 border-transparent text-lg font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                   value={dPrice || ""} 
-                  onChange={(e) => setDPrice(parseFloat(e.target.value))} 
+                  onChange={(e) => handlePriceChange(e.target.value)} 
                   placeholder="0.00"
                 />
              </div>
           </div>
 
           {/* Date Picker */}
-          <div className="flex flex-col gap-2 flex-1 max-w-[300px]">
+          <div className="flex flex-col gap-2 flex-1 max-w-[220px]">
              <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
              <div className="relative">
                 <input 
@@ -244,7 +253,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
               size="lg"
               onClick={() => onSave(variant.id, dPrice, dDate)} 
               disabled={isSaving}
-              className="h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 px-10 font-black text-[11px] uppercase tracking-widest gap-3 shadow-xl shadow-blue-600/20 transition-all active:scale-95"
+              className="h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 px-8 font-black text-[11px] uppercase tracking-widest gap-3 shadow-xl shadow-blue-600/20 transition-all active:scale-95"
             >
               {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />} Activate Offer
             </Button>
@@ -599,7 +608,7 @@ export default function AdminPage() {
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100 h-20">
                           <TableHead className="pl-10 text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Hardware Unit</TableHead>
-                          <TableHead className="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Catalog Price</TableHead>
+                          <TableHead className="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Regular Rate</TableHead>
                           <TableHead className="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Availability</TableHead>
                           <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Controls</TableHead>
                         </TableRow>
@@ -662,7 +671,7 @@ export default function AdminPage() {
               </div>
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                 <Table>
-                  <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Catalog Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory</TableHead><TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
+                  <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Catalog Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {filteredProducts.map((p) => (
                       <TableRow key={p.id} className="hover:bg-slate-50 transition-colors h-24">

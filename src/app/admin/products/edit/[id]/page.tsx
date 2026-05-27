@@ -326,13 +326,23 @@ export default function EditProductPage() {
                   <div className="space-y-2">
                     <label className="text-[13px] font-black uppercase tracking-widest text-blue-600 ml-1">Base Price (GH₵) <span className="text-red-500">*</span></label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg">GH₵</div>
-                      <Input type="number" className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" value={product.price} onChange={(e) => setProduct({...product, price: parseFloat(e.target.value)})} />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 text-lg pointer-events-none">GH₵</div>
+                      <Input 
+                        type="number" 
+                        className="pl-16 h-14 rounded-xl bg-blue-50/50 border-none font-black italic text-2xl text-slate-900 focus-visible:ring-blue-600/20" 
+                        value={product.price ?? 0} 
+                        onChange={(e) => setProduct({...product, price: e.target.value === "" ? 0 : parseFloat(e.target.value)})} 
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Stock Level <span className="text-red-500">*</span></label>
-                    <Input type="number" className="h-12 rounded-xl bg-slate-50 border-none font-black text-lg" value={product.stock} onChange={(e) => setProduct({...product, stock: parseInt(e.target.value)})} />
+                    <Input 
+                      type="number" 
+                      className="h-12 rounded-xl bg-slate-50 border-none font-black text-lg" 
+                      value={product.stock ?? 0} 
+                      onChange={(e) => setProduct({...product, stock: e.target.value === "" ? 0 : parseInt(e.target.value)})} 
+                    />
                   </div>
                 </div>
              </Card>
@@ -353,12 +363,12 @@ export default function EditProductPage() {
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-[12px] font-black uppercase text-slate-400 ml-1">Product Title <span className="text-red-500">*</span></label>
-                        <Input placeholder="Full Product Name" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name} onChange={(e) => setProduct({...product, name: e.target.value})} />
+                        <Input placeholder="Full Product Name" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.name ?? ""} onChange={(e) => setProduct({...product, name: e.target.value})} />
                       </div>
 
                       <div className="space-y-2">
                         <label className="text-[12px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Tag className="w-3 h-3" /> Brand (Optional)</label>
-                        <Input placeholder="e.g., Apple, HP, Custom" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand} onChange={(e) => setProduct({...product, brand: e.target.value})} />
+                        <Input placeholder="e.g., Apple, HP, Custom" className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.brand ?? ""} onChange={(e) => setProduct({...product, brand: e.target.value})} />
                       </div>
 
                       <div className="space-y-2">
@@ -382,7 +392,7 @@ export default function EditProductPage() {
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Show on the homepage slider</p>
                          </div>
                       </div>
-                      <Switch checked={product.featured} onCheckedChange={(val) => setProduct({...product, featured: val})} className="data-[state=checked]:bg-blue-600" />
+                      <Switch checked={product.featured ?? false} onCheckedChange={(val) => setProduct({...product, featured: val})} className="data-[state=checked]:bg-blue-600" />
                    </div>
 
                    {!isSimpleCategory && (
@@ -392,43 +402,43 @@ export default function EditProductPage() {
                               <MousePointer2 className="w-4 h-4 text-blue-600" />
                               <span className="text-[10px] font-black uppercase text-slate-600">Touchscreen</span>
                            </div>
-                           <Switch checked={product.touchscreen} onCheckedChange={val => setProduct({...product, touchscreen: val})} />
+                           <Switch checked={product.touchscreen ?? false} onCheckedChange={val => setProduct({...product, touchscreen: val})} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                            <div className="flex items-center gap-3">
                               <Keyboard className="w-4 h-4 text-blue-600" />
                               <span className="text-[10px] font-black uppercase text-slate-600">Backlit Keys</span>
                            </div>
-                           <Switch checked={product.keyboard_light} onCheckedChange={val => setProduct({...product, keyboard_light: val})} />
+                           <Switch checked={product.keyboard_light ?? false} onCheckedChange={val => setProduct({...product, keyboard_light: val})} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                            <div className="flex items-center gap-3">
                               <Fingerprint className="w-4 h-4 text-blue-600" />
                               <span className="text-[10px] font-black uppercase text-slate-600">Fingerprint</span>
                            </div>
-                           <Switch checked={product.fingerprint} onCheckedChange={val => setProduct({...product, fingerprint: val})} />
+                           <Switch checked={product.fingerprint ?? false} onCheckedChange={val => setProduct({...product, fingerprint: val})} />
                         </div>
                      </div>
                    )}
 
                    {!isSimpleCategory && product.category === "Laptops" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">CPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Screen</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Graphics (GPU)</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">CPU</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu ?? ""} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size ?? ""} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size ?? ""} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Speed</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.clock_speed ?? ""} onChange={(e) => setProduct({...product, clock_speed: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Screen</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.screen_resolution ?? ""} onChange={(e) => setProduct({...product, screen_resolution: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Graphics (GPU)</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.gpu ?? ""} onChange={(e) => setProduct({...product, gpu: e.target.value})} /></div>
                      </div>
                    )}
 
                    {!isSimpleCategory && product.category === "Phones" && (
                      <div className="pt-8 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in">
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Camera</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
-                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Battery</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Chipset</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.cpu ?? ""} onChange={(e) => setProduct({...product, cpu: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">RAM</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.ram_size ?? ""} onChange={(e) => setProduct({...product, ram_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Storage</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.storage_size ?? ""} onChange={(e) => setProduct({...product, storage_size: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[12px] font-black text-slate-400 ml-1">Camera</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.camera ?? ""} onChange={(e) => setProduct({...product, camera: e.target.value})} /></div>
+                        <div className="space-y-2 md:col-span-2"><label className="text-[12px] font-black text-slate-400 ml-1">Battery</label><Input className="h-14 rounded-2xl bg-slate-50 border-none font-black text-lg" value={product.battery ?? ""} onChange={(e) => setProduct({...product, battery: e.target.value})} /></div>
                      </div>
                    )}
 

@@ -7,14 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Product, ProductVariant, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductReviews } from "@/components/catalog/ProductReviews";
 import Image from "next/image";
 import { 
   ArrowLeft, Heart, ShieldCheck, Truck, Cpu, Database, 
   CircuitBoard, Monitor, Smartphone, 
-  Zap, Timer, 
-  Video, Layers, Info,  
+  Zap, 
+  Layers, 
   ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
   Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
   Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock
@@ -184,188 +183,238 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
-      <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
-          <ArrowLeft className="w-3 h-3" /> Back To Catalog
-        </Link>
+      <div className="max-w-7xl mx-auto space-y-12 md:space-y-20 animate-in fade-in duration-700">
+        <div className="flex items-center justify-between">
+           <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
+             <ArrowLeft className="w-3 h-3" /> Back To Catalog
+           </Link>
+           <button 
+             onClick={() => toggleItem(product)}
+             className={cn(
+               "p-3 rounded-full border bg-white transition-all shadow-sm",
+               isFavorite ? "text-red-500 border-red-100 bg-red-50" : "text-slate-300 border-slate-100 hover:text-slate-600"
+             )}
+           >
+             <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
+           </button>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
-          <div className="lg:col-span-6 space-y-20">
-            <div className="flex flex-col md:flex-row gap-6 h-fit lg:pt-48">
-              <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 md:w-20 pb-2 md:pb-0">
-                {productImages.map((url, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => handleThumbnailClick(idx)}
-                    className={cn(
-                      "relative aspect-square w-16 md:w-full rounded-2xl border-2 overflow-hidden bg-white cursor-pointer transition-all shrink-0 shadow-sm",
-                      current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-60 hover:opacity-100"
-                    )}
-                  >
-                    <Image src={url as string} alt={`View ${idx + 1}`} fill className="object-contain p-2" />
-                  </div>
-                ))}
-              </div>
+        {/* 1. PRODUCT NAME SECTION */}
+        <div className="space-y-6">
+           <div className="flex items-center gap-3">
+              {product.brand && (
+                <Badge className="bg-blue-600 text-white border-none px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">{product.brand}</Badge>
+              )}
+              <div className="h-4 w-px bg-slate-200" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{product.category}</span>
+           </div>
+           <h1 className="text-4xl md:text-8xl font-black text-slate-900 font-headline tracking-tighter leading-[0.95] uppercase italic">
+             {product.name}
+           </h1>
+        </div>
 
-              <div className="flex-1 order-1 md:order-2 relative aspect-square max-h-[600px] bg-white rounded-[3rem] overflow-hidden shadow-2xl group border border-slate-100">
-                <Carousel setApi={setApi} className="w-full h-full [&>div]:h-full">
-                  <CarouselContent className="h-full ml-0">
-                    {productImages.map((url, idx) => (
-                      <CarouselItem key={idx} className="relative h-full w-full pl-0">
-                        <div className="relative w-full h-full bg-white flex items-center justify-center">
-                          <Image 
-                            src={url as string} 
-                            alt={`${product?.name} ${idx + 1}`} 
-                            fill 
-                            className="object-contain p-6 transition-all duration-1000 group-hover:scale-105" 
-                            priority={idx === 0} 
-                            sizes="(max-width: 768px) 100vw, 40vw"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </div>
-            </div>
-
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-               <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Product Overview</h2>
-               </div>
-               <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "Premium quality item. Contact support for full details."}
-               </p>
-            </div>
-
-            <div className="hidden lg:block">
-               <ProductReviews productId={product.id} />
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 space-y-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                 {product.brand && (
-                   <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">{product.brand}</Badge>
-                 )}
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.category}</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-headline tracking-tighter leading-none uppercase italic">
-                {product.name}
-              </h1>
-            </div>
-
-            {product.variants && product.variants.length > 0 && (
-              <div className="space-y-8 bg-white p-4 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                 <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Select Configuration</h3>
-                    <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg mr-4">{product.variants.length} Options</Badge>
+        {/* 2. PRODUCT PICTURE SECTION */}
+        <div className="relative group">
+           <div className="absolute inset-0 bg-blue-600/5 blur-3xl rounded-[4rem] -z-10" />
+           <div className="bg-white rounded-[3rem] md:rounded-[4rem] border border-slate-100 shadow-2xl overflow-hidden p-6 md:p-12">
+              <div className="flex flex-col lg:flex-row gap-12 items-center">
+                 <div className="flex-1 w-full order-1 lg:order-2">
+                    <div className="relative aspect-square md:aspect-[4/3] max-h-[650px] mx-auto w-full">
+                       <Carousel setApi={setApi} className="w-full h-full">
+                          <CarouselContent className="h-full ml-0">
+                             {productImages.map((url, idx) => (
+                               <CarouselItem key={idx} className="relative h-full w-full pl-0">
+                                 <div className="relative w-full h-full flex items-center justify-center">
+                                   <Image 
+                                     src={url as string} 
+                                     alt={`${product?.name} ${idx + 1}`} 
+                                     fill 
+                                     className="object-contain transition-all duration-1000 group-hover:scale-105" 
+                                     priority={idx === 0} 
+                                     sizes="(max-width: 768px) 100vw, 60vw"
+                                   />
+                                 </div>
+                               </CarouselItem>
+                             ))}
+                          </CarouselContent>
+                       </Carousel>
+                    </div>
                  </div>
-                 <div className="grid grid-cols-1 gap-6">
-                    {product.variants.map((v) => {
-                      const isActive = selectedVariant?.id === v.id;
-                      const isExpanded = openSpecs[v.id] || false;
-                      const hasDiscount = !!v.discount;
-                      
-                      return (
-                        <div
-                          key={v.id}
-                          onClick={() => setSelectedVariant(v)}
-                          className={cn(
-                            "text-left p-6 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
-                            isActive 
-                              ? (hasDiscount ? "border-red-600 bg-red-50/20 ring-8 ring-red-600/5 shadow-xl" : "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl")
-                              : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
-                          )}
-                        >
-                          <div className="flex flex-col gap-8">
-                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                              <div className="space-y-1.5 flex-1">
-                                <div className="flex items-center gap-3">
-                                  <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'New'}</p>
-                                  {hasDiscount && (
-                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Deal</Badge>
-                                  )}
-                                </div>
-                                <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
-                                {hasDiscount && v.discount?.ends_at && isActive && <CountdownTimer expiryDate={v.discount.ends_at} />}
-                              </div>
-                              <div className="md:text-right">
-                                {hasDiscount ? (
-                                  <>
-                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
-                                    <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
-                                  </>
-                                ) : (
-                                  <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
-                                )}
-                              </div>
-                            </div>
+                 
+                 <div className="lg:w-24 shrink-0 order-2 lg:order-1 flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto scrollbar-hide py-2 w-full lg:h-[500px]">
+                    {productImages.map((url, idx) => (
+                      <div 
+                        key={idx} 
+                        onClick={() => handleThumbnailClick(idx)}
+                        className={cn(
+                          "relative aspect-square w-16 lg:w-full rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-slate-50",
+                          current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
+                        )}
+                      >
+                        <Image src={url as string} alt="Thumbnail" fill className="object-contain p-2" />
+                      </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
+        </div>
 
-                            {!isSimpleCategory && (
-                              <div className="space-y-4">
-                                <Collapsible open={isExpanded} onOpenChange={() => {}}>
-                                  <CollapsibleContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 pt-8 border-t border-slate-100/50">
-                                      {product.category === "Laptops" ? (
-                                        <>
-                                          <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                          <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                          <MiniSpec icon={Layers} label="GPU" value={v.gpu} active={isActive} />
-                                          <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
-                                          <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
-                                        </>
-                                      ) : (
-                                        <>
-                                          <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
-                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
-                                          <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                          <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
-                                          <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
-                                        </>
-                                      )}
-                                    </div>
-                                  </CollapsibleContent>
+        {/* 3. OTHERS (Pricing, Options, Description, Specs) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+           {/* Left Side: Pricing & Options */}
+           <div className="lg:col-span-7 space-y-12">
+              <div className="space-y-8 bg-white p-6 md:p-12 rounded-[3rem] border border-slate-100 shadow-xl shadow-blue-600/5">
+                 <div className="flex items-center justify-between border-b border-slate-50 pb-8">
+                    <div className="space-y-1">
+                       <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 italic font-headline">Select Your <span className="text-blue-600">Model</span></h3>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pricing varies by hardware configuration</p>
+                    </div>
+                    <Badge variant="outline" className="h-10 rounded-xl px-4 font-black text-xs text-slate-400 border-slate-100">{product.variants?.length || 0} Options</Badge>
+                 </div>
 
-                                  <button
-                                    onClick={(e) => toggleSpec(v.id, e)}
-                                    className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
-                                  >
-                                    {isExpanded ? (
-                                      <><ChevronUp className="w-3 h-3" /> Less Info</>
-                                    ) : (
-                                      <><ChevronDown className="w-3 h-3" /> Full Specifications</>
-                                    )}
-                                  </button>
-                                </Collapsible>
-                              </div>
-                            )}
-
-                            <div className="pt-6 border-t border-slate-50">
-                               <Button 
-                                 onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
-                                 className={cn(
-                                   "w-full h-14 rounded-2xl font-black uppercase text-[10px] tracking-[0.15em] gap-3 shadow-lg transition-all",
-                                   isActive 
-                                     ? (hasDiscount ? "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20") 
-                                     : "bg-slate-900 hover:bg-blue-600 text-white shadow-slate-900/10"
+                 <div className="space-y-6">
+                    {product.variants?.map((v) => {
+                       const isActive = selectedVariant?.id === v.id;
+                       const isExpanded = openSpecs[v.id] || false;
+                       const hasDiscount = !!v.discount;
+                       
+                       return (
+                         <div
+                           key={v.id}
+                           onClick={() => setSelectedVariant(v)}
+                           className={cn(
+                             "text-left p-8 md:p-10 rounded-[2.5rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
+                             isActive 
+                               ? (hasDiscount ? "border-red-600 bg-red-50/20 ring-8 ring-red-600/5 shadow-xl" : "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl")
+                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
+                           )}
+                         >
+                           <div className="flex flex-col gap-8">
+                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                               <div className="space-y-1.5 flex-1">
+                                 <div className="flex items-center gap-3">
+                                   <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'New'}</p>
+                                   {hasDiscount && (
+                                     <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Deal</Badge>
+                                   )}
+                                 </div>
+                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
+                                 {hasDiscount && v.discount?.ends_at && isActive && <CountdownTimer expiryDate={v.discount.ends_at} />}
+                               </div>
+                               <div className="md:text-right">
+                                 {hasDiscount ? (
+                                   <>
+                                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
+                                     <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
+                                   </>
+                                 ) : (
+                                   <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                  )}
-                                 disabled={v.stock <= 0}
-                               >
-                                 <ShoppingCart className="w-4 h-4" /> Add To Basket
-                               </Button>
-                            </div>
-                          </div>
-                        </div>
-                      );
+                               </div>
+                             </div>
+
+                             {!isSimpleCategory && (
+                               <div className="space-y-4">
+                                 <Collapsible open={isExpanded} onOpenChange={() => {}}>
+                                   <CollapsibleContent className="space-y-8 animate-in slide-in-from-top-2 duration-300">
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-8 pt-8 border-t border-slate-100/50">
+                                       {product.category === "Laptops" ? (
+                                         <>
+                                           <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
+                                           <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                           <MiniSpec icon={Layers} label="GPU" value={v.gpu} active={isActive} />
+                                           <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
+                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
+                                         </>
+                                       ) : (
+                                         <>
+                                           <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                           <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
+                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
+                                           <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
+                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
+                                         </>
+                                       )}
+                                     </div>
+                                   </CollapsibleContent>
+
+                                   <button
+                                     onClick={(e) => toggleSpec(v.id, e)}
+                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
+                                   >
+                                     {isExpanded ? (
+                                       <><ChevronUp className="w-3 h-3" /> Less Info</>
+                                     ) : (
+                                       <><ChevronDown className="w-3 h-3" /> Full Specifications</>
+                                     )}
+                                   </button>
+                                 </Collapsible>
+                               </div>
+                             )}
+
+                             <div className="pt-6 border-t border-slate-50">
+                                <Button 
+                                  onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
+                                  className={cn(
+                                    "w-full h-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.15em] gap-3 shadow-lg transition-all",
+                                    isActive 
+                                      ? (hasDiscount ? "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20") 
+                                      : "bg-slate-900 hover:bg-blue-600 text-white shadow-slate-900/10"
+                                  )}
+                                  disabled={v.stock <= 0}
+                                >
+                                  <ShoppingCart className="w-5 h-5" /> Add To Basket
+                                </Button>
+                             </div>
+                           </div>
+                         </div>
+                       );
                     })}
                  </div>
               </div>
-            )}
-          </div>
+           </div>
+
+           {/* Right Side: Description & Info */}
+           <div className="lg:col-span-5 space-y-12">
+              <div className="space-y-8">
+                 <div className="flex items-center gap-4">
+                    <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
+                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Description</h2>
+                 </div>
+                 <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
+                   {product.description || "Premium quality item. Contact support for full details."}
+                 </p>
+              </div>
+
+              {/* Badges/Info */}
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-blue-100 transition-colors">
+                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform"><ShieldCheck className="w-8 h-8" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Quality Verified</span>
+                 </div>
+                 <div className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-emerald-100 transition-colors">
+                    <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform"><Truck className="w-8 h-8" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Fast Delivery</span>
+                 </div>
+              </div>
+
+              <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white space-y-6 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
+                 <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-40 relative z-10">Purchase Protection</h4>
+                 <p className="text-sm font-medium leading-relaxed relative z-10">
+                   All items are covered by ZiCash standard warranty. Every piece of hardware undergoes a 24-point check before dispatch.
+                 </p>
+                 <div className="pt-4 border-t border-white/5 relative z-10">
+                    <Link href="/terms" className="text-[10px] font-black uppercase text-blue-400 hover:text-white transition-colors">View Warranty Terms &rarr;</Link>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="pt-20 border-t border-slate-200">
+           <ProductReviews productId={product.id} />
         </div>
       </div>
     </div>

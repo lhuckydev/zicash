@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -66,8 +65,8 @@ interface ProductVariantForm {
   color?: string;
   battery?: string;
   network?: string;
-  price: string; // Use string for smooth typing
-  stock: string; // Use string for smooth typing
+  price: string; 
+  stock: string;
   label: string;
 }
 
@@ -180,7 +179,7 @@ export default function EditProductPage() {
   const removeVariant = async (index: number) => {
     const variantToRemove = variants[index];
     if (variantToRemove.id) {
-      if (!confirm("Are you sure you want to permanently delete this configuration?")) return;
+      if (!confirm("Permanently delete this hardware configuration?")) return;
       const { error } = await supabase.from('product_variants').delete().eq('id', variantToRemove.id);
       if (error) {
         toast({ variant: "destructive", title: "Deletion Failed", description: error.message });
@@ -191,7 +190,17 @@ export default function EditProductPage() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { price: "0", stock: "10", condition: "New", touchscreen: true, keyboard_light: true, fingerprint: true, label: "New Configuration" }]);
+    setVariants([...variants, { price: "", stock: "10", condition: "New", touchscreen: true, keyboard_light: true, fingerprint: true, label: "New Module" }]);
+  };
+
+  const generateLabel = (v: ProductVariantForm) => {
+    if (isSimpleCategory) return "Standard Unit";
+    if (basicInfo.category === "Laptops") {
+      return `${v.cpu || 'Base'} / ${v.ram || '8GB'} / ${v.storage || '256GB'}${v.gpu ? ` / ${v.gpu}` : ''}`;
+    } else if (basicInfo.category === "Phones") {
+      return `${v.ram || '8GB'} / ${v.storage || '128GB'} / ${v.color || 'Onyx'}`;
+    }
+    return v.label || "Standard Configuration";
   };
 
   const handleSave = async () => {
@@ -211,7 +220,6 @@ export default function EditProductPage() {
         }
       }
 
-      // 1. Update Product Table
       const minPrice = Math.min(...variants.map(v => parseFloat(v.price) || 0));
       const { error: productError } = await supabase
         .from('products')
@@ -227,11 +235,11 @@ export default function EditProductPage() {
 
       if (productError) throw productError;
 
-      // 2. Update Variants Table
       for (const v of variants) {
         const variantPayload = {
           ...v,
           product_id: id as string,
+          label: generateLabel(v),
           price: parseFloat(v.price) || 0,
           stock: parseInt(v.stock) || 0,
         };
@@ -245,24 +253,14 @@ export default function EditProductPage() {
         }
       }
 
-      toast({ title: "Updated Successfully", description: "Changes saved to the marketplace catalog." });
+      toast({ title: "Updated Successfully", description: "Catalog changes have been committed." });
       router.push("/admin");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Save Failed", description: err.message });
+      toast({ variant: "destructive", title: "Update Failed", description: err.message });
     } finally {
       setIsSaving(false);
       setIsUploading(false);
     }
-  };
-
-  const generateLabel = (v: ProductVariantForm) => {
-    if (isSimpleCategory) return "Standard Unit";
-    if (basicInfo.category === "Laptops") {
-      return `${v.cpu || 'Base'} / ${v.ram || '8GB'} / ${v.storage || '256GB'}${v.gpu ? ` / ${v.gpu}` : ''}`;
-    } else if (basicInfo.category === "Phones") {
-      return `${v.ram || '8GB'} / ${v.storage || '128GB'} / ${v.color || 'Onyx'}`;
-    }
-    return v.label || "Standard Configuration";
   };
 
   if (isLoading) return <div className="flex min-h-screen items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-blue-600 opacity-20" /></div>;
@@ -272,12 +270,12 @@ export default function EditProductPage() {
       <main className="flex min-h-screen items-center justify-center p-6 bg-slate-950">
         <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
            <div className="bg-slate-900 p-10 text-center">
-               <h1 className="text-white font-black text-2xl uppercase italic">Admin <span className="text-blue-500">Editor</span></h1>
+               <h1 className="text-white font-black text-2xl uppercase">Admin <span className="text-blue-500 italic">Access</span></h1>
            </div>
            <CardContent className="p-10">
              <form onSubmit={handleAuth} className="space-y-6">
                <Input type="password" placeholder="Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-center" />
-               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest shadow-xl shadow-blue-600/20">Authorize Access</Button>
+               <Button className="w-full h-14 bg-blue-600 font-black rounded-2xl text-white uppercase tracking-widest">Identify</Button>
              </form>
            </CardContent>
         </Card>
@@ -291,17 +289,16 @@ export default function EditProductPage() {
         <div className="flex items-center justify-between">
           <Link href="/admin">
             <Button variant="ghost" className="gap-2 font-black text-slate-500 hover:text-blue-600 uppercase text-[10px] tracking-widest">
-              <ArrowLeft className="w-4 h-4" /> Exit Editor
+              <ArrowLeft className="w-4 h-4" /> Exit
             </Button>
           </Link>
           <div className="text-right">
             <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">ZiCash GH</p>
-            <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Edit <span className="text-blue-600">Hardware</span></h1>
+            <h1 className="text-2xl font-black text-slate-900 mt-1 uppercase italic">Hardware <span className="text-blue-600">Editor</span></h1>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Basic Media & Sidebar */}
           <div className="lg:col-span-4 space-y-8">
              <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-6">
                 <div className="space-y-4">
@@ -345,7 +342,7 @@ export default function EditProductPage() {
                      <ShieldCheck className="w-6 h-6 text-blue-500" />
                      <h3 className="font-black uppercase tracking-widest text-xs italic">System Verification</h3>
                   </div>
-                  <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Ensure all technical details are accurate before committing changes to the live marketplace.</p>
+                  <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Ensure all technical details are accurate before committing changes to the marketplace catalog.</p>
                   <Button onClick={handleSave} disabled={isSaving} className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl uppercase tracking-widest text-[11px] gap-2">
                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Commit Changes
                   </Button>
@@ -353,12 +350,11 @@ export default function EditProductPage() {
              </Card>
           </div>
 
-          {/* Right Column: Detailed Specs */}
           <div className="lg:col-span-8 space-y-10">
              <Card className="border-none shadow-xl rounded-[3rem] bg-white overflow-hidden">
                 <CardHeader className="p-10 bg-slate-900 text-white flex justify-between items-center">
                    <div>
-                     <CardTitle className="text-2xl uppercase tracking-tighter italic font-headline">Basic <span className="text-blue-500">Information</span></CardTitle>
+                     <CardTitle className="text-2xl uppercase tracking-tighter italic font-headline">Basic <span className="text-blue-500">Info</span></CardTitle>
                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">General catalog labels</p>
                    </div>
                    <div className="p-4 bg-blue-600 rounded-3xl">
@@ -378,7 +374,7 @@ export default function EditProductPage() {
                         <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.brand} onChange={(e) => setBasicInfo({...basicInfo, brand: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Coverage</label>
+                        <label className="text-[11px] font-black uppercase text-slate-400 ml-1">Warranty Period</label>
                         <Input className="h-14 rounded-2xl bg-slate-50 border-none font-bold" value={basicInfo.warranty} onChange={(e) => setBasicInfo({...basicInfo, warranty: e.target.value})} />
                       </div>
                       <div className="flex items-center justify-between p-6 bg-blue-50 rounded-3xl border border-blue-100 col-span-1 md:col-span-2">
@@ -400,7 +396,6 @@ export default function EditProductPage() {
                 </CardContent>
              </Card>
 
-             {/* Hardware Configurations Section */}
              <div className="space-y-6">
                <div className="flex items-center justify-between px-4">
                   <h2 className="text-2xl font-black uppercase italic tracking-tight font-headline">Option <span className="text-blue-600">Modules</span></h2>
@@ -415,7 +410,7 @@ export default function EditProductPage() {
                       <div className="p-6 bg-slate-50 flex items-center justify-between border-b border-slate-100">
                          <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">#{idx + 1}</div>
-                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight">{v.id ? `Editing: ${v.label}` : 'New Configuration'}</h3>
+                            <h3 className="font-black text-slate-900 uppercase italic tracking-tight truncate max-w-[200px] md:max-w-md">{v.id ? `Editing: ${v.label}` : 'New Configuration'}</h3>
                          </div>
                          {variants.length > 1 && (
                            <button onClick={() => removeVariant(idx)} className="h-10 w-10 flex items-center justify-center text-red-300 hover:text-red-600 transition-colors"><Trash2 className="w-5 h-5" /></button>
@@ -432,7 +427,7 @@ export default function EditProductPage() {
                                 <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Graphics</label><Input placeholder="Optional" className="h-12 bg-slate-50 border-none font-bold" value={v.gpu || ""} onChange={e => updateVariant(idx, 'gpu', e.target.value)} /></div>
                                 
                                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                   <div className="flex items-center gap-3"><MousePointer2 className="w-4 h-4 text-blue-600" /><span className="text-[10px] font-black uppercase text-slate-600">Touchscreen</span></div>
+                                   <div className="flex items-center gap-3"><MousePointer2 className="w-4 h-4 text-blue-600" /><span className="text-[10px] font-black uppercase text-slate-600">Touch</span></div>
                                    <Switch checked={v.touchscreen} onCheckedChange={val => updateVariant(idx, 'touchscreen', val)} />
                                 </div>
                                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -456,7 +451,7 @@ export default function EditProductPage() {
                         )}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-8 border-t border-slate-50">
                            <div className="space-y-2 md:col-span-2">
-                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Regular Price (GH₵)</label>
+                             <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Regular Price (GHS)</label>
                              <div className="relative">
                                <div className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-blue-600 pointer-events-none">GH₵</div>
                                <input 
@@ -492,7 +487,6 @@ export default function EditProductPage() {
                </div>
              </div>
 
-             {/* Advanced Specifications JSON Column */}
              {!isSimpleCategory && (
                <Card className="border-none shadow-xl rounded-[3rem] bg-white overflow-hidden">
                  <div className="p-10 bg-slate-900 text-white flex items-center justify-between">
@@ -522,10 +516,10 @@ export default function EditProductPage() {
                        ) : (
                          <>
                            {[
-                             { id: 'camera', label: 'Camera Specs', placeholder: 'e.g. 50MP Main' },
+                             { id: 'camera', label: 'Camera Quality', placeholder: 'e.g. 50MP Main' },
                              { id: 'refresh', label: 'Refresh Rate', placeholder: 'e.g. 120Hz' },
                              { id: 'charge', label: 'Charging Speed', placeholder: 'e.g. 67W' },
-                             { id: 'rating', label: 'Protection Rating', placeholder: 'e.g. IP68' },
+                             { id: 'rating', label: 'IP Rating', placeholder: 'e.g. IP68' },
                              { id: 'biometrics', label: 'Security', placeholder: 'e.g. Face ID' }
                            ].map(f => (
                              <div key={f.id} className="space-y-2">
@@ -542,7 +536,7 @@ export default function EditProductPage() {
 
              <div className="flex justify-end pt-6">
                 <Button onClick={handleSave} disabled={isSaving} className="h-20 px-12 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-3xl uppercase tracking-widest text-lg shadow-2xl shadow-blue-600/30 gap-4 transition-all hover:scale-[1.02]">
-                   {isSaving ? <Loader2 className="w-8 h-8 animate-spin" /> : <ShieldCheck className="w-8 h-8" />} Commit All Changes
+                   {isSaving ? <Loader2 className="w-8 h-8 animate-spin" /> : <ShieldCheck className="w-8 h-8" />} Save Changes
                 </Button>
              </div>
           </div>

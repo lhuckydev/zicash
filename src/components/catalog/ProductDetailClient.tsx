@@ -99,34 +99,6 @@ const CountdownTimer = ({ expiryDate }: { expiryDate: string }) => {
   );
 };
 
-const SafeShoppingCard = () => (
-  <Card className="rounded-[3rem] border-none shadow-2xl bg-slate-950 text-white p-10 space-y-10 overflow-hidden h-fit relative">
-    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-    <h3 className="text-xl font-black uppercase italic relative z-10">Safe <span className="text-blue-500">Shopping</span></h3>
-    
-    <div className="space-y-8 relative z-10">
-       <div className="flex gap-5">
-          <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><ShieldCheck className="w-6 h-6" /></div>
-          <div>
-             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Authentic Products</p>
-             <p className="text-sm font-medium leading-relaxed">Every item in our shop is checked for quality and performance.</p>
-          </div>
-       </div>
-       <div className="flex gap-5">
-          <div className="p-3 bg-white/5 rounded-2xl text-blue-500 border border-white/10 shrink-0"><CheckCircle2 className="w-6 h-6" /></div>
-          <div>
-             <p className="font-black uppercase text-[10px] text-white/40 tracking-widest mb-1">Secure Delivery</p>
-             <p className="text-sm font-medium leading-relaxed">Fast delivery ensuring your purchase reaches you safely.</p>
-          </div>
-       </div>
-    </div>
-
-    <div className="pt-8 border-t border-white/10 relative z-10">
-       <p className="text-center font-black italic text-blue-500 text-sm">"All You Need, All For You"</p>
-    </div>
-  </Card>
-);
-
 export default function ProductDetailClient({ initialProduct }: { initialProduct: Product }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -164,7 +136,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         .from('products')
         .select(`
           *,
-          variants:product_variants(*)
+          variants:product_variants(*, discount:discounts(*))
         `)
         .eq('id', initialProduct.id)
         .single();
@@ -201,8 +173,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     setIsAdding(true);
     addItem(product, variant || selectedVariant);
     toast({ 
-      title: "Added to Cart", 
-      description: `${product.name} ${variant ? `(${variant.label})` : ''} added to your basket.` 
+      title: "Added to Basket", 
+      description: `${product.name} ${variant ? `(${variant.label})` : ''} is now in your shopping cart.` 
     });
     setTimeout(() => setIsAdding(false), 500);
   };
@@ -214,7 +186,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
       <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
         <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
-          <ArrowLeft className="w-3 h-3" /> Back To Shop
+          <ArrowLeft className="w-3 h-3" /> Back To Catalog
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
@@ -254,33 +226,16 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                     ))}
                   </CarouselContent>
                 </Carousel>
-                
-                <div className="absolute top-6 left-6 flex flex-col gap-2 z-20">
-                   {product.featured && (
-                     <Badge className="bg-slate-900 text-white border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-xl">Top Choice</Badge>
-                   )}
-                   <Badge className="bg-blue-600/10 backdrop-blur-md text-blue-600 border-none font-black uppercase text-[8px] tracking-widest px-3 py-1.5 shadow-sm">Verified</Badge>
-                </div>
-
-                <button 
-                  onClick={() => toggleItem(product)} 
-                  className={cn(
-                    "absolute top-6 right-6 p-3 rounded-full border shadow-xl transition-all z-20 hover:scale-110 active:scale-95",
-                    isFavorite ? "text-red-500 bg-red-50 border-red-100" : "text-slate-300 bg-white/90 border-slate-100"
-                  )}
-                >
-                  <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
-                </button>
               </div>
             </div>
 
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
                <div className="flex items-center gap-4">
                   <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">About this Item</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic">Product Overview</h2>
                </div>
                <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
-                 {product.description || "No detailed description available."}
+                 {product.description || "Premium quality item. Contact support for full details."}
                </p>
             </div>
 
@@ -295,35 +250,24 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  {product.brand && (
                    <Badge className="bg-blue-50 text-blue-600 border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest shadow-sm">{product.brand}</Badge>
                  )}
-                 {product.brand && <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">/</span>}
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{product.category}</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-slate-900 font-headline tracking-tighter leading-none uppercase italic">
                 {product.name}
               </h1>
-              <div className="flex items-center gap-4">
-                 <div className="flex text-amber-400">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={cn("w-4 h-4", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
-                    ))}
-                 </div>
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                   {ratingInfo ? `${ratingInfo.count} Verified Customer Ratings` : 'Premium Quality Guaranteed'}
-                 </span>
-              </div>
             </div>
 
             {product.variants && product.variants.length > 0 && (
               <div className="space-y-8 bg-white p-4 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Choose your Version</h3>
+                    <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-600 ml-4">Select Configuration</h3>
                     <Badge variant="outline" className="text-[10px] font-bold text-slate-400 rounded-lg mr-4">{product.variants.length} Options</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-6">
                     {product.variants.map((v) => {
                       const isActive = selectedVariant?.id === v.id;
                       const isExpanded = openSpecs[v.id] || false;
-                      const hasDiscount = !!v.discount_price;
+                      const hasDiscount = !!v.discount;
                       
                       return (
                         <div
@@ -336,32 +280,27 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                               : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                           )}
                         >
-                          {isActive && <div className={cn("absolute top-0 left-0 w-12 h-12 flex items-center justify-center rounded-br-2xl text-white shadow-lg", hasDiscount ? "bg-red-600" : "bg-blue-600")}><CheckCircle2 className="w-6 h-6" /></div>}
-                          
                           <div className="flex flex-col gap-8">
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                               <div className="space-y-1.5 flex-1">
                                 <div className="flex items-center gap-3">
                                   <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'New'}</p>
                                   {hasDiscount && (
-                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Price</Badge>
+                                    <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest">Special Deal</Badge>
                                   )}
                                 </div>
                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase break-words">{v.label}</h4>
-                                {hasDiscount && v.discount_ends_at && isActive && <CountdownTimer expiryDate={v.discount_ends_at} />}
+                                {hasDiscount && v.discount?.ends_at && isActive && <CountdownTimer expiryDate={v.discount.ends_at} />}
                               </div>
                               <div className="md:text-right">
                                 {hasDiscount ? (
                                   <>
                                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
-                                    <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount_price!.toLocaleString()}</p>
+                                    <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
                                   </>
                                 ) : (
                                   <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                 )}
-                                <p className={cn("text-[10px] font-black uppercase mt-1 tracking-widest", v.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                                  {v.stock > 0 ? 'Available Now' : 'Sold Out'}
-                                </p>
                               </div>
                             </div>
 
@@ -373,30 +312,18 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                       {product.category === "Laptops" ? (
                                         <>
                                           <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
-                                          <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
-                                          <MiniSpec icon={Layers} label="Graphics" value={v.gpu} active={isActive} />
-                                          <MiniSpec icon={Maximize} label="Display" value={v.screen || product.advanced_specs?.res} active={isActive} />
-                                          <MiniSpec icon={MousePointer2} label="Touch" value={v.touchscreen} active={isActive} />
-                                          <MiniSpec icon={Keyboard} label="Light" value={v.keyboard_light} active={isActive} />
-                                          <MiniSpec icon={Fingerprint} label="Fingerprint" value={v.fingerprint} active={isActive} />
-                                          <MiniSpec icon={Terminal} label="System" value={product.advanced_specs?.os} active={isActive} />
-                                          <MiniSpec icon={Usb} label="Plug Ports" value={product.advanced_specs?.ports} active={isActive} />
-                                          <MiniSpec icon={Battery} label="Battery" value={product.advanced_specs?.battery} active={isActive} />
-                                          <MiniSpec icon={Speaker} label="Audio" value={product.advanced_specs?.audio} active={isActive} />
+                                          <MiniSpec icon={Layers} label="GPU" value={v.gpu} active={isActive} />
+                                          <MiniSpec icon={Maximize} label="Display" value={v.screen} active={isActive} />
                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       ) : (
                                         <>
-                                          <MiniSpec icon={SmartphoneIcon} label="Main Chip" value={v.chipset} active={isActive} />
-                                          <MiniSpec icon={CircuitBoard} label="Memory" value={v.ram} active={isActive} />
+                                          <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
+                                          <MiniSpec icon={CircuitBoard} label="RAM" value={v.ram} active={isActive} />
                                           <MiniSpec icon={Database} label="Storage" value={v.storage} active={isActive} />
                                           <MiniSpec icon={Power} label="Battery" value={v.battery} active={isActive} />
-                                          <MiniSpec icon={Camera} label="Camera" value={product.advanced_specs?.camera} active={isActive} />
-                                          <MiniSpec icon={Zap} label="Charging" value={product.advanced_specs?.charge} active={isActive} />
-                                          <MiniSpec icon={Shield} label="Protection" value={product.advanced_specs?.rating} active={isActive} />
-                                          <MiniSpec icon={Fingerprint} label="Security" value={v.fingerprint || product.advanced_specs?.biometrics} active={isActive} />
-                                          <MiniSpec icon={Timer} label="Screen Speed" value={product.advanced_specs?.refresh} active={isActive} />
                                           <MiniSpec icon={ShieldCheck} label="Warranty" value={product.warranty} active={isActive} />
                                         </>
                                       )}
@@ -408,9 +335,9 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                     className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity", hasDiscount ? "text-red-600" : "text-blue-600")}
                                   >
                                     {isExpanded ? (
-                                      <><ChevronUp className="w-3 h-3" /> Hide Details</>
+                                      <><ChevronUp className="w-3 h-3" /> Less Info</>
                                     ) : (
-                                      <><ChevronDown className="w-3 h-3" /> View Full Details</>
+                                      <><ChevronDown className="w-3 h-3" /> Full Specifications</>
                                     )}
                                   </button>
                                 </Collapsible>
@@ -428,7 +355,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                  )}
                                  disabled={v.stock <= 0}
                                >
-                                 <ShoppingCart className="w-4 h-4" /> Add to Shopping Basket
+                                 <ShoppingCart className="w-4 h-4" /> Add To Basket
                                </Button>
                             </div>
                           </div>
@@ -438,14 +365,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  </div>
               </div>
             )}
-
-            <div className="lg:hidden mt-10">
-               <ProductReviews productId={product.id} />
-            </div>
-
-            <div className="mt-10">
-              <SafeShoppingCard />
-            </div>
           </div>
         </div>
       </div>

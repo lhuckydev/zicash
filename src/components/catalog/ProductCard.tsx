@@ -66,20 +66,20 @@ export function ProductCard({
 
   const isFavorite = hasItem(product.id);
   
-  const discountActive = product.variants?.some(v => v.discount_price && v.discount_price > 0) || (product.discount_price && product.discount_price > 0);
-  const hasVariants = product.variants && product.variants.length > 1;
+  const discountActive = product.variants?.some(v => !!v.discount);
+  const hasVariants = (product.variants?.length || 0) > 1;
 
   // Find the earliest expiry date for the timer
   const earliestExpiry = product.variants
     ? product.variants
-        .filter(v => v.discount_ends_at && v.discount_price)
-        .map(v => v.discount_ends_at!)
+        .filter(v => v.discount?.ends_at)
+        .map(v => v.discount!.ends_at)
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0]
-    : product.discount_ends_at;
+    : undefined;
 
   const displayPrice = product.variants && product.variants.length > 0 
-    ? Math.min(...product.variants.map(v => (v.discount_price && v.discount_price > 0) ? v.discount_price : v.price))
-    : (product.discount_price || product.price);
+    ? Math.min(...product.variants.map(v => v.discount ? v.discount.discount_price : v.price))
+    : product.price;
 
   const originalPrice = product.variants && product.variants.length > 0
     ? Math.min(...product.variants.map(v => v.price))
@@ -113,9 +113,6 @@ export function ProductCard({
     e.stopPropagation();
     toggleItem(product);
   };
-
-  // Only hide price if it has more than one variant AND is currently discounted
-  const showPriceLine = !(hasVariants && discountActive);
 
   return (
     <motion.div 
@@ -177,7 +174,7 @@ export function ProductCard({
           </div>
 
           <div className="flex flex-col pt-1 min-h-[45px] md:min-h-[50px] justify-center">
-             {showPriceLine ? (
+             {!hasVariants ? (
                <div className="space-y-0.5">
                  {discountActive && (
                    <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60">GHS {originalPrice.toLocaleString()}</p>
@@ -188,6 +185,7 @@ export function ProductCard({
                </div>
              ) : (
                <div className="py-1">
+                 <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest italic">Multiple Deals Available</p>
                  {earliestExpiry && <CardTimer expiryDate={earliestExpiry} />}
                </div>
              )}
@@ -200,7 +198,7 @@ export function ProductCard({
               "w-full rounded-xl h-10 md:h-11 font-black text-white transition-all text-[9px] md:text-[10px] uppercase tracking-widest shadow-xl active:scale-95 gap-2",
               discountActive ? "bg-red-600 hover:bg-red-700 shadow-red-900/5" : "bg-slate-950 hover:bg-blue-600 shadow-slate-900/5"
             )}>
-              {hasVariants ? "Explore Options" : "View Details"} <ChevronRight className="w-3 h-3" />
+              {hasVariants ? "Explore Choices" : "View Item"} <ChevronRight className="w-3 h-3" />
             </Button>
           </Link>
         </motion.div>

@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface Discount {
+  id: string;
+  variant_id: string;
+  discount_price: number;
+  ends_at: string;
+  created_at: string;
+}
+
 export interface ProductVariant {
   id: string;
   product_id: string;
@@ -20,8 +28,7 @@ export interface ProductVariant {
   battery?: string;
   network?: string;
   is_default?: boolean;
-  discount_price?: number;
-  discount_ends_at?: string;
+  discount?: Discount; // Nested discount object from the new table
 }
 
 export interface Product {
@@ -35,15 +42,13 @@ export interface Product {
   featured: boolean;
   warranty: string;
   stock_status: string;
-  price: number; // Base price or starting price
+  price: number;
   variants?: ProductVariant[];
   advanced_specs?: any;
   touchscreen?: boolean;
   keyboard_light?: boolean;
   created_at?: string;
   updated_at?: string;
-  discount_price?: number;
-  discount_ends_at?: string;
 }
 
 export interface CartItem extends Product {
@@ -119,8 +124,9 @@ export const useCartStore = create<CartStore>()(
 
 function calculateTotal(items: CartItem[]) {
   return items.reduce((sum, item) => {
-    const originalPrice = item.selectedVariant ? item.selectedVariant.price : item.price;
-    const discountPrice = item.selectedVariant ? item.selectedVariant.discount_price : item.discount_price;
+    const v = item.selectedVariant;
+    const originalPrice = v ? v.price : item.price;
+    const discountPrice = v?.discount?.discount_price;
     const finalPrice = (discountPrice && discountPrice > 0) ? discountPrice : originalPrice;
     
     return sum + (finalPrice * item.quantity);

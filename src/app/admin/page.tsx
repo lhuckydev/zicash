@@ -13,72 +13,24 @@ import {
   Loader2, 
   DollarSign,
   Box,
-  Truck,
-  Zap,
-  ShieldAlert,
-  UserCheck,
-  Eye,
-  EyeOff,
-  MoreVertical,
-  AlertCircle,
+  Clock,
+  Search,
+  ChevronDown, 
+  ChevronUp, 
+  ChevronRight,
   Menu,
   RefreshCcw,
-  FileText,
-  Search,
-  TrendingUp,
-  ArrowUpRight,
-  ChevronDown,
-  ChevronUp,
-  ChevronRight,
-  Globe,
-  Bell,
-  Mail,
-  Calendar as CalendarIcon,
-  CheckSquare,
-  CreditCard,
-  Target,
-  FileBadge,
-  CheckCircle2,
-  Clock,
-  Filter,
-  ArrowRight,
-  Image as ImageIcon,
-  Monitor,
-  Gauge,
-  Lock,
-  ShieldCheck,
-  Receipt,
-  Smartphone,
-  Save,
+  Eye,
   LogOut,
-  Tag,
-  Calendar,
-  X,
+  CheckCircle2,
   Settings2,
-  Banknote
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator 
-} from "@/components/ui/dropdown-menu";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { 
   Sheet, 
   SheetContent, 
@@ -91,13 +43,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Product, ProductVariant } from "@/store/useCartStore";
 import Link from "next/link";
 import Image from "next/image";
-import { SymbolIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Invoices" | "Customers" | "Analytics" | "History" | "Tasks" | "Settings";
+type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Invoices" | "Customers" | "Settings";
 
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
+const SESSION_TIMEOUT = 7200000; 
 
 interface Order {
   id: string;
@@ -107,24 +59,15 @@ interface Order {
   total_amount: any;
   status: string;
   payment_type: "POD" | "Prepayment";
-  momo_sender_name?: string;
-  payment_screenshot_url?: string;
-  is_accra: boolean;
   items: any[];
-  user_id?: string;
 }
 
 interface Customer {
   id: string;
   full_name: string;
-  contact: string;
-  location: string;
   email: string;
   created_at?: string;
-  avatar_url?: string;
 }
-
-const SESSION_TIMEOUT = 7200000; 
 
 interface DiscountRowProps {
   product: Product;
@@ -151,7 +94,7 @@ const DiscountRow = ({ product, onSaveVariant, isSaving }: DiscountRowProps) => 
         </TableCell>
         <TableCell>
            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Regular Rate</span>
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Base Price</span>
               <span className="text-sm font-black text-slate-500 italic">GH₵ {product.price.toLocaleString()}</span>
            </div>
         </TableCell>
@@ -192,7 +135,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
   onSave: (vId: string, p: number | null, d: string) => Promise<void>,
   isSaving: boolean 
 }) => {
-  const [dPrice, setDPrice] = useState<number | null>(variant.discount?.discount_price || null);
+  const [dPrice, setDPrice] = useState<number | null>(variant.discount?.discount_price ?? null);
   const [dDate, setDDate] = useState(variant.discount?.ends_at ? variant.discount.ends_at.split('T')[0] : "");
 
   const handlePriceChange = (val: string) => {
@@ -206,27 +149,27 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
 
   return (
     <TableRow className="bg-slate-50/50 border-l-4 border-l-blue-600">
-      <TableCell className="pl-12 py-6" colSpan={4}>
-        <div className="max-w-3xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+      <TableCell className="pl-12 py-4" colSpan={4}>
+        <div className="max-w-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
           
-          <div className="flex items-center gap-4 min-w-[180px]">
+          <div className="flex items-center gap-4 min-w-[150px]">
             <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shrink-0"><Settings2 className="w-5 h-5" /></div>
             <div className="space-y-0.5">
-              <h4 className="text-xs font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <h4 className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight">{variant.label}</h4>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                 Rate: <span className="text-slate-600 font-black">GH₵ {variant.price.toLocaleString()}</span>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
-             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">New Sale Price</label>
+          <div className="flex flex-col gap-1 flex-1 max-w-[140px]">
+             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">New Sale Price</label>
              <div className="relative group">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-blue-600 pointer-events-none">GHS</div>
                 <input 
                   type="number" 
                   step="0.01"
-                  className="pl-12 w-full h-12 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+                  className="pl-11 w-full h-11 rounded-xl bg-slate-50 border-transparent text-sm font-black italic px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                   value={dPrice ?? ""} 
                   onChange={(e) => handlePriceChange(e.target.value)} 
                   placeholder="0.00"
@@ -234,11 +177,11 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
              </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 flex-1 max-w-[160px]">
-             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-[0.2em]">Offer Expiry</label>
+          <div className="flex flex-col gap-1 flex-1 max-w-[140px]">
+             <label className="text-[9px] font-black uppercase text-slate-400 ml-1 tracking-widest">Offer Expiry</label>
              <input 
                type="date" 
-               className="h-12 w-full rounded-xl bg-slate-50 border-transparent text-xs font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
+               className="h-11 w-full rounded-xl bg-slate-50 border-transparent text-[10px] font-black uppercase tracking-tight px-4 focus:outline-none border-2 focus:border-blue-600 focus:bg-white transition-all shadow-inner" 
                value={dDate} 
                onChange={(e) => setDDate(e.target.value)} 
              />
@@ -249,7 +192,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
               size="sm"
               onClick={() => onSave(variant.id, dPrice, dDate)} 
               disabled={isSaving}
-              className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
+              className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 px-5 font-black text-[10px] uppercase tracking-widest gap-2 shadow-lg shadow-blue-600/10 transition-all"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Activate
             </Button>
@@ -258,7 +201,7 @@ const VariantDiscountSubRow = ({ variant, onSave, isSaving }: {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onSave(variant.id, null, "")}
-                className="h-12 w-12 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
+                className="h-11 w-11 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -275,7 +218,6 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<AdminTab>("Overview");
   const [isStoreOpen, setIsStoreOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -287,20 +229,20 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [discountSearch, setDiscountSearch] = useState("");
-  const [productCategory, setProductCategory] = useState("all");
-
   const [savingDiscountId, setSavingDiscountId] = useState<string | null>(null);
 
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Strictly use explicit join for discount logic
       const { data: pData, error: pError } = await supabase
         .from('products')
         .select('*, variants:product_variants(*, discount:discounts(*))')
         .order('created_at', { ascending: false });
       
       if (pError) {
-        console.warn("Pricing Join unavailable. Checking Catalog access:", pError.message);
+        console.warn("Pricing Table Sync Required. Check RLS or existence of 'discounts' table.");
+        // Fallback fetch
         const { data: fallbackData } = await supabase
           .from('products')
           .select('*, variants:product_variants(*)')
@@ -352,7 +294,7 @@ export default function AdminPage() {
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session || !session.user?.email || !ADMIN_EMAILS.includes(session.user.email)) {
-      toast({ variant: "destructive", title: "Access Denied", description: "Your account is not whitelisted for management." });
+      toast({ variant: "destructive", title: "Access Denied", description: "This account is not authorized for management." });
       return;
     }
 
@@ -361,7 +303,7 @@ export default function AdminPage() {
       localStorage.setItem('admin_last_activity', Date.now().toString());
       setIsAuthenticated(true);
     } else {
-      toast({ variant: "destructive", title: "Denied", description: "Incorrect login credentials." });
+      toast({ variant: "destructive", title: "Denied", description: "Incorrect passkey." });
     }
   };
 
@@ -389,20 +331,20 @@ export default function AdminPage() {
       toast({ title: "Pricing Updated", description: `Special offer applied successfully.` });
       fetchAllData();
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Update Failed", description: err.message });
+      toast({ variant: "destructive", title: "Update Failed", description: err.message || "Permission error. Ensure SQL RLS policies are active." });
     } finally {
       setSavingDiscountId(null);
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Permanently remove this item from the catalog?")) return;
+    if (!confirm("Permanently remove this hardware unit from the catalog?")) return;
     
     setIsLoading(true);
     try {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      toast({ title: "Item Removed", description: "The product record has been deleted." });
+      toast({ title: "Item Removed", description: "The product has been deleted." });
       fetchAllData();
     } catch (err: any) {
       toast({ variant: "destructive", title: "Action Failed", description: err.message });
@@ -420,30 +362,10 @@ export default function AdminPage() {
     toast({ title: "Logged Out", description: "Manager session ended." });
   };
 
-  const approvedOrders = useMemo(() => 
-    orders.filter(o => o.status !== "Pending" && o.status !== "Cancelled"), 
-  [orders]);
-
   const totalRevenue = useMemo(() => 
-    approvedOrders.reduce((acc, o) => acc + (parseFloat(o.total_amount?.toString() || "0") || 0), 0), 
-  [approvedOrders]);
-
-  const activeOrdersCount = useMemo(() => 
-    orders.filter(o => o.status === "Pending").length, 
+    orders.filter(o => o.status === "Delivered")
+      .reduce((acc, o) => acc + (parseFloat(o.total_amount?.toString() || "0") || 0), 0), 
   [orders]);
-
-  const filteredProducts = useMemo(() => 
-    products.filter(p => 
-      p.name.toLowerCase().includes(productSearch.toLowerCase()) && 
-      (productCategory === "all" || p.category === productCategory)
-    ), 
-  [products, productSearch, productCategory]);
-
-  const filteredDiscounting = useMemo(() => 
-    products.filter(p => 
-      p.name.toLowerCase().includes(discountSearch.toLowerCase())
-    ), 
-  [products, discountSearch]);
 
   const SidebarItem = ({ tab, icon: Icon, active, onClick, children }: any) => (
     <button onClick={onClick} className={cn("flex items-center justify-between w-full px-4 py-3 rounded-xl transition-all text-sm font-bold text-left", active ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-white/50 hover:bg-white/5 hover:text-white")}>
@@ -477,7 +399,7 @@ export default function AdminPage() {
         <nav className="space-y-2">
           <SidebarItem tab="Overview" icon={LayoutDashboard} active={activeTab === "Overview"} onClick={() => { setActiveTab("Overview"); setIsMobileMenuOpen(false); }} />
           <div className="space-y-1">
-            <SidebarItem tab="Store" icon={Package} active={["Orders", "Products", "Special Offers", "Invoices"].includes(activeTab)} onClick={() => setIsStoreOpen(!isStoreOpen)}>
+            <SidebarItem tab="Store" icon={Package} active={["Orders", "Products", "Special Offers"].includes(activeTab)} onClick={() => setIsStoreOpen(!isStoreOpen)}>
               <ChevronDown className={cn("w-3 h-3 transition-transform", isStoreOpen ? "" : "-rotate-90")} />
             </SidebarItem>
             {isStoreOpen && (
@@ -485,7 +407,6 @@ export default function AdminPage() {
                 <SubItem tab="Orders" active={activeTab === "Orders"} onClick={() => { setActiveTab("Orders"); setIsMobileMenuOpen(false); }} />
                 <SubItem tab="Products" active={activeTab === "Products"} onClick={() => { setActiveTab("Products"); setIsMobileMenuOpen(false); }} />
                 <SubItem tab="Special Offers" active={activeTab === "Special Offers"} onClick={() => { setActiveTab("Special Offers"); setIsMobileMenuOpen(false); }} />
-                <SubItem tab="Invoices" active={activeTab === "Invoices"} onClick={() => { setActiveTab("Invoices"); setIsMobileMenuOpen(false); }} />
               </div>
             )}
           </div>
@@ -505,7 +426,7 @@ export default function AdminPage() {
     return (
       <main className="flex min-h-screen items-center justify-center p-6 bg-[#F1F5F9] tech-grid">
         <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
-          <div className="bg-[#0F172A] p-12 text-center relative overflow-hidden">
+          <div className="bg-slate-950 p-12 text-center relative overflow-hidden">
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-20 h-20 bg-white rounded-2xl p-4 shadow-2xl mb-6"><Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={80} height={80} className="object-cover rounded-lg" /></div>
               <h1 className="text-white font-black text-2xl uppercase tracking-tight">ZiCash <span className="text-blue-500 italic">Manager</span></h1>
@@ -515,7 +436,7 @@ export default function AdminPage() {
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1 tracking-widest">Entry Passkey</label>
-                 <Input type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-center text-xl tracking-[0.5em] focus-visible:ring-blue-600/10" />
+                 <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-center text-xl tracking-[0.5em]" />
               </div>
               <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20">Authorize Access</Button>
             </form>
@@ -538,41 +459,33 @@ export default function AdminPage() {
               <SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden"><Menu className="w-5 h-5" /></Button></SheetTrigger>
               <SheetContent side="left" className="p-0 bg-slate-950 border-none w-[300px] flex flex-col rounded-r-[2.5rem] overflow-hidden shadow-2xl"><AdminSidebarContent /></SheetContent>
             </Sheet>
-            <div className="relative w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Find items, orders or users..." className="bg-slate-50 border-none rounded-xl h-11 pl-12 text-xs font-bold w-full" /></div>
+            <div className="relative w-full max-w-sm"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Search catalog..." className="bg-slate-50 border-none rounded-xl h-11 pl-12 text-xs font-bold w-full" /></div>
           </div>
           <div className="flex items-center gap-6">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={fetchAllData} 
-              disabled={isLoading}
-              className="h-10 w-10 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
-            >
-              <RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-            </Button>
-            <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] hover:opacity-70 transition-all"><Eye className="w-4 h-4" /> Visit Storefront</Link>
+            <Button variant="ghost" size="icon" onClick={fetchAllData} disabled={isLoading} className="h-10 w-10 rounded-xl"><RefreshCcw className={cn("w-4 h-4", isLoading && "animate-spin")} /></Button>
+            <Link href="/" className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest"><Eye className="w-4 h-4" /> Storefront</Link>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-10 space-y-10 scrollbar-hide pb-24">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-               <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">ZiCash GH Operations</div>
-               <h1 className="text-4xl font-black text-slate-900 font-headline uppercase italic">{activeTab === "Overview" ? "Dashboard Summary" : activeTab}</h1>
+               <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">ZiCash Operations</div>
+               <h1 className="text-4xl font-black text-slate-900 font-headline uppercase italic">{activeTab}</h1>
             </div>
           </div>
 
           {activeTab === "Overview" && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                {[
-                { label: "Gross Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, bg: "bg-blue-50", color: "text-blue-600" },
-                { label: "Catalog Size", value: products.length, icon: Box, bg: "bg-indigo-50", color: "text-indigo-600" },
-                { label: "Awaiting Check", value: activeOrdersCount, icon: Clock, bg: "bg-orange-50", color: "text-orange-600" },
-                { label: "Verified Users", value: customers.length, icon: UserCheck, bg: "bg-blue-50", color: "text-blue-600" },
+                { label: "Sales Revenue", value: `GH₵ ${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-blue-600", bg: "bg-blue-50" },
+                { label: "Catalog Size", value: products.length, icon: Box, color: "text-indigo-600", bg: "bg-indigo-50" },
+                { label: "Active Orders", value: orders.filter(o => o.status === "Pending").length, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
+                { label: "Total Users", value: customers.length, icon: Users, color: "text-emerald-600", bg: "bg-emerald-50" },
               ].map((stat, i) => (
-                <Card key={i} className="border-none shadow-sm rounded-3xl p-8 flex items-center justify-between bg-white hover:shadow-xl transition-all group">
-                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><h3 className="text-3xl font-black text-slate-900 mt-2 italic tracking-tighter">{stat.value}</h3></div>
-                  <div className={cn("p-4 rounded-2xl transition-transform group-hover:scale-110", stat.bg)}><stat.icon className={cn("w-6 h-6", stat.color)} /></div>
+                <Card key={i} className="border-none shadow-sm rounded-3xl p-8 flex items-center justify-between bg-white">
+                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p><h3 className="text-3xl font-black text-slate-900 mt-2 italic">{stat.value}</h3></div>
+                  <div className={cn("p-4 rounded-2xl", stat.bg)}><stat.icon className={cn("w-6 h-6", stat.color)} /></div>
                 </Card>
               ))}
             </div>
@@ -580,51 +493,37 @@ export default function AdminPage() {
 
           {activeTab === "Special Offers" && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-10">
+              <Card className="rounded-[3rem] border-none shadow-xl bg-white p-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-8">
                     <div>
-                       <h2 className="text-2xl font-black uppercase tracking-tight italic">Active Promotions</h2>
-                       <p className="text-[11px] text-slate-400 mt-2 font-bold uppercase tracking-widest">Set specific sale prices for hardware configurations.</p>
+                       <h2 className="text-2xl font-black uppercase italic">Hardware Promotions</h2>
+                       <p className="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Set specific sale prices for your premium configurations.</p>
                     </div>
-                    <div className="flex items-center gap-6">
-                       <div className="relative w-full max-w-sm">
-                          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                          <Input 
-                             placeholder="Search items for sale..." 
-                             className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-black text-lg focus-visible:ring-blue-600/10" 
-                             value={discountSearch} 
-                             onChange={(e) => setDiscountSearch(e.target.value)} 
-                          />
-                       </div>
+                    <div className="relative w-full max-w-sm">
+                       <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                       <Input 
+                          placeholder="Search items..." 
+                          className="h-14 pl-14 rounded-2xl bg-slate-50 border-none font-bold text-lg" 
+                          value={discountSearch} 
+                          onChange={(e) => setDiscountSearch(e.target.value)} 
+                       />
                     </div>
                  </div>
                  
-                 <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-inner">
+                 <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 overflow-hidden">
                     <Table>
                       <TableHeader className="bg-white">
                         <TableRow className="border-slate-100 h-20">
-                          <TableHead className="pl-10 text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Hardware Unit</TableHead>
-                          <TableHead className="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Regular Rate</TableHead>
-                          <TableHead className="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Availability</TableHead>
-                          <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-[0.25em] text-slate-400">Controls</TableHead>
+                          <TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead>
+                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Regular Rate</TableHead>
+                          <TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Availability</TableHead>
+                          <TableHead className="pr-10 text-right text-[10px] uppercase font-black tracking-widest text-slate-400">Controls</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredDiscounting.map((p) => (
-                          <DiscountRow 
-                            key={p.id} 
-                            product={p} 
-                            onSaveVariant={handleSaveVariantDiscount} 
-                            isSaving={savingDiscountId} 
-                          />
+                        {products.filter(p => p.name.toLowerCase().includes(discountSearch.toLowerCase())).map((p) => (
+                          <DiscountRow key={p.id} product={p} onSaveVariant={handleSaveVariantDiscount} isSaving={savingDiscountId} />
                         ))}
-                        {filteredDiscounting.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={4} className="py-32 text-center text-slate-300 font-black uppercase tracking-[0.3em] text-sm italic">
-                               No items found matching your search criteria.
-                            </TableCell>
-                          </TableRow>
-                        )}
                       </TableBody>
                     </Table>
                  </div>
@@ -632,56 +531,24 @@ export default function AdminPage() {
             </div>
           )}
 
-          {activeTab === "Orders" && (
-            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden animate-in fade-in duration-500">
-              <Table>
-                <TableHeader className="bg-slate-50/50"><TableRow className="border-slate-50 h-16"><TableHead className="pl-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Order Reference</TableHead><TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Customer</TableHead><TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Paid</TableHead><TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Details</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {orders.map((o) => (
-                    <TableRow key={o.id} className="cursor-pointer hover:bg-slate-50 transition-colors h-20 group" onClick={() => router.push(`/admin/order/${o.id}`)}>
-                      <TableCell className="pl-10 font-black text-xs text-blue-600 uppercase">#{o.id.slice(0, 8)}</TableCell>
-                      <TableCell className="text-sm font-black text-slate-700">{o.customer_name}</TableCell>
-                      <TableCell className="text-sm font-black italic tracking-tighter">GH₵ {parseFloat(o.total_amount).toLocaleString()}</TableCell>
-                      <TableCell><Badge className={cn("text-[9px] font-black uppercase px-3 py-1 rounded-lg border-none shadow-sm", o.status === "Delivered" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700")}>{o.status}</Badge></TableCell>
-                      <TableCell className="pr-10 text-right"><ChevronRight className="w-5 h-5 ml-auto text-slate-200 group-hover:text-blue-600 transition-colors" /></TableCell>
-                    </TableRow>
-                  ))}
-                  {orders.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="py-20 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[10px]">No orders found.</TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
           {activeTab === "Products" && (
-            <div className="space-y-8 animate-in fade-in duration-500">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="relative w-full max-w-md">
-                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                   <Input placeholder="Search Catalog..." className="h-14 pl-12 rounded-2xl bg-white border-slate-100 shadow-sm font-bold text-lg" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} />
-                </div>
-                <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20"><Plus className="w-5 h-5" /> New Product</Button></Link>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="relative w-full max-w-md"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><Input placeholder="Find items..." className="h-14 pl-12 rounded-2xl bg-white border-slate-100 shadow-sm font-bold" value={productSearch} onChange={(e) => setProductSearch(e.target.value)} /></div>
+                <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700 px-10 h-14 rounded-2xl font-black uppercase text-[11px] gap-3 shadow-xl"><Plus className="w-5 h-5" /> New Product</Button></Link>
               </div>
               <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
                 <Table>
                   <TableHeader className="bg-slate-50/50 h-16"><TableRow className="border-slate-50"><TableHead className="pl-10 text-[10px] uppercase font-black tracking-widest text-slate-400">Hardware Unit</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Catalog Price</TableHead><TableHead className="text-[10px] uppercase font-black tracking-widest text-slate-400">Inventory</TableHead><TableHead className="pr-10 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Manage</TableHead></TableRow></TableHeader>
                   <TableBody>
-                    {filteredProducts.map((p) => (
-                      <TableRow key={p.id} className="hover:bg-slate-50 transition-colors h-24">
-                        <TableCell className="pl-10 py-4"><div className="flex items-center gap-6"><div className="w-14 h-14 bg-slate-50 rounded-xl relative overflow-hidden border border-slate-100 shadow-inner"><Image src={p.image_url} alt={p.name} fill className="object-contain p-2" /></div><span className="text-sm font-black text-slate-900 uppercase italic tracking-tight">{p.name}</span></div></TableCell>
-                        <TableCell className="text-sm font-black italic tracking-tighter">GH₵ {p.price.toLocaleString()}</TableCell>
-                        <TableCell><Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[9px] uppercase tracking-widest px-3 py-1 shadow-sm">In Stock</Badge></TableCell>
-                        <TableCell className="pr-10 text-right space-x-3"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl text-slate-300 hover:text-blue-600 hover:bg-blue-50"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl text-slate-300 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
+                    {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map((p) => (
+                      <TableRow key={p.id} className="h-24">
+                        <TableCell className="pl-10 py-4"><div className="flex items-center gap-6"><div className="w-14 h-14 bg-slate-50 rounded-xl relative overflow-hidden border border-slate-100"><Image src={p.image_url} alt={p.name} fill className="object-contain p-2" /></div><span className="text-sm font-black text-slate-900 uppercase italic">{p.name}</span></div></TableCell>
+                        <TableCell className="text-sm font-black italic">GH₵ {p.price.toLocaleString()}</TableCell>
+                        <TableCell><Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[9px] uppercase px-3 py-1">In Stock</Badge></TableCell>
+                        <TableCell className="pr-10 text-right space-x-3"><Link href={`/admin/products/edit/${p.id}`}><Button variant="ghost" size="icon" className="text-slate-300 hover:text-blue-600"><Edit className="w-4 h-4" /></Button></Link><Button variant="ghost" size="icon" className="text-slate-300 hover:text-red-600" onClick={() => handleDeleteProduct(p.id)}><Trash2 className="w-4 h-4" /></Button></TableCell>
                       </TableRow>
                     ))}
-                    {filteredProducts.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-20 text-center text-slate-300 font-black uppercase tracking-[0.2em] text-[10px]">No hardware found matching your criteria.</TableCell>
-                      </TableRow>
-                    )}
                   </TableBody>
                 </Table>
               </div>

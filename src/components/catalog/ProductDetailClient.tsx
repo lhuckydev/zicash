@@ -194,28 +194,15 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
-      <div className="max-w-7xl mx-auto space-y-12 md:y-16 animate-in fade-in duration-700">
+      <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 animate-in fade-in duration-700">
         
-        {/* Navigation & Favorite */}
-        <div className="flex items-center justify-between">
-           <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase text-[10px] tracking-widest">
-             <ArrowLeft className="w-3 h-3" /> Catalog Index
-           </Link>
-           <button 
-             onClick={() => toggleItem(product)}
-             className={cn(
-               "p-3 rounded-full border bg-white transition-all shadow-sm",
-               isFavorite ? "text-red-500 border-red-100 bg-red-50" : "text-slate-300 border-slate-100 hover:text-slate-600"
-             )}
-           >
-             <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
-           </button>
-        </div>
-
         {/* 1. NAME & IDENTITY (FIRST) */}
         <div className="space-y-8">
            <div className="space-y-4">
               <div className="flex items-center gap-3">
+                 <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:opacity-70 transition-colors font-bold uppercase text-[10px] tracking-widest mr-2">
+                   <ArrowLeft className="w-3 h-3" /> Back
+                 </Link>
                  {product.brand && (
                    <Badge className="bg-blue-600 text-white border-none px-4 py-1.5 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20">{product.brand}</Badge>
                  )}
@@ -227,29 +214,43 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </h1>
            </div>
 
-           {ratingInfo && (
-             <div className="flex items-center gap-6 px-1">
-                <div className="flex text-amber-400">
-                   {[1, 2, 3, 4, 5].map((s) => (
-                     <Star key={s} className={cn("w-5 h-5 md:w-6 md:h-6", (ratingInfo?.average || 0) >= s ? "fill-current" : "opacity-20")} />
-                   ))}
+           <div className="flex items-center justify-between gap-6 px-1">
+              {ratingInfo ? (
+                <div className="flex items-center gap-6">
+                   <div className="flex text-amber-400">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={cn("w-5 h-5 md:w-6 md:h-6", (ratingInfo.average || 0) >= s ? "fill-current" : "opacity-20")} />
+                      ))}
+                   </div>
+                   <div className="flex items-baseline gap-2">
+                      <span className="text-lg md:text-xl font-black text-slate-900">{(ratingInfo.average || 0).toFixed(1)}</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">({ratingInfo.count} Verified Reviews)</span>
+                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                   <span className="text-lg md:text-xl font-black text-slate-900">{(ratingInfo?.average || 0).toFixed(1)}</span>
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">({ratingInfo.count} Verified Reviews)</span>
-                </div>
-             </div>
-           )}
+              ) : (
+                <div className="flex text-slate-100"><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /></div>
+              )}
+
+              <button 
+                onClick={() => toggleItem(product)}
+                className={cn(
+                  "p-3 rounded-full border bg-white transition-all shadow-sm",
+                  isFavorite ? "text-red-500 border-red-100 bg-red-50" : "text-slate-300 border-slate-100 hover:text-slate-600"
+                )}
+              >
+                <Heart className={cn("w-5 h-5", isFavorite && "fill-current")} />
+              </button>
+           </div>
         </div>
 
         {/* 2. GALLERY (SECOND) */}
         <div className="space-y-8">
-          <div className="relative aspect-square md:aspect-video w-full max-w-5xl mx-auto rounded-[3rem] md:rounded-[4rem] bg-white border border-slate-100 shadow-2xl overflow-hidden flex items-center justify-center p-6 md:p-12">
+          <div className="relative aspect-video w-full max-w-5xl mx-auto rounded-[3rem] md:rounded-[4rem] bg-white border border-slate-100 shadow-2xl overflow-hidden flex flex-col items-center justify-center p-6 md:p-12">
              {productImages.length > 0 ? (
-               <Carousel setApi={setApi} className="w-full h-full flex items-center justify-center">
-                 <CarouselContent className="h-full ml-0">
+               <Carousel setApi={setApi} className="w-full h-full">
+                 <CarouselContent className="h-full flex items-center">
                     {productImages.map((url, idx) => (
-                      <CarouselItem key={idx} className="h-full pl-0 relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
+                      <CarouselItem key={idx} className="h-full relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
                         <div className="relative w-full h-full flex items-center justify-center">
                           <Image 
                             src={url as string} 
@@ -395,7 +396,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                     "w-full h-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.15em] gap-3 shadow-lg transition-all",
                                     isActive 
                                       ? (hasDiscount ? "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20") 
-                                      : "bg-slate-900 hover:bg-blue-600 text-white shadow-slate-900/10"
+                                      : "bg-slate-950 hover:bg-blue-600 text-white shadow-slate-950/10"
                                   )}
                                   disabled={v.stock <= 0}
                                 >

@@ -14,24 +14,18 @@ import {
   CircuitBoard, Monitor, Smartphone, 
   Zap, 
   Layers, 
-  ShoppingCart, Star, Loader2, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
-  Box, Maximize, SmartphoneIcon, Camera, MousePointer2,
+  ShoppingCart, Star, Tag, ChevronRight, ChevronDown, ChevronUp, CheckCircle2,
+  Box, SmartphoneIcon, Camera, MousePointer2,
   Keyboard, Power, Terminal, Usb, Battery, Speaker, Fingerprint, Shield, Clock,
-  Globe, Palette, HardDrive, Settings2, Info
+  Palette, HardDrive, Info
 } from "lucide-react";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  type CarouselApi
-} from "@/components/ui/carousel";
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface MiniSpecProps {
   icon: any;
@@ -100,7 +94,6 @@ const CountdownTimer = ({ expiryDate }: { expiryDate: string }) => {
 };
 
 export default function ProductDetailClient({ initialProduct }: { initialProduct: Product }) {
-  const router = useRouter();
   const { toast } = useToast();
   const addItem = useCartStore((state) => state.addItem);
   const { toggleItem, hasItem } = useWishlistStore();
@@ -110,11 +103,17 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     initialProduct.variants?.find(v => v.is_default) || initialProduct.variants?.[0]
   );
   
-  const [isAdding, setIsAdding] = useState(false);
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
   const [openSpecs, setOpenSpecs] = useState<Record<string, boolean>>({});
   const [ratingInfo, setRatingInfo] = useState<{ average: number; count: number } | null>(null);
+  
+  const images = (product.image_urls && product.image_urls.length > 0 ? product.image_urls : [product.image_url]).filter(Boolean);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  useEffect(() => {
+    if (images.length > 0) {
+      setSelectedImage(images[0]);
+    }
+  }, [product]);
 
   useEffect(() => {
     async function fetchFullData() {
@@ -149,17 +148,6 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
     fetchFullData();
   }, [initialProduct.id]);
 
-  useEffect(() => {
-    if (!api) return;
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
-
-  const handleThumbnailClick = useCallback((index: number) => {
-    api?.scrollTo(index);
-  }, [api]);
-
   const toggleSpec = (variantId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setOpenSpecs(prev => ({ ...prev, [variantId]: !prev[variantId] }));
@@ -167,17 +155,14 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
   const handleAddToCart = (variant?: ProductVariant) => {
     if (!product) return;
-    setIsAdding(true);
     addItem(product, variant || selectedVariant);
     toast({ 
       title: "Added to Basket", 
       description: `${product.name} ${variant ? `(${variant.label})` : ''} is now in your shopping cart.` 
     });
-    setTimeout(() => setIsAdding(false), 500);
   };
 
   const isFavorite = hasItem(product.id);
-  const productImages = (product.image_urls?.length ? product.image_urls : [product.image_url]).filter(Boolean);
 
   const advancedLabels: Record<string, { label: string, icon: any }> = {
     res: { label: 'Screen Resolution', icon: Monitor },
@@ -245,47 +230,53 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
         {/* 2. GALLERY (SECOND) */}
         <div className="space-y-8">
-          <div className="relative aspect-video w-full max-w-5xl mx-auto rounded-[3rem] md:rounded-[4rem] bg-white border border-slate-100 shadow-2xl overflow-hidden flex flex-col items-center justify-center p-6 md:p-12">
-             {productImages.length > 0 ? (
-               <Carousel setApi={setApi} className="w-full h-full">
-                 <CarouselContent className="h-full flex items-center">
-                    {productImages.map((url, idx) => (
-                      <CarouselItem key={idx} className="h-full relative flex items-center justify-center min-h-[300px] md:min-h-[450px]">
-                        <div className="relative w-full h-full flex items-center justify-center">
-                          <Image 
-                            src={url as string} 
-                            alt={`${product?.name} ${idx + 1}`} 
-                            fill 
-                            className="object-contain transition-all duration-1000" 
-                            priority={idx === 0} 
-                            sizes="(max-width: 1024px) 100vw, 800px"
-                          />
-                        </div>
-                      </CarouselItem>
-                    ))}
-                 </CarouselContent>
-               </Carousel>
-             ) : (
-               <div className="flex flex-col items-center gap-4 text-slate-200">
-                 <Box className="w-16 h-16" />
-                 <p className="text-[10px] font-black uppercase tracking-widest">Gallery Offline</p>
-               </div>
-             )}
+          <div className="relative w-full h-[350px] md:h-[500px] rounded-3xl overflow-hidden bg-white shadow-sm flex items-center justify-center border border-slate-100 p-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedImage}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 flex items-center justify-center p-6 md:p-12"
+              >
+                {selectedImage ? (
+                  <Image 
+                    src={selectedImage} 
+                    alt={product.name} 
+                    fill 
+                    priority 
+                    className="object-contain" 
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-4 text-slate-200">
+                    <Box className="w-16 h-16" />
+                    <p className="text-[10px] font-black uppercase tracking-widest">Gallery Offline</p>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
           
-          <div className="flex justify-center gap-4 px-4 overflow-x-auto scrollbar-hide py-2">
-             {productImages.map((url, idx) => (
-               <div 
-                 key={idx} 
-                 onClick={() => handleThumbnailClick(idx)}
-                 className={cn(
-                   "relative aspect-square w-16 md:w-24 rounded-2xl border-2 transition-all cursor-pointer shadow-sm shrink-0 bg-white overflow-hidden",
-                   current === idx ? "border-blue-600 ring-4 ring-blue-500/10" : "border-transparent opacity-40 hover:opacity-100"
-                 )}
-               >
-                 <Image src={url as string} alt="Thumbnail" fill className="object-contain p-2" />
-               </div>
-             ))}
+          <div className="flex gap-3 overflow-x-auto py-4 scrollbar-hide max-w-5xl mx-auto px-2">
+            {images.map((img, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(img)}
+                className={`relative min-w-[80px] w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 shrink-0 ${
+                  selectedImage === img
+                    ? "border-blue-500 scale-105 shadow-md"
+                    : "border-slate-100 opacity-60 hover:opacity-100"
+                }`}
+              >
+                <Image
+                  src={img}
+                  alt={`Preview ${index}`}
+                  fill
+                  className="object-cover"
+                />
+              </button>
+            ))}
           </div>
         </div>
 
@@ -343,7 +334,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                              </div>
 
                              <div className="space-y-4">
-                               <Collapsible open={isExpanded} onOpenChange={() => {}}>
+                               <Collapsible open={isExpanded}>
                                  <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />

@@ -79,6 +79,7 @@ EXPERT CONSULTATION PROTOCOLS:
 7. PRODUCT HIGHLIGHTS (CRITICAL): Wrap the FULL PRODUCT NAME (e.g. HP Probook x360 11 G5) in this EXACT format: [NAME:Full Product Name].
 8. TECHNICAL HIGHLIGHTS (CRITICAL): ALWAYS wrap core technical specs (e.g. CPUs like Core i7, RAM amounts like 16GB RAM, Storage sizes) in double asterisks like this: **Core i7**.
 9. PRICING (CRITICAL): Always use the symbol **GH₵** for prices (e.g., GH₵ 2,500).
+10. SPACING (CRITICAL): Always use double line breaks (\n\n) between numbered points and paragraphs to ensure maximum readability.
 
 IMPORTANT FORMATTING RULES:
 - NO ASTERISKS (*) FOR LISTS. Use numbers only.

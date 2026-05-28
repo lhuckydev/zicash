@@ -66,7 +66,7 @@ function RecommendedProduct({ productId }: { productId: string }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ y: -2 }}
-      className="group my-4 max-w-md"
+      className="group my-2 max-w-md"
     >
       <Link href={`/product/${product.id}`} className="block">
         <div className={cn(
@@ -257,7 +257,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
     const blocks = content.split(/(\[MATCH_ID:.*?\])/g);
     
     return (
-      <div className="space-y-1">
+      <div className="space-y-6">
         {blocks.map((block, index) => {
           const match = block.match(/\[MATCH_ID:(.*?)\]/);
           if (match) {
@@ -265,41 +265,42 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
           }
           if (block.trim() === "") return null;
           
-          // Enhanced visual parsing for:
-          // 1. [NAME:Product Name] -> Yellow
-          // 2. **Spec** -> Blue Badge
-          // 3. GH₵ Pricing -> Green
-          const inlineRegex = /(\[NAME:.*?\]|\*\*.*?\*\*|GH₵\s?[\d,.]+)/g;
-          const inlineParts = block.split(inlineRegex);
+          // Split by newlines to render separate paragraphs with space-y-6
+          const paragraphs = block.split(/\n+/).filter(p => p.trim() !== "");
 
-          return (
-            <p key={index} className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-              {inlineParts.map((part, i) => {
-                if (part.startsWith('[NAME:') && part.endsWith(']')) {
-                  return (
-                    <span key={i} className="font-black text-yellow-500 mx-0.5 uppercase tracking-tight italic drop-shadow-sm">
-                      {part.slice(6, -1)}
-                    </span>
-                  );
-                }
-                if (part.startsWith('**') && part.endsWith('**')) {
-                  return (
-                    <span key={i} className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-md font-black text-[0.85em] mx-0.5 uppercase tracking-tighter align-baseline border border-blue-100/50 shadow-sm">
-                      {part.slice(2, -2)}
-                    </span>
-                  );
-                }
-                if (part.includes('GH₵')) {
-                  return (
-                    <span key={i} className="font-black text-emerald-600 mx-0.5 whitespace-nowrap">
-                      {part}
-                    </span>
-                  );
-                }
-                return part;
-              })}
-            </p>
-          );
+          return paragraphs.map((paragraph, pIdx) => {
+            const inlineRegex = /(\[NAME:.*?\]|\*\*.*?\*\*|GH₵\s?[\d,.]+)/g;
+            const inlineParts = paragraph.split(inlineRegex);
+
+            return (
+              <p key={`${index}-${pIdx}`} className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                {inlineParts.map((part, i) => {
+                  if (part.startsWith('[NAME:') && part.endsWith(']')) {
+                    return (
+                      <span key={i} className="font-black text-yellow-500 mx-0.5 uppercase tracking-tight italic drop-shadow-sm">
+                        {part.slice(6, -1)}
+                      </span>
+                    );
+                  }
+                  if (part.startsWith('**') && part.endsWith('**')) {
+                    return (
+                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-md font-black text-[0.85em] mx-0.5 uppercase tracking-tighter align-baseline border border-blue-100/50 shadow-sm">
+                        {part.slice(2, -2)}
+                      </span>
+                    );
+                  }
+                  if (part.includes('GH₵')) {
+                    return (
+                      <span key={i} className="font-black text-emerald-600 mx-0.5 whitespace-nowrap">
+                        {part}
+                      </span>
+                    );
+                  }
+                  return part;
+                })}
+              </p>
+            );
+          });
         })}
       </div>
     );

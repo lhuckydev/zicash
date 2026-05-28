@@ -90,7 +90,7 @@ function RecommendedProduct({ productId }: { productId: string }) {
             <p className={cn(
               "text-[11px] font-black italic mt-1",
               hasDiscount ? "text-red-600" : "text-blue-600"
-            )}>GHS {product.price.toLocaleString()}</p>
+            )}>GH₵ {product.price.toLocaleString()}</p>
             <div className="flex items-center gap-1.5 mt-2">
                <span className="text-[8px] font-black uppercase text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Verified Hardware</span>
                <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">In Stock</span>
@@ -254,19 +254,40 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
   };
 
   const renderMessageContent = (content: string) => {
-    const parts = content.split(/(\[MATCH_ID:.*?\])/g);
+    const blocks = content.split(/(\[MATCH_ID:.*?\])/g);
     
     return (
       <div className="space-y-1">
-        {parts.map((part, index) => {
-          const match = part.match(/\[MATCH_ID:(.*?)\]/);
+        {blocks.map((block, index) => {
+          const match = block.match(/\[MATCH_ID:(.*?)\]/);
           if (match) {
             return <RecommendedProduct key={index} productId={match[1]} />;
           }
-          if (part.trim() === "") return null;
+          if (block.trim() === "") return null;
+          
+          // Enhanced visual parsing for **Bold Tech Specs** and GH₵ Pricing
+          const inlineRegex = /(\*\*.*?\*\*|GH₵\s?[\d,.]+)/g;
+          const inlineParts = block.split(inlineRegex);
+
           return (
             <p key={index} className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-              {part}
+              {inlineParts.map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  return (
+                    <span key={i} className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-md font-black text-[0.85em] mx-0.5 uppercase tracking-tighter align-baseline border border-blue-100/50 shadow-sm">
+                      {part.slice(2, -2)}
+                    </span>
+                  );
+                }
+                if (part.startsWith('GH₵')) {
+                  return (
+                    <span key={i} className="font-black text-emerald-600 mx-0.5">
+                      {part}
+                    </span>
+                  );
+                }
+                return part;
+              })}
             </p>
           );
         })}
@@ -379,7 +400,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-[#FBFBFE] via-[#FBFBFE]/80 to-transparent z-20 pointer-events-none">
-        <div className="max-w-3xl auto pointer-events-auto">
+        <div className="max-w-3xl auto pointer-events-auto mx-auto">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
             className="relative group"

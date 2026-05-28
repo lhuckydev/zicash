@@ -58,7 +58,7 @@ export async function aiLaptopAdvisor(input: AiLaptopAdvisorInput) {
       const discount = v.discount?.[0];
       const finalPrice = discount?.discount_price || v.price;
       const onSale = !!discount;
-      return `- ${v.label}: GHS ${finalPrice.toLocaleString()}${onSale ? ' (HOT DEAL / ON SALE)' : ''} [Stock: ${v.stock}] [ID: ${p.id}]`;
+      return `- ${v.label}: GH₵ ${finalPrice.toLocaleString()}${onSale ? ' (HOT DEAL / ON SALE)' : ''} [Stock: ${v.stock}] [ID: ${p.id}]`;
     }).join('\n');
 
     return `PRODUCT: ${p.name} | BRAND: ${p.brand} | CATEGORY: ${p.category}\nCONFIGURATIONS:\n${variantStrings}`;
@@ -76,11 +76,13 @@ EXPERT CONSULTATION PROTOCOLS:
 4. VISUAL TRIGGER (CRITICAL): Immediately follow your description of a recommended product with its ID in this EXACT format: [MATCH_ID:id_goes_here].
 5. RESPONSE STRUCTURE: Use professional, numbered lists (1. 2. 3.) for recommendations. DO NOT use asterisks (*) for bullet points.
 6. TONE: Professional, authoritative, and sophisticated. Use the ZiCash signature "All You Need, All For You" as a closing statement if appropriate.
+7. TECHNICAL HIGHLIGHTS: Wrap core technical specs (e.g. CPUs like Core i7, RAM amounts like 16GB RAM, Storage sizes) in double asterisks like this: **Core i7**.
+8. PRICING: Always use the symbol **GH₵** for prices.
 
 IMPORTANT FORMATTING RULES:
 - NO ASTERISKS (*) FOR LISTS. Use numbers only.
 - Keep paragraphs short (2-3 sentences).
-- Use bolding sparingly for technical specs.
+- Wrap technical specifications in double asterisks (**).
 - Do not use markdown headers (#).`;
 
   const messages = [

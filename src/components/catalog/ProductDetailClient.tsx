@@ -178,11 +178,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-6 md:py-12 text-slate-900 bg-[#FBFBFE] tech-grid">
-      <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 animate-in fade-in duration-700">
+    <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 text-slate-900 bg-[#FBFBFE] tech-grid">
+      <div className="max-w-6xl mx-auto space-y-10 md:space-y-12 animate-in fade-in duration-700">
         
         {/* 1. NAME & IDENTITY (FIRST) */}
-        <div className="space-y-8">
+        <div className="space-y-6">
            <div className="space-y-4">
               <div className="flex items-center gap-3">
                  <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:opacity-70 transition-colors font-bold uppercase text-[10px] tracking-widest mr-2">
@@ -194,7 +194,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                  <div className="h-4 w-px bg-slate-200" />
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{product.category}</span>
               </div>
-              <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-slate-900 font-headline tracking-tighter leading-[0.95] uppercase italic">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 font-headline tracking-tight leading-[1.1] uppercase italic">
                 {product.name}
               </h1>
            </div>
@@ -204,16 +204,16 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 <div className="flex items-center gap-6">
                    <div className="flex text-amber-400">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={cn("w-5 h-5 md:w-6 md:h-6", (ratingInfo.average || 0) >= s ? "fill-current" : "opacity-20")} />
+                        <Star key={s} className={cn("w-4 h-4 md:w-5 md:h-5", (ratingInfo.average || 0) >= s ? "fill-current" : "opacity-20")} />
                       ))}
                    </div>
                    <div className="flex items-baseline gap-2">
-                      <span className="text-lg md:text-xl font-black text-slate-900">{(ratingInfo.average || 0).toFixed(1)}</span>
+                      <span className="text-lg font-black text-slate-900">{(ratingInfo.average || 0).toFixed(1)}</span>
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">({ratingInfo.count} Verified Reviews)</span>
                    </div>
                 </div>
               ) : (
-                <div className="flex text-slate-100"><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /><Star className="w-6 h-6" /></div>
+                <div className="flex text-slate-100"><Star className="w-5 h-5" /><Star className="w-5 h-5" /><Star className="w-5 h-5" /><Star className="w-5 h-5" /><Star className="w-5 h-5" /></div>
               )}
 
               <button 
@@ -229,8 +229,8 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </div>
 
         {/* 2. GALLERY (SECOND) */}
-        <div className="space-y-8">
-          <div className="relative w-full h-[350px] md:h-[500px] rounded-3xl overflow-hidden bg-white shadow-sm flex items-center justify-center border border-slate-100 p-4">
+        <div className="space-y-6">
+          <div className="relative w-full h-[300px] md:h-[450px] rounded-3xl overflow-hidden bg-white shadow-sm flex items-center justify-center border border-slate-100 p-4">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
@@ -238,7 +238,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center p-6 md:p-12"
+                className="absolute inset-0 flex items-center justify-center p-6 md:p-8"
               >
                 {selectedImage ? (
                   <Image 
@@ -258,12 +258,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
             </AnimatePresence>
           </div>
           
-          <div className="flex gap-3 overflow-x-auto py-4 scrollbar-hide max-w-5xl mx-auto px-2">
+          <div className="flex gap-3 overflow-x-auto py-2 scrollbar-hide max-w-4xl mx-auto px-2">
             {images.map((img, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedImage(img)}
-                className={`relative min-w-[80px] w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 shrink-0 ${
+                className={`relative min-w-[70px] w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 shrink-0 ${
                   selectedImage === img
                     ? "border-blue-500 scale-105 shadow-md"
                     : "border-slate-100 opacity-60 hover:opacity-100"
@@ -281,18 +281,18 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
         </div>
 
         {/* 3. DETAILS & ACTIONS */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-           <div className="lg:col-span-7 space-y-12">
-              <div className="space-y-8 bg-white p-6 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-xl shadow-blue-600/5">
-                 <div className="flex items-center justify-between border-b border-slate-50 pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
+           <div className="lg:col-span-7 space-y-10">
+              <div className="space-y-6 bg-white p-6 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-blue-600/5">
+                 <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                     <div className="space-y-1">
-                       <h3 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">Option <span className="text-blue-600">Select</span></h3>
+                       <h3 className="text-xl font-black uppercase tracking-tight text-slate-900 italic font-headline">Option <span className="text-blue-600">Select</span></h3>
                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available hardware configurations</p>
                     </div>
-                    <Badge variant="outline" className="h-10 rounded-xl px-4 font-black text-[10px] text-slate-400 border-slate-100 uppercase">{product.variants?.length || 0} Models</Badge>
+                    <Badge variant="outline" className="h-9 rounded-xl px-4 font-black text-[10px] text-slate-400 border-slate-100 uppercase">{product.variants?.length || 0} Models</Badge>
                  </div>
 
-                 <div className="space-y-6">
+                 <div className="space-y-4">
                     {product.variants?.map((v) => {
                        const isActive = selectedVariant?.id === v.id;
                        const isExpanded = openSpecs[v.id] || false;
@@ -303,40 +303,40 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                            key={v.id}
                            onClick={() => setSelectedVariant(v)}
                            className={cn(
-                             "text-left p-8 md:p-10 rounded-[3rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
+                             "text-left p-6 md:p-8 rounded-[2rem] border-2 transition-all group relative overflow-hidden cursor-pointer",
                              isActive 
-                               ? (hasDiscount ? "border-red-600 bg-red-50/20 ring-8 ring-red-600/5 shadow-xl" : "border-blue-600 bg-blue-50/40 ring-8 ring-blue-600/5 shadow-xl")
+                               ? (hasDiscount ? "border-red-600 bg-red-50/20 ring-4 ring-red-600/5 shadow-lg" : "border-blue-600 bg-blue-50/40 ring-4 ring-blue-600/5 shadow-lg")
                                : "border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50/50 shadow-sm"
                            )}
                          >
-                           <div className="flex flex-col gap-10">
-                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                               <div className="space-y-2 flex-1">
+                           <div className="flex flex-col gap-6">
+                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                               <div className="space-y-1 flex-1">
                                  <div className="flex items-center gap-3">
-                                   <p className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'Factory New'}</p>
+                                   <p className={cn("text-[9px] font-black uppercase tracking-widest", isActive ? (hasDiscount ? "text-red-600" : "text-blue-600") : "text-slate-400")}>{v.condition || 'Factory New'}</p>
                                    {hasDiscount && (
                                      <Badge className="bg-red-600 text-white border-none font-black uppercase text-[8px] tracking-widest px-2 py-0.5">Special Offer</Badge>
                                    )}
                                  </div>
-                                 <h4 className="text-xl md:text-3xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase font-headline italic tracking-tighter">{v.label}</h4>
+                                 <h4 className="text-lg md:text-2xl font-black text-slate-900 leading-tight group-hover:text-blue-600 transition-colors uppercase font-headline italic tracking-tighter">{v.label}</h4>
                                  {hasDiscount && v.discount?.ends_at && isActive && <CountdownTimer expiryDate={v.discount.ends_at} />}
                                </div>
                                <div className="md:text-right">
                                  {hasDiscount ? (
                                    <>
-                                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
-                                     <p className="text-3xl md:text-5xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
+                                     <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
                                    </>
                                  ) : (
-                                   <p className="text-3xl md:text-5xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                   <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
                                  )}
                                </div>
                              </div>
 
                              <div className="space-y-4">
                                <Collapsible open={isExpanded}>
-                                 <CollapsibleContent className="space-y-12 animate-in slide-in-from-top-2 duration-300">
-                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-10 border-t border-slate-100">
+                                 <CollapsibleContent className="space-y-10 animate-in slide-in-from-top-2 duration-300">
+                                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 pt-8 border-t border-slate-100">
                                      <MiniSpec icon={Cpu} label="Processor" value={v.cpu} active={isActive} />
                                      <MiniSpec icon={SmartphoneIcon} label="Chipset" value={v.chipset} active={isActive} />
                                      <MiniSpec icon={CircuitBoard} label="Memory (RAM)" value={v.ram} active={isActive} />
@@ -369,7 +369,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
 
                                  <button
                                    onClick={(e) => toggleSpec(v.id, e)}
-                                   className={cn("flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
+                                   className={cn("flex items-center gap-2 text-[9px] font-black uppercase tracking-widest hover:opacity-70 transition-opacity mt-4", hasDiscount ? "text-red-600" : "text-blue-600")}
                                  >
                                    {isExpanded ? (
                                      <><ChevronUp className="w-3 h-3" /> Hide Details</>
@@ -380,18 +380,18 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                </Collapsible>
                              </div>
 
-                             <div className="pt-6 border-t border-slate-50">
+                             <div className="pt-4 border-t border-slate-50">
                                 <Button 
                                   onClick={(e) => { e.stopPropagation(); handleAddToCart(v); }}
                                   className={cn(
-                                    "w-full h-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.15em] gap-3 shadow-lg transition-all",
+                                    "w-full h-14 rounded-xl font-black uppercase text-[10px] tracking-[0.15em] gap-3 shadow-lg transition-all",
                                     isActive 
                                       ? (hasDiscount ? "bg-red-600 hover:bg-red-700 text-white shadow-red-600/20" : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20") 
                                       : "bg-slate-950 hover:bg-blue-600 text-white shadow-slate-950/10"
                                   )}
                                   disabled={v.stock <= 0}
                                 >
-                                  {v.stock <= 0 ? "Out of Stock" : <><ShoppingCart className="w-5 h-5" /> Add To Basket</>}
+                                  {v.stock <= 0 ? "Out of Stock" : <><ShoppingCart className="w-4 h-4" /> Add To Basket</>}
                                 </Button>
                              </div>
                            </div>
@@ -402,31 +402,31 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
               </div>
            </div>
 
-           <div className="lg:col-span-5 space-y-12">
-              <div className="space-y-8">
+           <div className="lg:col-span-5 space-y-10">
+              <div className="space-y-6">
                  <div className="flex items-center gap-4">
-                    <div className="w-1.5 h-10 bg-blue-600 rounded-full" />
-                    <h2 className="text-2xl font-black uppercase tracking-widest text-slate-900 italic font-headline">Product Vision</h2>
+                    <div className="w-1.5 h-8 bg-blue-600 rounded-full" />
+                    <h2 className="text-xl font-black uppercase tracking-widest text-slate-900 italic font-headline">Product Vision</h2>
                  </div>
-                 <p className="text-xl text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
+                 <p className="text-lg text-slate-600 leading-relaxed font-medium whitespace-pre-wrap px-2">
                    {product.description || "Premium hardware curated for efficiency and style. Every unit undergoes strict quality control."}
                  </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                 <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-blue-100 transition-colors">
-                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform"><ShieldCheck className="w-8 h-8" /></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authentic Unit</span>
+                 <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-blue-100 transition-colors">
+                    <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform"><ShieldCheck className="w-6 h-6" /></div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Authentic Unit</span>
                  </div>
-                 <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-4 group hover:border-emerald-100 transition-colors">
-                    <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform"><Truck className="w-8 h-8" /></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Regional Delivery</span>
+                 <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-emerald-100 transition-colors">
+                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform"><Truck className="w-6 h-6" /></div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Regional Delivery</span>
                  </div>
               </div>
 
-              <div className="p-10 bg-slate-900 rounded-[3rem] text-white space-y-6 relative overflow-hidden">
+              <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white space-y-4 relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
-                 <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-40 relative z-10">Quality Assurance</h4>
+                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 relative z-10">Quality Assurance</h4>
                  <p className="text-sm font-medium leading-relaxed relative z-10">
                    {product.warranty}. Each hardware unit is technically verified by our expert team before shipping.
                  </p>
@@ -437,7 +437,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </div>
         </div>
 
-        <div className="pt-24 border-t border-slate-200">
+        <div className="pt-16 border-t border-slate-200">
            <ProductReviews productId={product.id} />
         </div>
       </div>

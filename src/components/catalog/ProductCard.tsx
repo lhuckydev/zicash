@@ -134,11 +134,6 @@ export function ProductCard({
               <Zap className="w-2.5 h-2.5 md:w-3 h-3 fill-current" /> Hot Deal
             </Badge>
           )}
-          {hasMultipleChoices && (
-            <Badge className="bg-blue-600 text-white border-none text-[7px] md:text-[8px] font-black uppercase py-1 px-2 md:py-1.5 md:px-3 shadow-lg">
-              More Choices
-            </Badge>
-          )}
         </div>
       </Link>
 
@@ -158,7 +153,7 @@ export function ProductCard({
           {product.brand && (
             <p className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-widest", discountActive ? "text-red-600" : "text-blue-600")}>{product.brand}</p>
           )}
-          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug group-hover:text-blue-600 transition-colors uppercase">
+          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug group-hover:text-blue-600 transition-colors uppercase line-clamp-2 md:line-clamp-3">
             {product.name}
           </h3>
           

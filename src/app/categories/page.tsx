@@ -143,8 +143,9 @@ function CategoriesContent() {
     (priceRange[1] < maxPriceLimit || priceRange[0] > 0 ? 1 : 0);
 
   return (
-    <main className="flex-1 flex overflow-hidden bg-slate-50">
-      <aside className="w-24 md:w-32 bg-white border-r border-slate-100 flex flex-col overflow-y-auto scrollbar-hide shrink-0 z-20 shadow-sm">
+    <main className="flex-1 flex flex-col md:flex-row overflow-hidden bg-slate-50">
+      {/* Sidebar/TopNav for Categories */}
+      <aside className="w-full md:w-32 bg-white border-b md:border-b-0 md:border-r border-slate-100 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 z-20 shadow-sm">
         {categories.map((cat) => {
           const isActive = activeCategory === cat.name;
           return (
@@ -152,14 +153,19 @@ function CategoriesContent() {
               key={cat.id}
               onClick={() => { setActiveCategory(cat.name); resetFilters(); }}
               className={cn(
-                "relative py-6 px-2 flex flex-col items-center gap-2 transition-all group",
+                "relative py-4 md:py-6 px-4 md:px-2 flex flex-row md:flex-col items-center gap-2 md:gap-2 transition-all group shrink-0",
                 isActive ? "bg-blue-50/30" : "bg-white hover:bg-slate-50/50"
               )}
             >
-              {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full" />}
+              {isActive && (
+                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full" />
+              )}
+              {isActive && (
+                <div className="md:hidden absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-t-full" />
+              )}
               <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center p-2 transition-all duration-300",
-                isActive ? "bg-white shadow-xl scale-110" : "bg-slate-50 opacity-40 group-hover:opacity-100"
+                "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center p-1.5 md:p-2 transition-all duration-300",
+                isActive ? "bg-white shadow-lg scale-110" : "bg-slate-50 opacity-40 group-hover:opacity-100"
               )}>
                 <div className="relative w-full h-full">
                   <Image src={cat.imageUrl} alt={cat.name} fill className="object-contain" />

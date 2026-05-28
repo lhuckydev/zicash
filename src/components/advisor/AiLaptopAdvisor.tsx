@@ -265,13 +265,23 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
           }
           if (block.trim() === "") return null;
           
-          // Enhanced visual parsing for **Bold Tech Specs** and GH₵ Pricing
-          const inlineRegex = /(\*\*.*?\*\*|GH₵\s?[\d,.]+)/g;
+          // Enhanced visual parsing for:
+          // 1. [NAME:Product Name] -> Yellow
+          // 2. **Spec** -> Blue Badge
+          // 3. GH₵ Pricing -> Green
+          const inlineRegex = /(\[NAME:.*?\]|\*\*.*?\*\*|GH₵\s?[\d,.]+)/g;
           const inlineParts = block.split(inlineRegex);
 
           return (
             <p key={index} className="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
               {inlineParts.map((part, i) => {
+                if (part.startsWith('[NAME:') && part.endsWith(']')) {
+                  return (
+                    <span key={i} className="font-black text-yellow-500 mx-0.5 uppercase tracking-tight italic drop-shadow-sm">
+                      {part.slice(6, -1)}
+                    </span>
+                  );
+                }
                 if (part.startsWith('**') && part.endsWith('**')) {
                   return (
                     <span key={i} className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded-md font-black text-[0.85em] mx-0.5 uppercase tracking-tighter align-baseline border border-blue-100/50 shadow-sm">

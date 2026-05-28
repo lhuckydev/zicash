@@ -45,30 +45,30 @@ export function HotDeals() {
   if (!isLoading && products.length === 0) return null;
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="pb-8 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/5 blur-[120px] rounded-full -mr-48 -mt-48" />
       
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-          <div className="space-y-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 border border-red-100 text-[10px] font-black uppercase tracking-widest animate-pulse">
               <Zap className="w-3 h-3 fill-current" /> Exclusive Offers
             </div>
-            <h2 className="text-4xl md:text-6xl font-black font-headline uppercase italic">Hot <span className="text-red-600">Deals</span></h2>
-            <p className="text-slate-500 font-medium max-w-xl">
+            <h2 className="text-3xl md:text-5xl font-black font-headline uppercase italic">Hot <span className="text-red-600">Deals</span></h2>
+            <p className="text-slate-500 font-medium max-w-xl text-sm">
               Limited-time discounts on our premium configurations. Grab yours before the sale ends.
             </p>
           </div>
           
           <Link href="/categories?filter=discounted">
-            <Button className="h-14 px-8 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-xl transition-all hover:scale-105">
+            <Button className="h-12 px-8 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl uppercase tracking-widest text-[10px] gap-3 shadow-xl transition-all hover:scale-105">
               View All Offers <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-24">
+          <div className="flex justify-center py-12">
             <Loader2 className="w-10 h-10 text-red-600 animate-spin opacity-20" />
           </div>
         ) : (

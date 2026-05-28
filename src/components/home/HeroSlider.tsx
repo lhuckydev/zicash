@@ -65,21 +65,21 @@ export function HeroSlider() {
 
   if (isLoading) return (
     <div className="container mx-auto px-5 pt-6">
-       <Skeleton className="w-full h-[350px] md:h-[450px] rounded-[3rem] animate-pulse" />
+       <Skeleton className="w-full h-[350px] md:h-[400px] rounded-[3rem] animate-pulse" />
     </div>
   );
 
   if (slides.length === 0) return null;
 
   return (
-    <section className="relative group pt-6 px-4 md:px-10 overflow-hidden">
+    <section className="relative group pt-4 px-4 md:px-10 overflow-hidden">
       <Carousel 
         setApi={setApi} 
         className="w-full relative z-10" 
         opts={{ loop: true, align: 'center' }}
         plugins={[Autoplay({ delay: 6000, stopOnInteraction: false })]}
       >
-        <CarouselContent className="-ml-4 h-[350px] md:h-[450px] items-center">
+        <CarouselContent className="-ml-4 h-[320px] md:h-[400px] items-center">
           {slides.map((slide, index) => {
             const isInternal = slide.link_type === 'internal';
             const isActive = current === index;
@@ -165,7 +165,7 @@ export function HeroSlider() {
       </Carousel>
 
       {/* Pagination Dots */}
-      <div className="flex justify-center gap-2 mt-8">
+      <div className="flex justify-center gap-2 mt-4">
         {slides.map((_, i) => (
           <button 
             key={i} 

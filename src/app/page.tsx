@@ -124,24 +124,24 @@ export default function CatalogPage() {
     <div className="flex flex-col min-h-screen tech-grid">
       <Navbar />
 
-      <main className="flex-1 pb-32 md:pb-12 text-slate-900">
-        <div className="container mx-auto space-y-16">
+      <main className="flex-1 pb-24 md:pb-12 text-slate-900">
+        <div className="container mx-auto space-y-6">
           
           {/* Customizable Promotional Slideshow */}
           {category === "All" && <HeroSlider />}
 
-          <div className="px-5 space-y-16">
+          <div className="px-5 space-y-6">
             
             {/* 1. Category Quick Links (Now right after slideshow) */}
             {!error && (
-              <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-8">
+              <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-4">
                 <div className="flex items-center justify-between">
                   <motion.h2 variants={slideUp} className="text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">Product Categories</motion.h2>
                   <Link href="/categories">
                     <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest hover:opacity-70">Browse All</motion.button>
                   </Link>
                 </div>
-                <div className="flex gap-6 overflow-x-auto md:justify-center pb-4 scrollbar-hide px-2">
+                <div className="flex gap-6 overflow-x-auto md:justify-center pb-2 scrollbar-hide px-2">
                   {categories.map((cat) => (
                     <motion.button key={cat.name} variants={slideUp} {...buttonTap} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-3 shrink-0 group">
                       <div className={cn(
@@ -167,9 +167,9 @@ export default function CatalogPage() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mx-auto max-w-full lg:max-w-6xl py-12 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
+                className="mx-auto max-w-full lg:max-w-6xl py-8 px-6 bg-white rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-blue-600/5 overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-8 px-2">
+                <div className="flex items-center justify-between mb-4 px-2">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-600/20">
                       <Sparkles className="w-5 h-5" />
@@ -187,8 +187,8 @@ export default function CatalogPage() {
               </motion.div>
             )}
 
-            <div id="marketplace" className="scroll-mt-24 space-y-12">
-              <section className="space-y-8">
+            <div id="marketplace" className="scroll-mt-24 space-y-6">
+              <section className="space-y-6">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                   <div className="flex items-center gap-4">
                     <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Our Items" : `${category} Section`}</h3>
@@ -214,7 +214,7 @@ export default function CatalogPage() {
                     ))}
                   </motion.div>
                 ) : (
-                  <div className="text-center py-32 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                  <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
                     <p className="text-sm font-black text-slate-400 uppercase tracking-widest">No items found in this section</p>
                   </div>
                 )}

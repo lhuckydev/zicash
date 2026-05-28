@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Product, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -40,7 +40,7 @@ const CardTimer = ({ expiryDate }: { expiryDate: string }) => {
   if (!timeLeft) return null;
 
   return (
-    <div className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-lg border border-red-100 w-fit">
+    <div className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-lg border border-red-100 w-fit mt-1">
       <Clock className="w-3 h-3 animate-pulse" />
       <span className="text-[8px] font-black uppercase tracking-widest">
         Ends: {timeLeft.h}h {timeLeft.m}m {timeLeft.s}s
@@ -77,6 +77,15 @@ export function ProductCard({
   const singleVariant = product.variants?.[0];
   const displayPrice = singleVariant?.discount?.discount_price || singleVariant?.price || product.price;
   const originalPrice = singleVariant?.price || product.price;
+
+  // Multiple options range calculation
+  const priceRange = useMemo(() => {
+    if (!product.variants || product.variants.length <= 1) return null;
+    const effectivePrices = product.variants.map(v => v.discount?.discount_price || v.price);
+    const min = Math.min(...effectivePrices);
+    const max = Math.max(...effectivePrices);
+    return { min, max };
+  }, [product.variants]);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -167,7 +176,7 @@ export function ProductCard({
                <div className="space-y-0.5">
                  {discountActive && (
                    <div className="flex flex-col">
-                     <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Standard Rate</span>
+                     <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Regular Price</span>
                      <p className="text-[10px] md:text-[11px] text-slate-400 font-bold uppercase tracking-widest line-through opacity-60">GHS {originalPrice.toLocaleString()}</p>
                    </div>
                  )}
@@ -180,7 +189,14 @@ export function ProductCard({
                </div>
              ) : (
                <div className="py-1">
-                 <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest italic">Multiple Deals Available</p>
+                 {priceRange && (
+                   <div className="flex flex-col">
+                     <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-0.5">Price Range</span>
+                     <p className="text-lg md:text-xl font-black font-headline italic tracking-tighter text-blue-600">
+                       GH₵ {priceRange.min.toLocaleString()} - {priceRange.max.toLocaleString()}
+                     </p>
+                   </div>
+                 )}
                  {earliestExpiry && <CardTimer expiryDate={earliestExpiry} />}
                </div>
              )}

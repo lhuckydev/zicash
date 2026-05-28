@@ -1,7 +1,8 @@
 'use server';
 /**
  * @fileOverview AI Laptop Advisor Flow using Groq AI.
- * Handles the logic of matching user preferences with the laptop inventory.
+ * Handles the logic of matching user preferences with the deep hardware inventory.
+ * Now scans through all variants and specific technical specs.
  */
 
 import { z } from 'genkit';
@@ -24,33 +25,59 @@ export async function aiLaptopAdvisor(input: AiLaptopAdvisorInput) {
     throw new Error('AI Hub Sync Failure: Missing credentials.');
   }
   
-  // 1. Fetch available laptops from DB for context
-  const { data: laptops } = await supabase
+  // 1. Fetch available products with their deep configurations (variants) and discounts
+  // We fetch Laptops, Phones, and Accessories to be safe, though the focus is hardware advice.
+  const { data: inventory } = await supabase
     .from('products')
-    .select('id, name, price, brand, specs, stock')
-    .eq('category', 'Laptops')
-    .gt('stock', 0);
+    .select(`
+      id, 
+      name, 
+      brand, 
+      category, 
+      description,
+      variants:product_variants(
+        id, 
+        label, 
+        price, 
+        stock, 
+        cpu, 
+        ram, 
+        storage, 
+        gpu, 
+        condition,
+        discount:discounts(discount_price, ends_at)
+      )
+    `)
+    .gt('price', 0);
 
-  const inventoryContext = laptops?.map(p => 
-    `ID: ${p.id} | Name: ${p.name} | Brand: ${p.brand} | Price: GHS ${p.price} | Specs: ${p.specs}`
-  ).join('\n') || "No laptops currently in stock.";
+  // 2. Format the inventory context for the LLM
+  const inventoryContext = inventory?.map(p => {
+    const availableVariants = p.variants?.filter((v: any) => v.stock > 0) || [];
+    if (availableVariants.length === 0) return null;
 
-  const systemPrompt = `You are the ZiCash AI Laptop Advisor, a premium hardware expert.
-Your goal is to help users find the perfect laptop from the ZiCash Marketplace inventory.
+    const variantStrings = availableVariants.map((v: any) => {
+      const price = v.discount?.[0]?.discount_price || v.price;
+      const onSale = !!v.discount?.[0];
+      return `- ${v.label}: GHS ${price.toLocaleString()}${onSale ? ' (ON SALE)' : ''} [Stock: ${v.stock}]`;
+    }).join('\n');
 
-INVENTORY CONTEXT:
+    return `PRODUCT: ${p.name} | BRAND: ${p.brand} | CATEGORY: ${p.category}\nCONFIGURATIONS:\n${variantStrings}`;
+  }).filter(Boolean).join('\n\n') || "Currently synchronizing inventory. No items found in active stock.";
+
+  const systemPrompt = `You are the ZiCash AI Hardware Advisor, a premium technical consultant for Ghana's high-performance marketplace.
+
+INVENTORY REPOSITORY (Live Stock Only):
 ${inventoryContext}
 
-GUIDELINES:
-1. Analyze user needs (budget, use case, specs) and recommend the top matches from the inventory above.
-2. IMPORTANT: Do not just list products at the end. Use a sectional approach:
-   - Introduce the first recommended laptop with its pros and cons.
-   - Immediately follow the description with its ID in this format: [MATCH_ID:id_goes_here].
-   - If there is another option to consider (e.g. "If you want better graphics..."), describe it and follow it with its ID: [MATCH_ID:id2].
-3. This ensures the user sees the visual product card immediately after reading about it.
-4. Be technical and precise. Mention RAM, CPU, and Storage details.
-5. If no perfect match exists, suggest the closest alternative or explain why.
-6. Keep a professional, high-performance tone. Use the motto "All You Need, All For You" if appropriate.`;
+EXPERT PROTOCOLS:
+1. DEEP SCAN: Always analyze the user's specific needs (gaming, office, student, pro-creator) against the CPU, RAM, and Storage options in the inventory.
+2. RECOMMENDATION MAPPING: Identify the top 2-3 matches. Do not just suggest the product name; specify which CONFIGURATION (Variant) is best for them and why.
+3. PRICING ACCURACY: Use the exact prices provided in the context. If an item is "ON SALE", mention the value.
+4. VISUAL HOOK: Immediately follow your description of a recommended product with its ID in this format: [MATCH_ID:id_goes_here].
+5. FALLBACK: If no perfect match exists for their budget, explain what the closest possible options are or suggest how much more they might need to spend for their requirement.
+6. TONE: Professional, authoritative, yet helpful. Use the ZiCash motto "All You Need, All For You" to close the conversation if appropriate.
+
+IMPORTANT: Your response is rendered in a chat UI. Keep paragraphs concise. Do not use markdown headers (#), use bolding and lists for clarity.`;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -67,8 +94,8 @@ GUIDELINES:
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages,
-        temperature: 0.7,
-        max_tokens: 1024,
+        temperature: 0.6,
+        max_tokens: 1200,
       }),
     });
 

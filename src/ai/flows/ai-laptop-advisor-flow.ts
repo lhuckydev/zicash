@@ -26,7 +26,6 @@ export async function aiLaptopAdvisor(input: AiLaptopAdvisorInput) {
   }
   
   // 1. Fetch available products with their deep configurations (variants) and discounts
-  // We fetch Laptops, Phones, and Accessories to be safe, though the focus is hardware advice.
   const { data: inventory } = await supabase
     .from('products')
     .select(`
@@ -56,9 +55,10 @@ export async function aiLaptopAdvisor(input: AiLaptopAdvisorInput) {
     if (availableVariants.length === 0) return null;
 
     const variantStrings = availableVariants.map((v: any) => {
-      const price = v.discount?.[0]?.discount_price || v.price;
-      const onSale = !!v.discount?.[0];
-      return `- ${v.label}: GHS ${price.toLocaleString()}${onSale ? ' (ON SALE)' : ''} [Stock: ${v.stock}]`;
+      const discount = v.discount?.[0];
+      const finalPrice = discount?.discount_price || v.price;
+      const onSale = !!discount;
+      return `- ${v.label}: GHS ${finalPrice.toLocaleString()}${onSale ? ' (HOT DEAL / ON SALE)' : ''} [Stock: ${v.stock}] [ID: ${p.id}]`;
     }).join('\n');
 
     return `PRODUCT: ${p.name} | BRAND: ${p.brand} | CATEGORY: ${p.category}\nCONFIGURATIONS:\n${variantStrings}`;
@@ -71,13 +71,13 @@ ${inventoryContext}
 
 EXPERT PROTOCOLS:
 1. DEEP SCAN: Always analyze the user's specific needs (gaming, office, student, pro-creator) against the CPU, RAM, and Storage options in the inventory.
-2. RECOMMENDATION MAPPING: Identify the top 2-3 matches. Do not just suggest the product name; specify which CONFIGURATION (Variant) is best for them and why.
-3. PRICING ACCURACY: Use the exact prices provided in the context. If an item is "ON SALE", mention the value.
-4. VISUAL HOOK: Immediately follow your description of a recommended product with its ID in this format: [MATCH_ID:id_goes_here].
-5. FALLBACK: If no perfect match exists for their budget, explain what the closest possible options are or suggest how much more they might need to spend for their requirement.
+2. RECOMMENDATION MAPPING: Identify the top 2-3 matches. Specify which CONFIGURATION (Variant) is best for them and why.
+3. DISCOUNT AWARENESS: If an item is "ON SALE" or a "HOT DEAL", prioritize it and explain the savings. Users love value for money.
+4. VISUAL HOOK (CRITICAL): Immediately follow your description of a recommended product with its ID in this EXACT format: [MATCH_ID:id_goes_here]. This triggers a visual card in the UI.
+5. FALLBACK: If no perfect match exists, explain the closest options or suggest a budget adjustment.
 6. TONE: Professional, authoritative, yet helpful. Use the ZiCash motto "All You Need, All For You" to close the conversation if appropriate.
 
-IMPORTANT: Your response is rendered in a chat UI. Keep paragraphs concise. Do not use markdown headers (#), use bolding and lists for clarity.`;
+IMPORTANT: Your response is rendered in a chat UI. Keep paragraphs concise. Use bolding and lists for clarity. Do not use markdown headers (#).`;
 
   const messages = [
     { role: 'system', content: systemPrompt },

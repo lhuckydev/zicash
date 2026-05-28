@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -41,7 +40,11 @@ function RecommendedProduct({ productId }: { productId: string }) {
 
   useEffect(() => {
     async function fetchProduct() {
-      const { data } = await supabase.from('products').select('*').eq('id', productId).single();
+      const { data } = await supabase
+        .from('products')
+        .select('*, variants:product_variants(*, discount:discounts(*))')
+        .eq('id', productId)
+        .single();
       if (data) setProduct(data);
       setLoading(false);
     }
@@ -49,12 +52,14 @@ function RecommendedProduct({ productId }: { productId: string }) {
   }, [productId]);
 
   if (loading) return (
-    <div className="w-full h-20 rounded-2xl bg-white animate-pulse border border-slate-100 flex items-center justify-center shadow-sm my-4">
+    <div className="w-full h-24 rounded-2xl bg-white animate-pulse border border-slate-100 flex items-center justify-center shadow-sm my-4">
        <RefreshCcw className="w-4 h-4 text-slate-200 animate-spin" />
     </div>
   );
 
   if (!product) return null;
+
+  const hasDiscount = product.variants?.some((v: any) => v.discount && v.discount.length > 0);
 
   return (
     <motion.div 
@@ -64,20 +69,35 @@ function RecommendedProduct({ productId }: { productId: string }) {
       className="group my-4 max-w-md"
     >
       <Link href={`/product/${product.id}`} className="block">
-        <div className="flex items-center gap-4 p-4 bg-white rounded-[1.5rem] border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-blue-200 transition-all">
-          <div className="relative w-16 h-16 bg-slate-50 rounded-xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-100">
+        <div className={cn(
+          "flex items-center gap-4 p-4 bg-white rounded-[2rem] border transition-all shadow-sm group-hover:shadow-xl",
+          hasDiscount ? "border-red-100 ring-4 ring-red-500/5" : "border-slate-100 group-hover:border-blue-200"
+        )}>
+          <div className="relative w-20 h-20 bg-slate-50 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center border border-slate-100">
             <Image src={product.image_url} alt={product.name} fill className="object-contain p-2" />
+            {hasDiscount && (
+              <div className="absolute top-1 left-1 bg-red-600 text-white p-1 rounded-lg shadow-lg">
+                <Zap className="w-3 h-3 fill-current" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">{product.brand}</span>
+              {hasDiscount && <span className="text-[8px] font-black uppercase text-red-600 bg-red-50 px-1.5 py-0.5 rounded">Hot Deal</span>}
+            </div>
             <h4 className="text-xs font-black text-slate-900 truncate uppercase leading-tight">{product.name}</h4>
-            <p className="text-[10px] font-black text-blue-600 italic mt-1">GHS {product.price.toLocaleString()}</p>
+            <p className={cn(
+              "text-[11px] font-black italic mt-1",
+              hasDiscount ? "text-red-600" : "text-blue-600"
+            )}>GHS {product.price.toLocaleString()}</p>
             <div className="flex items-center gap-1.5 mt-2">
-               <span className="text-[8px] font-black uppercase text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">In Stock</span>
-               <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Verified Item</span>
+               <span className="text-[8px] font-black uppercase text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">Verified Hardware</span>
+               <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">In Stock</span>
             </div>
           </div>
-          <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
-            <ChevronRight className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
+            <ChevronRight className="w-5 h-5" />
           </div>
         </div>
       </Link>
@@ -359,7 +379,7 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-[#FBFBFE] via-[#FBFBFE]/80 to-transparent z-20 pointer-events-none">
-        <div className="max-w-3xl mx-auto pointer-events-auto">
+        <div className="max-w-3xl auto pointer-events-auto">
           <form 
             onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
             className="relative group"

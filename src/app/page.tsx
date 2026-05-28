@@ -53,7 +53,7 @@ function SuggestedProductTile({ product }: { product: Product }) {
           />
         </div>
         <div className="space-y-1 text-center w-full px-1">
-          <h4 className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-tight line-clamp-1 group-hover:text-blue-600 transition-colors">
+          <h4 className="text-[10px] md:text-[11px] font-black text-slate-800 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
             {product.name}
           </h4>
           <p className="text-[11px] md:text-xs font-black text-blue-600 italic">GH₵ {product.price.toLocaleString()}</p>

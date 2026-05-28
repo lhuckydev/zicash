@@ -158,7 +158,7 @@ export function ProductCard({
           {product.brand && (
             <p className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-widest", discountActive ? "text-red-600" : "text-blue-600")}>{product.brand}</p>
           )}
-          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] group-hover:text-blue-600 transition-colors uppercase">
+          <h3 className="font-bold text-xs md:text-sm text-slate-900 leading-snug group-hover:text-blue-600 transition-colors uppercase">
             {product.name}
           </h3>
           

@@ -279,9 +279,9 @@ export function AiLaptopAdvisor({ usageCount, onUsageUpdate }: AiLaptopAdvisorPr
                     </span>
                   );
                 }
-                if (part.startsWith('GH₵')) {
+                if (part.includes('GH₵')) {
                   return (
-                    <span key={i} className="font-black text-emerald-600 mx-0.5">
+                    <span key={i} className="font-black text-emerald-600 mx-0.5 whitespace-nowrap">
                       {part}
                     </span>
                   );

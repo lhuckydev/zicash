@@ -8,6 +8,7 @@ import { Product, ProductVariant, useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useToast } from "@/hooks/use-toast";
 import { ProductReviews } from "@/components/catalog/ProductReviews";
+import { ServiceHighlights } from "@/components/layout/ServiceHighlights";
 import Image from "next/image";
 import { 
   ArrowLeft, Heart, ShieldCheck, Truck, Cpu, Database, 
@@ -178,10 +179,12 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
   };
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-6 md:py-10 text-slate-900 bg-[#FBFBFE] tech-grid">
+    <div className="container mx-auto px-4 md:px-6 py-4 md:py-10 text-slate-900 bg-[#FBFBFE] tech-grid">
       <div className="max-w-6xl mx-auto space-y-10 md:space-y-12 animate-in fade-in duration-700">
         
-        {/* 1. NAME & IDENTITY (FIRST) */}
+        <ServiceHighlights />
+
+        {/* 1. NAME & IDENTITY */}
         <div className="space-y-6">
            <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -228,7 +231,7 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
            </div>
         </div>
 
-        {/* 2. GALLERY (SECOND) */}
+        {/* 2. GALLERY */}
         <div className="space-y-6">
           <div className="relative w-full h-[300px] md:h-[450px] rounded-3xl overflow-hidden bg-white shadow-sm flex items-center justify-center border border-slate-100 p-4">
             <AnimatePresence mode="wait">
@@ -324,11 +327,11 @@ export default function ProductDetailClient({ initialProduct }: { initialProduct
                                <div className="md:text-right">
                                  {hasDiscount ? (
                                    <>
-                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {v.price.toLocaleString()}</p>
-                                     <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {v.discount!.discount_price.toLocaleString()}</p>
+                                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-through opacity-60">GHS {parseFloat(v.price).toLocaleString()}</p>
+                                     <p className="text-2xl md:text-4xl font-black text-red-600 italic tracking-tighter">GH₵ {parseFloat(v.discount!.discount_price).toLocaleString()}</p>
                                    </>
                                  ) : (
-                                   <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {v.price.toLocaleString()}</p>
+                                   <p className="text-2xl md:text-4xl font-black text-blue-600 italic tracking-tighter">GH₵ {parseFloat(v.price).toLocaleString()}</p>
                                  )}
                                </div>
                              </div>

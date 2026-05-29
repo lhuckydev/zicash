@@ -1,9 +1,9 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceHighlights } from "@/components/layout/ServiceHighlights";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -75,27 +75,29 @@ export default function UserOrdersPage() {
     <div className="flex flex-col min-h-screen tech-grid">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-6 py-12 pb-24 md:pb-12 text-slate-900">
+      <main className="flex-1 container mx-auto px-6 py-6 pb-24 md:pb-12 text-slate-900">
         <div className="max-w-4xl mx-auto space-y-10">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h1 className="text-4xl font-bold font-headline">My <span className="text-primary italic">Orders</span></h1>
+              <h1 className="text-4xl font-bold font-headline uppercase italic">My <span className="text-primary">Orders</span></h1>
               <Button 
                 variant="outline" 
                 onClick={fetchOrders} 
                 disabled={isLoading}
                 className="rounded-xl border-slate-100 font-bold text-[10px] uppercase tracking-widest gap-2 h-10 shadow-sm hover:bg-slate-50 transition-all"
               >
-                <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} /> Refresh status
+                <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} /> Refresh
               </Button>
             </div>
             <p className="text-slate-500 font-medium text-sm">Track your hardware purchases and delivery status</p>
           </div>
 
+          <ServiceHighlights />
+
           {isLoading && orders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24">
               <Loader2 className="w-10 h-10 text-primary animate-spin opacity-20" />
-              <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing order history...</p>
+              <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing history...</p>
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-24 bg-white/60 backdrop-blur-md rounded-[3rem] border border-dashed border-slate-200">

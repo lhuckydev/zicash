@@ -1,10 +1,10 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceHighlights } from "@/components/layout/ServiceHighlights";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -121,8 +121,8 @@ export default function UserOrderDetailsPage() {
     <div className="flex flex-col min-h-screen tech-grid">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-6 py-12 pb-24 md:pb-12 text-slate-900">
-        <div className="max-w-5xl mx-auto space-y-10">
+      <main className="flex-1 container mx-auto px-6 py-6 pb-24 md:pb-12 text-slate-900">
+        <div className="max-w-5xl mx-auto space-y-8">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-4">
@@ -134,14 +134,16 @@ export default function UserOrderDetailsPage() {
                 <ArrowLeft className="w-3 h-3 mr-2" /> Back to Orders
               </Button>
               <div className="flex items-center gap-4">
-                <h1 className="text-3xl md:text-5xl font-bold font-headline">Order <span className="text-primary italic">Summary</span></h1>
+                <h1 className="text-3xl md:text-5xl font-bold font-headline uppercase italic">Order <span className="text-primary">Summary</span></h1>
                 <Badge className={cn("rounded-full px-4 py-1 font-bold text-[10px] uppercase tracking-widest border-none", status.bg, status.color)}>
                   {order.status}
                 </Badge>
               </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">REF: #{order.id.toUpperCase()}</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">REF: #{order.id.slice(0,8).toUpperCase()}</p>
             </div>
           </div>
+
+          <ServiceHighlights />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Left Column: Products */}
@@ -160,17 +162,17 @@ export default function UserOrderDetailsPage() {
                           <Image src={item.image_url} alt={item.name} width={80} height={80} className="object-contain p-2" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-slate-900 text-base truncate">{item.name}</h4>
+                          <h4 className="font-bold text-slate-900 text-base truncate uppercase">{item.name}</h4>
                           <div className="flex items-center gap-4 mt-1">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
                               <Hash className="w-3 h-3" /> Qty: {item.quantity}
                             </span>
                             <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                              GH₵{item.price.toLocaleString()}
+                              GH₵{parseFloat(item.price).toLocaleString()}
                             </span>
                           </div>
                         </div>
-                        <p className="font-bold text-slate-900">GH₵{(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="font-bold text-slate-900 italic">GH₵{(parseFloat(item.price) * item.quantity).toLocaleString()}</p>
                       </div>
                     ))}
                   </div>
@@ -182,7 +184,7 @@ export default function UserOrderDetailsPage() {
                     </div>
                     <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
                       <span>Delivery Fee</span>
-                      <span className="text-emerald-600">FREE</span>
+                      <span className="text-emerald-600 font-black italic">FREE</span>
                     </div>
                     <div className="pt-6 flex justify-between items-end">
                       <div>
@@ -208,10 +210,10 @@ export default function UserOrderDetailsPage() {
                         {order.payment_type === "Prepayment" ? <Smartphone className="w-6 h-6" /> : <CreditCard className="w-6 h-6" />}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900">
+                        <p className="font-bold text-slate-900 uppercase">
                           {order.payment_type === "Prepayment" ? "Mobile Money Prepayment" : "Payment on Delivery"}
                         </p>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Status: Verified</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status: Verified & Secured</p>
                       </div>
                    </div>
                 </CardContent>
@@ -229,7 +231,7 @@ export default function UserOrderDetailsPage() {
                   <CardContent className="p-8 space-y-8">
                     <div>
                       <p className="text-[10px] font-black opacity-30 uppercase tracking-[0.2em] mb-2">Recipient</p>
-                      <p className="text-xl font-bold font-headline">{profile?.full_name || 'Shopping Guest'}</p>
+                      <p className="text-xl font-bold font-headline uppercase">{profile?.full_name || 'Shopping Guest'}</p>
                     </div>
 
                     <div>
@@ -245,7 +247,7 @@ export default function UserOrderDetailsPage() {
                     <div className="pt-6 border-t border-white/5">
                        <div className="flex items-center gap-3 text-emerald-400">
                          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                         <span className="text-[10px] font-black uppercase tracking-widest">In Transit Area: {order.is_accra ? "Accra" : "Regional"}</span>
+                         <span className="text-[10px] font-black uppercase tracking-widest">Active: {order.is_accra ? "Accra Metropolis" : "Regional Shipping"}</span>
                        </div>
                     </div>
                   </CardContent>
@@ -255,7 +257,7 @@ export default function UserOrderDetailsPage() {
                   <CardContent className="p-8 text-center space-y-4">
                     <Receipt className="w-10 h-10 text-slate-200 mx-auto" />
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed px-4">
-                      Thank you for choosing ZiCash for your hardware needs.
+                      Thank you for choosing ZiCash. Your hardware is in good hands.
                     </p>
                     <Button 
                       variant="outline" 

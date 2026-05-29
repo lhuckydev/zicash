@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -113,29 +112,6 @@ export function HeroSlider() {
                       <p className="text-blue-100/80 font-bold text-[7px] md:text-lg uppercase tracking-widest drop-shadow-md">
                         {slide.subtitle}
                       </p>
-                    )}
-                    
-                    {slide.link && (
-                      <div className="pt-0.5 md:pt-2">
-                         <Button 
-                           className={cn(
-                             "h-6 md:h-14 px-3 md:px-10 rounded-lg md:rounded-3xl font-black uppercase tracking-widest text-[6px] md:text-11px shadow-2xl transition-all hover:scale-105 gap-1.5 md:gap-2",
-                             slide.link_type === 'whatsapp' ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"
-                           )}
-                           onClick={(e) => {
-                             if (!isInternal) {
-                               e.preventDefault();
-                               handleSlideClick(slide);
-                             }
-                           }}
-                         >
-                           {slide.link_type === 'whatsapp' ? (
-                             <><MessageCircle className="w-2 h-2 md:w-5 h-5" /> Chat Now</>
-                           ) : (
-                             <><Zap className="w-2 h-2 md:w-5 h-5" /> Shop Now</>
-                           )}
-                         </Button>
-                      </div>
                     )}
                   </motion.div>
                 </div>

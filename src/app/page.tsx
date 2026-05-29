@@ -11,7 +11,7 @@ import { Product } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
   Laptop, Smartphone, Shirt, GraduationCap, Zap, 
-  LayoutGrid, Sparkles, RefreshCcw
+  LayoutGrid, Sparkles, RefreshCcw, ArrowRight
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -80,7 +80,10 @@ export default function CatalogPage() {
     { name: "Educational Consult", imageUrl: "https://i.ibb.co/pB4yX4JL/high-resolution-graduation-cap-png-icon-17-removebg-preview.png", icon: GraduationCap },
   ];
 
-  const filteredProducts = useMemo(() => products.filter((p) => category === "All" || p.category === category), [products, category]);
+  const filteredProducts = useMemo(() => {
+    const items = products.filter((p) => category === "All" || p.category === category);
+    return items.slice(0, 6); // Limit to 6 products
+  }, [products, category]);
 
   return (
     <div className="flex flex-col min-h-screen tech-grid">
@@ -141,13 +144,23 @@ export default function CatalogPage() {
                     {Array.from({ length: 8 }).map((_, i) => <ProductSkeleton key={i} />)}
                   </div>
                 ) : filteredProducts.length > 0 ? (
-                  <motion.div variants={staggerContainer(0.04)} initial="initial" animate="animate" className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {filteredProducts.map((product) => (
-                      <motion.div key={product.id} variants={fadeIn}>
-                        <ProductCard product={product} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                  <>
+                    <motion.div variants={staggerContainer(0.04)} initial="initial" animate="animate" className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {filteredProducts.map((product) => (
+                        <motion.div key={product.id} variants={fadeIn}>
+                          <ProductCard product={product} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                    
+                    <div className="pt-8 flex justify-center">
+                      <Link href="/products">
+                        <Button className="h-14 px-10 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] rounded-2xl gap-3 shadow-xl shadow-blue-600/5 group">
+                          View All Hardware <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inventory empty in this segment</p>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -34,7 +35,9 @@ import {
   Video,
   Linkedin,
   MessageCircle,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Lock,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -474,16 +477,45 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6 bg-slate-900">
-        <Card className="w-full max-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
+      <main className="flex min-h-screen items-center justify-center p-6 bg-[#0F172A] tech-grid">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-transparent to-slate-900/40 pointer-events-none" />
+        <Card className="w-full max-w-md shadow-2xl border-none rounded-[3rem] overflow-hidden bg-white/95 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-700">
           <div className="bg-slate-950 p-12 text-center relative overflow-hidden">
-             <h1 className="text-white font-black text-2xl uppercase italic">ZiCash <span className="text-blue-500">Manager</span></h1>
+             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16" />
+             <div className="relative z-10 flex flex-col items-center gap-4">
+               <div className="w-16 h-16 rounded-[1.5rem] bg-white p-3 shadow-xl shadow-blue-500/10 rotate-3">
+                 <Image src="https://i.ibb.co/v4p0sdxs/zicash.jpg" alt="ZiCash" width={64} height={64} className="object-cover rounded-lg" />
+               </div>
+               <div className="space-y-1">
+                 <h1 className="text-white font-black text-2xl uppercase italic tracking-tight">ZiCash <span className="text-blue-500">Manager</span></h1>
+                 <p className="text-[10px] font-black text-blue-500/60 uppercase tracking-[0.3em]">Authorized Access Only</p>
+               </div>
+             </div>
           </div>
-          <CardContent className="p-12 space-y-8">
-            <form onSubmit={handleAuth} className="space-y-6">
-              <Input type="password" placeholder="Passkey" value={password} onChange={(e) => setPassword(e.target.value)} className="h-14 rounded-2xl bg-slate-50 border-none font-black text-center text-lg" />
-              <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest">Authorize</Button>
+          <CardContent className="p-12 space-y-10">
+            <form onSubmit={handleAuth} className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Secure Passkey</label>
+                <div className="relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="h-16 pl-14 rounded-2xl bg-slate-50 border-none font-black text-center text-xl shadow-inner focus-visible:ring-4 focus-visible:ring-blue-600/5 transition-all" 
+                  />
+                </div>
+              </div>
+              <Button className="w-full h-16 bg-blue-600 hover:bg-blue-700 font-black rounded-2xl text-white uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20 transition-all active:scale-95">
+                <ShieldCheck className="w-5 h-5" /> Initiate Authorization
+              </Button>
             </form>
+            <div className="pt-6 border-t border-slate-50 flex items-center justify-center gap-4">
+              <div className="flex items-center gap-2 text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Secure Node Active
+              </div>
+            </div>
           </CardContent>
         </Card>
       </main>

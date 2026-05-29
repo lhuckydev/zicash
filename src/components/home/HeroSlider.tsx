@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -118,7 +119,7 @@ export function HeroSlider() {
               );
 
               return (
-                <CarouselItem key={slide.id} className="pl-4 basis-[95%] md:basis-[80%] lg:basis-[70%]">
+                <CarouselItem key={slide.id} className="pl-4 basis-[92%] md:basis-[85%] lg:basis-[80%]">
                   {isInternal ? (
                     <Link href={slide.link || "#"} className="block">
                       {content}

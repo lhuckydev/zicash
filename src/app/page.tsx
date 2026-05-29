@@ -11,7 +11,7 @@ import { Product } from "@/store/useCartStore";
 import { Button } from "@/components/ui/button";
 import { 
   Laptop, Smartphone, Shirt, GraduationCap, Zap, 
-  LayoutGrid, Sparkles, RefreshCcw, ArrowRight
+  LayoutGrid, RefreshCcw, ArrowRight
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";

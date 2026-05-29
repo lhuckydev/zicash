@@ -129,7 +129,7 @@ export default function CatalogPage() {
               <section className="space-y-6">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-4">
-                    <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "Catalog Index" : `${category}`}</h3>
+                    <h3 className="text-base md:text-xl font-black font-headline text-slate-900 uppercase tracking-tight italic">{category === "All" ? "OUR ITEMS" : `${category}`}</h3>
                     <Button variant="ghost" size="icon" onClick={fetchProducts} disabled={isLoading} className="h-8 w-8 rounded-lg text-slate-300 hover:text-blue-600">
                       <RefreshCcw className={cn("w-3 h-3", isLoading && "animate-spin")} />
                     </Button>

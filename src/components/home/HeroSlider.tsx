@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -64,14 +65,14 @@ export function HeroSlider() {
 
   if (isLoading) return (
     <div className="container mx-auto px-5 pt-4">
-       <Skeleton className="w-full h-[180px] md:h-[400px] rounded-[2rem] animate-pulse" />
+       <Skeleton className="w-full h-[140px] md:h-[400px] rounded-[2rem] animate-pulse" />
     </div>
   );
 
   if (slides.length === 0) return null;
 
   return (
-    <section className="relative group pt-4 px-4 md:px-10 overflow-hidden">
+    <section className="relative group pt-2 px-1 md:px-10 overflow-hidden">
       <Carousel 
         setApi={setApi} 
         className="w-full relative z-10" 
@@ -85,8 +86,8 @@ export function HeroSlider() {
 
             const content = (
               <div className={cn(
-                "relative h-[160px] md:h-[400px] rounded-[2rem] md:rounded-[4rem] overflow-hidden transition-all duration-1000 ease-out shadow-2xl group/item",
-                isActive ? "scale-100 opacity-100 ring-2 ring-blue-500/10" : "scale-90 opacity-40 blur-[1px]"
+                "relative h-[160px] md:h-[400px] rounded-[1.5rem] md:rounded-[4rem] overflow-hidden transition-all duration-1000 ease-out shadow-2xl group/item",
+                isActive ? "scale-100 opacity-100 ring-2 ring-blue-500/5" : "scale-95 opacity-40 blur-[0.5px]"
               )}>
                 <Image 
                   src={slide.image_url} 
@@ -95,7 +96,7 @@ export function HeroSlider() {
                   className="object-cover transition-transform duration-[10000ms] group-hover/item:scale-110" 
                   priority={index === 0}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/20 to-transparent z-20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/10 to-transparent z-20" />
                 <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-14 z-30">
                   <motion.div 
                     initial={{ opacity: 0, y: 15 }}
@@ -104,21 +105,21 @@ export function HeroSlider() {
                     className="max-w-2xl space-y-1 md:space-y-4"
                   >
                     {slide.title && (
-                      <h2 className="text-lg md:text-5xl font-black text-white font-headline tracking-tighter uppercase italic leading-none drop-shadow-2xl">
+                      <h2 className="text-sm md:text-5xl font-black text-white font-headline tracking-tighter uppercase italic leading-none drop-shadow-2xl">
                         {slide.title}
                       </h2>
                     )}
                     {slide.subtitle && (
-                      <p className="text-blue-100/80 font-bold text-[8px] md:text-lg uppercase tracking-widest drop-shadow-md">
+                      <p className="text-blue-100/80 font-bold text-[7px] md:text-lg uppercase tracking-widest drop-shadow-md">
                         {slide.subtitle}
                       </p>
                     )}
                     
                     {slide.link && (
-                      <div className="pt-1 flex gap-4">
+                      <div className="pt-0.5 md:pt-2">
                          <Button 
                            className={cn(
-                             "h-7 md:h-14 px-4 md:px-10 rounded-lg md:rounded-3xl font-black uppercase tracking-widest text-[7px] md:text-11px shadow-2xl transition-all hover:scale-105 gap-1.5 md:gap-2",
+                             "h-6 md:h-14 px-3 md:px-10 rounded-lg md:rounded-3xl font-black uppercase tracking-widest text-[6px] md:text-11px shadow-2xl transition-all hover:scale-105 gap-1.5 md:gap-2",
                              slide.link_type === 'whatsapp' ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"
                            )}
                            onClick={(e) => {
@@ -129,9 +130,9 @@ export function HeroSlider() {
                            }}
                          >
                            {slide.link_type === 'whatsapp' ? (
-                             <><MessageCircle className="w-2.5 h-2.5 md:w-5 h-5" /> Chat</>
+                             <><MessageCircle className="w-2 h-2 md:w-5 h-5" /> Chat Now</>
                            ) : (
-                             <><Zap className="w-2.5 h-2.5 md:w-5 h-5" /> Explore</>
+                             <><Zap className="w-2 h-2 md:w-5 h-5" /> Shop Now</>
                            )}
                          </Button>
                       </div>
@@ -142,7 +143,7 @@ export function HeroSlider() {
             );
 
             return (
-              <CarouselItem key={slide.id} className="pl-4 basis-[95%] md:basis-[85%] lg:basis-[75%]">
+              <CarouselItem key={slide.id} className="pl-4 basis-[98%] md:basis-[85%] lg:basis-[75%]">
                 {isInternal ? (
                   <Link href={slide.link || "#"} className="block">
                     {content}
@@ -158,14 +159,14 @@ export function HeroSlider() {
         </CarouselContent>
       </Carousel>
 
-      <div className="flex justify-center gap-1.5 mt-3">
+      <div className="flex justify-center gap-1.5 mt-2 md:mt-3">
         {slides.map((_, i) => (
           <button 
             key={i} 
             onClick={() => api?.scrollTo(i)}
             className={cn(
               "h-1 rounded-full transition-all duration-500",
-              current === i ? "bg-blue-600 w-6" : "bg-slate-200 w-1.5 hover:bg-slate-300"
+              current === i ? "bg-blue-600 w-5" : "bg-slate-200 w-1 hover:bg-slate-300"
             )}
           />
         ))}

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -75,7 +76,7 @@ export function Footer() {
                   <link.icon className="w-5 h-5" />
                 </Link>
               ))}
-              <Link href="mailto:support@zicashgh.com" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm flex items-center justify-center">
+              <Link href="mailto:support@zicashonline.com" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm flex items-center justify-center">
                 <Mail className="w-5 h-5" />
               </Link>
             </div>

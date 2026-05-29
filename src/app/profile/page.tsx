@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceHighlights } from "@/components/layout/ServiceHighlights";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -165,6 +166,9 @@ export default function ProfilePage() {
       <Navbar />
       <main className="flex-1 container mx-auto px-6 py-12 tech-grid pb-24 md:pb-12">
         <div className="max-w-2xl mx-auto space-y-8">
+          
+          <ServiceHighlights />
+
           <div className="mb-8 space-y-2">
             <h1 className="text-4xl font-headline font-bold">Account <span className="text-primary italic">Settings</span></h1>
             <p className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">Manage Your Profile</p>

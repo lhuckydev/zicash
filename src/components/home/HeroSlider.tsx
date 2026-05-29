@@ -64,7 +64,7 @@ export function HeroSlider() {
 
   if (isLoading) return (
     <div className="container mx-auto px-5 pt-6">
-       <Skeleton className="w-full h-[240px] md:h-[400px] rounded-[3rem] animate-pulse" />
+       <Skeleton className="w-full h-[240px] md:h-[400px] rounded-[2.5rem] animate-pulse" />
     </div>
   );
 

@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { Product } from "@/store/useCartStore";
 import Link from "next/link";
-import { Zap, ChevronRight, Clock, Loader2 } from "lucide-react";
+import { Zap, ChevronRight, Clock, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -56,7 +57,7 @@ function FlashSaleCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/product/${product.id}`} className="block shrink-0 w-[140px] md:w-[180px] group">
-      <div className="bg-white rounded-xl p-2 space-y-2">
+      <div className="bg-white rounded-xl p-2 space-y-2 shadow-sm border border-slate-50">
         <div className="relative aspect-square rounded-lg bg-slate-50 overflow-hidden">
           <Image 
             src={product.image_url} 
@@ -132,8 +133,6 @@ export function HotDeals() {
     fetchHotDeals();
   }, []);
 
-  if (!isLoading && products.length === 0) return null;
-
   return (
     <section className="px-1 md:px-0">
       <div className="bg-red-600 rounded-2xl overflow-hidden shadow-xl shadow-red-900/10 border-2 border-red-600">
@@ -157,7 +156,7 @@ export function HotDeals() {
             <div className="flex justify-center py-10">
               <Loader2 className="w-8 h-8 text-red-600 animate-spin opacity-20" />
             </div>
-          ) : (
+          ) : products.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
               {products.map((p) => (
                 <FlashSaleCard key={p.id} product={p} />
@@ -169,6 +168,16 @@ export function HotDeals() {
                 </div>
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center px-2 leading-tight">View More Deals</span>
               </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 space-y-3">
+               <div className="p-3 bg-red-50 rounded-full">
+                  <Sparkles className="w-6 h-6 text-red-400" />
+               </div>
+               <div className="text-center">
+                  <p className="text-sm font-black text-slate-900 uppercase italic">Discounts Coming Soon</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Stay tuned for premium price drops!</p>
+               </div>
             </div>
           )}
         </div>

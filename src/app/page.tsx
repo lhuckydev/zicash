@@ -100,13 +100,13 @@ export default function CatalogPage() {
 
             {!error && (
               <motion.div variants={staggerContainer(0.05)} initial="initial" animate="animate" className="space-y-4">
-                <div className="flex items-center justify-between px-1">
+                <div className="flex items-center justify-between lg:justify-center lg:gap-10 px-1">
                   <motion.h2 variants={slideUp} className="text-lg font-black font-headline text-slate-900 uppercase tracking-tight italic">Departments</motion.h2>
-                  <Link href="/categories">
+                  <Link href="/categories" className="lg:hidden">
                     <motion.button variants={fadeIn} className="text-blue-600 text-[10px] font-black uppercase tracking-widest">Browse All</motion.button>
                   </Link>
                 </div>
-                <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-hide lg:justify-center">
                   {categories.map((cat) => (
                     <motion.button key={cat.name} variants={slideUp} {...buttonTap} onClick={() => setCategory(cat.name)} className="flex flex-col items-center gap-2 shrink-0 group">
                       <div className={cn(

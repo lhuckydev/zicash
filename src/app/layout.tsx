@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { UserDataSync } from "@/components/auth/UserDataSync";
 import { ProfilePrompt } from "@/components/auth/ProfilePrompt";
+import { PWAInstaller } from "@/components/pwa/PWAInstaller";
 
 export const metadata: Metadata = {
   title: {
@@ -13,6 +14,12 @@ export const metadata: Metadata = {
   description: 'Your premium destination for curated products, lifestyle essentials, and professional services in Ghana. All You Need, All For You.',
   keywords: ['marketplace', 'Ghana', 'electronics', 'laptops', 'phones', 'lifestyle', 'ZiCash'],
   metadataBase: new URL('https://zicash.online'),
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ZiCash GH',
+  },
   alternates: {
     canonical: '/',
   },
@@ -61,8 +68,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="font-body antialiased bg-background text-slate-900 min-h-screen flex flex-col overflow-x-hidden">
+        <PWAInstaller />
         <UserDataSync />
         <ProfilePrompt />
         {children}

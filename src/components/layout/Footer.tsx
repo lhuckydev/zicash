@@ -4,8 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Twitter, Linkedin, Mail, Instagram, Zap, Video, MessageCircle } from "lucide-react";
+import { Twitter, Linkedin, Mail, Instagram, Video, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const SnapchatIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 2.5c-2.4 0-3.9 1.6-4.4 3 .2 1 .3 1.8.3 2.6 0 .5-.1 1-.3 1.4-.4.9-1.1 1.7-2 2.3-.5.3-.9.7-1.2 1.2-.2.5-.2 1 0 1.5.3.7 1 1.2 1.8 1.4 1 .2 2.1-.1 3.1-.5.3-.1.6-.2 1-.2.4 0 .7.1 1.1.3 1 .6 2.3.9 3.6.9 1.3 0 2.6-.3 3.6-.9.4-.2.7-.3 1.1-.3.4 0 .7.1 1 .2 1 .4 2.1.7 3.1.5.8-.2 1.5-.7 1.8-1.4.2-.5.2-1 0-1.5-.3-.5-.7-.9-1.2-1.2-.9-.6-1.6-1.4-2-2.3-.1-.2-.2-.5-.2-.7.2-.8.3-1.6.3-2.6-.5-1.4-2-3-4.4-3z"/>
+  </svg>
+);
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -21,10 +32,10 @@ export function Footer() {
   }, []);
 
   const socialLinks = [
-    { icon: Instagram, url: socials.instagram, color: "hover:text-pink-500" },
-    { icon: Zap, url: socials.snapchat, color: "hover:text-yellow-500" },
-    { icon: Video, url: socials.tiktok, color: "hover:text-slate-900" },
-    { icon: Linkedin, url: socials.linkedin, color: "hover:text-blue-600" },
+    { id: 'instagram', icon: Instagram, url: socials.instagram, color: "hover:text-pink-500" },
+    { id: 'snapchat', icon: SnapchatIcon, url: socials.snapchat, color: "hover:text-yellow-500" },
+    { id: 'tiktok', icon: Video, url: socials.tiktok, color: "hover:text-slate-900" },
+    { id: 'linkedin', icon: Linkedin, url: socials.linkedin, color: "hover:text-blue-600" },
   ].filter(link => link.url);
 
   return (
@@ -55,17 +66,17 @@ export function Footer() {
             <p className="text-primary font-black italic tracking-widest text-xs uppercase">"All You Need, All For You"</p>
             
             <div className="flex items-center gap-4">
-              {socialLinks.map((link, i) => (
+              {socialLinks.map((link) => (
                 <Link 
-                  key={i} 
+                  key={link.id} 
                   href={link.url} 
                   target="_blank" 
-                  className={cn("p-2 bg-white border border-slate-200 rounded-full transition-all shadow-sm", link.color)}
+                  className={cn("p-2 bg-white border border-slate-200 rounded-full transition-all shadow-sm flex items-center justify-center", link.color)}
                 >
                   <link.icon className="w-5 h-5" />
                 </Link>
               ))}
-              <Link href="mailto:support@zicashgh.com" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm">
+              <Link href="mailto:support@zicashgh.com" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm flex items-center justify-center">
                 <Mail className="w-5 h-5" />
               </Link>
             </div>

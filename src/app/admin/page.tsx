@@ -63,6 +63,17 @@ type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Slidesh
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 const SESSION_TIMEOUT = 7200000; 
 
+const SnapchatIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 2.5c-2.4 0-3.9 1.6-4.4 3 .2 1 .3 1.8.3 2.6 0 .5-.1 1-.3 1.4-.4.9-1.1 1.7-2 2.3-.5.3-.9.7-1.2 1.2-.2.5-.2 1 0 1.5.3.7 1 1.2 1.8 1.4 1 .2 2.1-.1 3.1-.5.3-.1.6-.2 1-.2.4 0 .7.1 1.1.3 1 .6 2.3.9 3.6.9 1.3 0 2.6-.3 3.6-.9.4-.2.7-.3 1.1-.3.4 0 .7.1 1 .2 1 .4 2.1.7 3.1.5.8-.2 1.5-.7 1.8-1.4.2-.5.2-1 0-1.5-.3-.5-.7-.9-1.2-1.2-.9-.6-1.6-1.4-2-2.3-.1-.2-.2-.5-.2-.7.2-.8.3-1.6.3-2.6-.5-1.4-2-3-4.4-3z"/>
+  </svg>
+);
+
 interface Order {
   id: string;
   created_at: string;
@@ -534,7 +545,7 @@ export default function AdminPage() {
                     <form onSubmit={handleSaveSocials} className="space-y-6">
                        {[
                          { id: 'instagram', label: 'Instagram', icon: Instagram, color: 'text-pink-500' },
-                         { id: 'snapchat', label: 'Snapchat', icon: Zap, color: 'text-yellow-500' },
+                         { id: 'snapchat', label: 'Snapchat', icon: SnapchatIcon, color: 'text-yellow-500' },
                          { id: 'tiktok', label: 'TikTok', icon: Video, color: 'text-slate-900' },
                          { id: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: 'text-blue-600' }
                        ].map((soc) => (

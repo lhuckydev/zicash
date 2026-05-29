@@ -1,3 +1,8 @@
+/**
+ * @fileOverview Next.js Dynamic Manifest
+ * Note: We are using a static /public/manifest.json as the primary authority 
+ * to ensure 100% MIME type compatibility and browser detection.
+ */
 import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -9,7 +14,6 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#FBFBFE',
     theme_color: '#2563eb',
-    orientation: 'portrait',
     icons: [
       {
         src: 'https://i.ibb.co/v4p0sdxs/zicash.jpg',
@@ -23,8 +27,6 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/jpeg',
         purpose: 'any'
       }
-    ],
-    scope: '/',
-    categories: ['shopping', 'business']
+    ]
   }
 }

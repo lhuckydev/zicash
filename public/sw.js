@@ -1,6 +1,6 @@
 /**
- * ZiCash PWA Core Service Worker
- * Handles offline caching and satisfies browser installability requirements.
+ * ZiCash PWA Service Worker
+ * Implements basic caching and the required fetch handler for PWA installability.
  */
 
 const CACHE_NAME = 'zicash-v1';
@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('ZiCash SW: Caching core assets');
+      console.log('ZiCash PWA: Pre-caching offline assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -28,6 +28,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
+            console.log('ZiCash PWA: Clearing old cache');
             return caches.delete(cacheName);
           }
         })
@@ -38,19 +39,21 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          return cache.match(OFFLINE_URL);
+  // We only care about GET requests
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => {
+        // Fallback to cache if network fails
+        return caches.match(event.request).then((response) => {
+          if (response) return response;
+          // If the request is for a page, show offline fallback
+          if (event.request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+          return null;
         });
       })
-    );
-  } else {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
-      })
-    );
-  }
+  );
 });

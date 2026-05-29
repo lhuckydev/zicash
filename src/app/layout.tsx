@@ -70,6 +70,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#2563eb" />
       </head>
       <body className="font-body antialiased bg-background text-slate-900 min-h-screen flex flex-col overflow-x-hidden">
         <PWAInstaller />

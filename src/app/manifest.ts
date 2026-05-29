@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'ZiCash GH Limited',
     short_name: 'ZiCash',
-    description: 'Premium Online Marketplace for Ghana',
+    description: 'Premium Online Marketplace for Ghana. All You Need, All For You.',
     start_url: '/',
     display: 'standalone',
     background_color: '#FBFBFE',
@@ -24,5 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'any'
       }
     ],
+    scope: '/',
+    categories: ['shopping', 'business']
   }
 }

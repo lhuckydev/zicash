@@ -156,7 +156,7 @@ export default function CatalogPage() {
                     <div className="pt-8 flex justify-center">
                       <Link href="/products">
                         <Button className="h-14 px-10 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] rounded-2xl gap-3 shadow-xl shadow-blue-600/5 group">
-                          View All Hardware <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                          View Shop <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </Button>
                       </Link>
                     </div>

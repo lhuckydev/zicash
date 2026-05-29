@@ -122,7 +122,7 @@ function ProductsContent() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1">
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-slate-900 italic font-headline">
-              All <span className="text-blue-600">Hardware</span>
+              Our <span className="text-blue-600">Shop</span>
             </h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Curated high-performance inventory</p>
           </div>
@@ -211,7 +211,7 @@ function ProductsContent() {
         ) : (
           <div className="flex flex-col items-center justify-center py-40 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
             <Package className="w-12 h-12 text-slate-200 mb-4" />
-            <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No hardware matching your criteria.</p>
+            <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">No items matching your criteria.</p>
             <Button onClick={resetFilters} className="mt-8 bg-blue-600 text-white font-black rounded-2xl h-12 px-8 uppercase text-[10px] tracking-widest">Clear All Filters</Button>
           </div>
         )}

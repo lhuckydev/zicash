@@ -24,14 +24,17 @@ import {
   LogOut,
   CheckCircle2,
   Settings2,
-  X,
   Zap,
   Image as ImageIcon,
   Smartphone,
   User as UserIcon,
-  MapPin,
   Save,
-  Info
+  Info,
+  Instagram,
+  Video,
+  Linkedin,
+  MessageCircle,
+  Link as LinkIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +58,7 @@ import { cn } from "@/lib/utils";
 import { AdminSlideManager } from "@/components/admin/AdminSlideManager";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Slideshow" | "Customers" | "Settings";
+type AdminTab = "Overview" | "Orders" | "Products" | "Special Offers" | "Slideshow" | "Customers" | "Social Links" | "Settings";
 
 const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 const SESSION_TIMEOUT = 7200000; 
@@ -246,6 +249,7 @@ export default function AdminPage() {
   // Settings State
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [momoDetails, setMomoDetails] = useState({ name: "", number: "" });
+  const [socialLinks, setSocialLinks] = useState({ instagram: "", snapchat: "", tiktok: "", linkedin: "" });
 
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
@@ -265,15 +269,17 @@ export default function AdminPage() {
         setProducts(pData);
       }
 
-      const [oRes, cRes, sRes] = await Promise.all([
+      const [oRes, cRes, sRes, socRes] = await Promise.all([
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('settings').select('*').eq('key', 'momo_payment_details').maybeSingle()
+        supabase.from('settings').select('*').eq('key', 'momo_payment_details').maybeSingle(),
+        supabase.from('settings').select('*').eq('key', 'social_links').maybeSingle()
       ]);
       
       if (oRes.data) setOrders(oRes.data);
       if (cRes.data) setCustomers(cRes.data);
       if (sRes.data && sRes.data.value) setMomoDetails(sRes.data.value);
+      if (socRes.data && socRes.data.value) setSocialLinks(socRes.data.value);
       
     } catch (err: any) {
       console.error("Management Hub sync error:", err);
@@ -335,6 +341,27 @@ export default function AdminPage() {
       toast({ title: "Settings Updated", description: "Store payment credentials are now active." });
     } catch (err: any) {
       toast({ variant: "destructive", title: "Update Failed", description: err.message });
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleSaveSocials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .upsert({
+          key: 'social_links',
+          value: socialLinks,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+
+      if (error) throw error;
+      toast({ title: "Socials Updated", description: "Brand links synchronized across the node." });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Sync Failed", description: err.message });
     } finally {
       setIsSavingSettings(false);
     }
@@ -424,6 +451,7 @@ export default function AdminPage() {
            <div className="space-y-1">
              <div className="px-4 py-2 text-[9px] font-black text-white/20 uppercase tracking-widest">Relationships</div>
              <button onClick={() => setActiveTab("Customers")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Customers" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Users className="w-4 h-4" /> Customers</button>
+             <button onClick={() => setActiveTab("Social Links")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Social Links" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><LinkIcon className="w-4 h-4" /> Social Links</button>
              <button onClick={() => setActiveTab("Settings")} className={cn("flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest", activeTab === "Settings" ? "bg-blue-600 text-white" : "text-white/40 hover:text-white")}><Settings className="w-4 h-4" /> Settings</button>
            </div>
         </nav>
@@ -437,7 +465,7 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6 bg-slate-900">
-        <Card className="w-full max-w-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
+        <Card className="w-full max-md shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
           <div className="bg-slate-950 p-12 text-center relative overflow-hidden">
              <h1 className="text-white font-black text-2xl uppercase italic">ZiCash <span className="text-blue-500">Manager</span></h1>
           </div>
@@ -492,6 +520,47 @@ export default function AdminPage() {
             </div>
           )}
 
+          {activeTab === "Social Links" && (
+            <div className="max-w-2xl animate-in fade-in slide-in-from-left-4 duration-700">
+              <Card className="rounded-[3rem] border-none shadow-xl bg-white overflow-hidden">
+                 <div className="p-10 bg-slate-950 text-white flex items-center justify-between">
+                    <div>
+                       <h2 className="text-2xl font-black uppercase italic tracking-tight">Digital <span className="text-blue-500">Presence</span></h2>
+                       <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Manage brand social connectivity</p>
+                    </div>
+                    <LinkIcon className="w-10 h-10 text-blue-500 opacity-50" />
+                 </div>
+                 <CardContent className="p-10 space-y-10">
+                    <form onSubmit={handleSaveSocials} className="space-y-6">
+                       {[
+                         { id: 'instagram', label: 'Instagram', icon: Instagram, color: 'text-pink-500' },
+                         { id: 'snapchat', label: 'Snapchat', icon: Zap, color: 'text-yellow-500' },
+                         { id: 'tiktok', label: 'TikTok', icon: Video, color: 'text-slate-900' },
+                         { id: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: 'text-blue-600' }
+                       ].map((soc) => (
+                         <div key={soc.id} className="space-y-2">
+                           <label className="text-[11px] font-black uppercase text-slate-400 ml-1 tracking-widest">{soc.label} URL</label>
+                           <div className="relative">
+                             <soc.icon className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", soc.color)} />
+                             <Input 
+                                placeholder="https://..." 
+                                className="h-14 pl-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" 
+                                value={(socialLinks as any)[soc.id] || ""} 
+                                onChange={e => setSocialLinks({...socialLinks, [soc.id]: e.target.value})} 
+                             />
+                           </div>
+                         </div>
+                       ))}
+
+                       <Button disabled={isSavingSettings} className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] gap-3 shadow-xl shadow-blue-600/20">
+                          {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} Sync Digital Presence
+                       </Button>
+                    </form>
+                 </CardContent>
+              </Card>
+            </div>
+          )}
+
           {activeTab === "Orders" && (
             <Card className="rounded-[3rem] border-none shadow-xl bg-white overflow-hidden">
                <Table>
@@ -534,7 +603,7 @@ export default function AdminPage() {
                            </div>
                          </TableCell>
                          <TableCell><span className="text-xs font-bold text-slate-600">{c.contact || 'N/A'}</span></TableCell>
-                         <TableCell><div className="flex items-center gap-2 text-xs text-slate-400 italic max-w-[200px] truncate"><MapPin className="w-3 h-3 shrink-0" /> {c.location || 'Not Specified'}</div></TableCell>
+                         <TableCell><div className="flex items-center gap-2 text-xs text-slate-400 italic max-w-[200px] truncate"> {c.location || 'Not Specified'}</div></TableCell>
                          <TableCell className="pr-10 text-right"><Link href={`/admin/customer/${c.id}`}><Button variant="ghost" size="icon" className="rounded-xl text-slate-300 hover:text-blue-600 group-hover:bg-white shadow-sm transition-all"><Eye className="w-4 h-4" /></Button></Link></TableCell>
                        </TableRow>
                      ))}

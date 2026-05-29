@@ -1,15 +1,34 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { Twitter, Linkedin, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { Twitter, Linkedin, Mail, Instagram, Zap, Video, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  // Ensure the baseline starts at 2026 as per user request if actual year is earlier, 
-  // otherwise use the real current year.
   const displayYear = Math.max(2026, currentYear);
+  const [socials, setSocials] = useState({ instagram: "", snapchat: "", tiktok: "", linkedin: "" });
+
+  useEffect(() => {
+    async function fetchSocials() {
+      const { data } = await supabase.from('settings').select('*').eq('key', 'social_links').maybeSingle();
+      if (data?.value) setSocials(data.value);
+    }
+    fetchSocials();
+  }, []);
+
+  const socialLinks = [
+    { icon: Instagram, url: socials.instagram, color: "hover:text-pink-500" },
+    { icon: Zap, url: socials.snapchat, color: "hover:text-yellow-500" },
+    { icon: Video, url: socials.tiktok, color: "hover:text-slate-900" },
+    { icon: Linkedin, url: socials.linkedin, color: "hover:text-blue-600" },
+  ].filter(link => link.url);
 
   return (
-    <footer className="hidden md:block bg-slate-50 border-t border-slate-200 pt-16 pb-8 no-print">
+    <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-32 md:pb-8 no-print">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-2 space-y-6">
@@ -34,15 +53,20 @@ export function Footer() {
               ZiCash GH Limited is your high-performance destination for premium goods and essential services. We focus on quality, reliability, and total customer satisfaction.
             </p>
             <p className="text-primary font-black italic tracking-widest text-xs uppercase">"All You Need, All For You"</p>
+            
             <div className="flex items-center gap-4">
-              <Link href="#" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm">
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm">
+              {socialLinks.map((link, i) => (
+                <Link 
+                  key={i} 
+                  href={link.url} 
+                  target="_blank" 
+                  className={cn("p-2 bg-white border border-slate-200 rounded-full transition-all shadow-sm", link.color)}
+                >
+                  <link.icon className="w-5 h-5" />
+                </Link>
+              ))}
+              <Link href="mailto:support@zicashgh.com" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm">
                 <Mail className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="p-2 bg-white border border-slate-200 rounded-full hover:border-primary hover:text-primary transition-all shadow-sm">
-                <Linkedin className="w-5 h-5" />
               </Link>
             </div>
           </div>

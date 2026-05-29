@@ -1,18 +1,17 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ServiceHighlights } from "@/components/layout/ServiceHighlights";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { Product } from "@/store/useCartStore";
 import { supabase } from "@/lib/supabase";
-import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, ArrowDownWideNarrow, Zap, Loader2 } from "lucide-react";
+import { Package, RefreshCcw, Filter, X, ChevronRight, SlidersHorizontal, Zap, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Sheet, 
   SheetContent, 
@@ -91,7 +90,6 @@ function CategoriesContent() {
       setMaxPriceLimit(max);
       setPriceRange([0, max]);
     } catch (err: any) {
-      console.warn("Categories fetch fallback active:", err.message);
       const { data } = await supabase
         .from('products')
         .select('*, variants:product_variants(*)')
@@ -106,14 +104,6 @@ function CategoriesContent() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const availableBrands = useMemo(() => {
-    const brands = new Set<string>();
-    products
-      .filter(p => p.category === activeCategory)
-      .forEach(p => { if (p.brand) brands.add(p.brand); });
-    return Array.from(brands).sort();
-  }, [products, activeCategory]);
-
   const activeProducts = useMemo(() => {
     let filtered = products.filter((p) => p.category === activeCategory);
     if (showHotDeals) {
@@ -126,7 +116,6 @@ function CategoriesContent() {
     return [...filtered].sort((a, b) => {
       if (sortBy === "price_asc") return a.price - b.price;
       if (sortBy === "price_desc") return b.price - a.price;
-      if (sortBy === "oldest") return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
       return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [products, activeCategory, showHotDeals, priceRange, selectedBrands, sortBy]);
@@ -138,13 +127,8 @@ function CategoriesContent() {
     setSelectedBrands([]);
   };
 
-  const activeFilterCount = (selectedBrands.length > 0 ? 1 : 0) + 
-    (showHotDeals ? 1 : 0) + 
-    (priceRange[1] < maxPriceLimit || priceRange[0] > 0 ? 1 : 0);
-
   return (
     <main className="flex-1 flex flex-col md:flex-row overflow-hidden bg-slate-50">
-      {/* Sidebar/TopNav for Categories */}
       <aside className="w-full md:w-32 bg-white border-b md:border-b-0 md:border-r border-slate-100 flex flex-row md:flex-col overflow-x-auto md:overflow-y-auto scrollbar-hide shrink-0 z-20 shadow-sm">
         {categories.map((cat) => {
           const isActive = activeCategory === cat.name;
@@ -157,12 +141,6 @@ function CategoriesContent() {
                 isActive ? "bg-blue-50/30" : "bg-white hover:bg-slate-50/50"
               )}
             >
-              {isActive && (
-                <div className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full" />
-              )}
-              {isActive && (
-                <div className="md:hidden absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-600 rounded-t-full" />
-              )}
               <div className={cn(
                 "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center p-1.5 md:p-2 transition-all duration-300",
                 isActive ? "bg-white shadow-lg scale-110" : "bg-slate-50 opacity-40 group-hover:opacity-100"
@@ -184,6 +162,9 @@ function CategoriesContent() {
 
       <section className="flex-1 overflow-y-auto scrollbar-hide pb-24 md:pb-12">
         <div className="p-4 md:p-8 space-y-6">
+          
+          <ServiceHighlights />
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
              <div>
                 <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 italic font-headline">{activeCategory}</h1>
@@ -194,11 +175,6 @@ function CategoriesContent() {
                   <SheetTrigger asChild>
                      <Button variant="outline" className="rounded-xl border-slate-200 bg-white font-black text-[10px] uppercase tracking-widest gap-2 h-10 shadow-sm relative">
                         <Filter className="w-3.5 h-3.5" /> Filters
-                        {activeFilterCount > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-white">
-                            {activeFilterCount}
-                          </span>
-                        )}
                      </Button>
                   </SheetTrigger>
                   <SheetContent className="w-[85vw] sm:max-w-md rounded-l-[2rem] border-none bg-white p-0 overflow-hidden flex flex-col">
@@ -216,7 +192,6 @@ function CategoriesContent() {
                                  <SelectItem value="newest" className="font-bold">Newest Arrivals</SelectItem>
                                  <SelectItem value="price_asc" className="font-bold">Price: Low to High</SelectItem>
                                  <SelectItem value="price_desc" className="font-bold">Price: High to Low</SelectItem>
-                                 <SelectItem value="oldest" className="font-bold">Oldest Items</SelectItem>
                               </SelectContent>
                            </Select>
                         </div>
@@ -258,11 +233,11 @@ function CategoriesContent() {
           </div>
 
           {isLoading && products.length === 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Array.from({ length: 8 }).map((_, i) => <ItemLoadingView key={i} />)}
             </div>
           ) : activeProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 animate-in fade-in duration-500">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in duration-500">
               {activeProducts.map((product) => <ProductCard key={product.id} product={product} showCategory={false} />)}
             </div>
           ) : (

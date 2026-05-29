@@ -64,14 +64,13 @@ const ADMIN_EMAILS = ['zicashonline@gmail.com', 'ericboatenglucky@gmail.com'];
 const SESSION_TIMEOUT = 7200000; 
 
 const SnapchatIcon = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="currentColor" 
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M12 2.5c-2.4 0-3.9 1.6-4.4 3 .2 1 .3 1.8.3 2.6 0 .5-.1 1-.3 1.4-.4.9-1.1 1.7-2 2.3-.5.3-.9.7-1.2 1.2-.2.5-.2 1 0 1.5.3.7 1 1.2 1.8 1.4 1 .2 2.1-.1 3.1-.5.3-.1.6-.2 1-.2.4 0 .7.1 1.1.3 1 .6 2.3.9 3.6.9 1.3 0 2.6-.3 3.6-.9.4-.2.7-.3 1.1-.3.4 0 .7.1 1 .2 1 .4 2.1.7 3.1.5.8-.2 1.5-.7 1.8-1.4.2-.5.2-1 0-1.5-.3-.5-.7-.9-1.2-1.2-.9-.6-1.6-1.4-2-2.3-.1-.2-.2-.5-.2-.7.2-.8.3-1.6.3-2.6-.5-1.4-2-3-4.4-3z"/>
-  </svg>
+  <div className={cn("relative w-4 h-4 flex items-center justify-center", className)}>
+    <img 
+      src="https://i.ibb.co/0RfvrwC5/snapchat-PNG41-removebg-preview.png" 
+      alt="Snapchat" 
+      className="w-full h-full object-contain"
+    />
+  </div>
 );
 
 interface Order {
@@ -546,13 +545,15 @@ export default function AdminPage() {
                        {[
                          { id: 'instagram', label: 'Instagram', icon: Instagram, color: 'text-pink-500' },
                          { id: 'snapchat', label: 'Snapchat', icon: SnapchatIcon, color: 'text-yellow-500' },
-                         { id: 'tiktok', label: 'TikTok', icon: Video, color: 'text-slate-900' },
-                         { id: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: 'text-blue-600' }
+                         { id: 'tiktok', icon: Video, label: 'TikTok', color: 'text-slate-900' },
+                         { id: 'linkedin', icon: Linkedin, label: 'LinkedIn', color: 'text-blue-600' }
                        ].map((soc) => (
                          <div key={soc.id} className="space-y-2">
                            <label className="text-[11px] font-black uppercase text-slate-400 ml-1 tracking-widest">{soc.label} URL</label>
                            <div className="relative">
-                             <soc.icon className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4", soc.color)} />
+                             <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
+                               <soc.icon className={cn("w-4 h-4", soc.color)} />
+                             </div>
                              <Input 
                                 placeholder="https://..." 
                                 className="h-14 pl-12 rounded-2xl bg-slate-50 border-none font-bold shadow-inner" 

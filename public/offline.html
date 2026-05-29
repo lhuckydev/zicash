@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZiCash GH - Offline</title>
+    <title>ZiCash | Offline</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #FBFBFE; color: #1e293b; text-align: center; }
-        .container { padding: 2rem; }
-        h1 { font-size: 2rem; margin-bottom: 1rem; color: #2563eb; }
-        p { color: #64748b; margin-bottom: 2rem; }
-        button { background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #FBFBFE; color: #1e293b; text-align: center; padding: 20px; }
+        .card { background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 400px; }
+        h1 { color: #2563eb; margin: 0 0 10px; font-size: 24px; }
+        p { color: #64748b; line-height: 1.6; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 30px; border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="card">
         <h1>You're Offline</h1>
-        <p>Please check your internet connection to continue shopping at ZiCash GH Limited.</p>
+        <p>It looks like your connection has been interrupted. Please check your internet and try again.</p>
         <button onclick="window.location.reload()">Retry Connection</button>
     </div>
 </body>

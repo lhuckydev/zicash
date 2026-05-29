@@ -4,45 +4,44 @@ import { useEffect, useState } from "react";
 import { PWAInstallBanner } from "./PWAInstallBanner";
 
 /**
- * PWA Registration & Native Install Handler
- * Capture the browser's beforeinstallprompt to trigger the native installation UI.
+ * ZiCash PWA Core Installer
+ * Captures native browser install prompts and stashes for custom UI triggering.
  */
 export function PWAInstaller() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
-    // 1. Service Worker Registration
+    // 1. Service Worker Registration (Production Protocol)
     if ("serviceWorker" in navigator) {
-      const registerSW = async () => {
+      const handleRegister = async () => {
         try {
           const registration = await navigator.serviceWorker.register("/sw.js", {
             scope: "/",
           });
-          console.log("ZiCash PWA: Service Worker registered. Scope:", registration.scope);
+          console.log("ZiCash PWA: Service Worker Active. Scope:", registration.scope);
         } catch (error) {
-          console.error("ZiCash PWA: Service Worker registration failed:", error);
+          console.error("ZiCash PWA: Service Worker Registration Failed:", error);
         }
       };
 
-      // Register on window load
       if (document.readyState === "complete") {
-        registerSW();
+        handleRegister();
       } else {
-        window.addEventListener("load", registerSW);
+        window.addEventListener("load", handleRegister);
       }
     }
 
-    // 2. Installability Listener (Native Browser Event)
+    // 2. Installability Listener (The "Hard Fix" for Chrome)
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log("ZiCash PWA: Native install capability detected (beforeinstallprompt fired)");
-      // Prevent the default mini-infobar from appearing on mobile
+      console.log("ZiCash PWA: Installability detected by browser.");
+      // Prevent automatic prompt
       e.preventDefault();
-      // Stash the event so it can be triggered by our custom button later.
+      // Stash event for later use
       setDeferredPrompt(e);
     };
 
     const handleAppInstalled = () => {
-      console.log("ZiCash PWA: App successfully installed to Home Screen");
+      console.log("ZiCash PWA: App successfully installed to local system.");
       setDeferredPrompt(null);
     };
 
@@ -57,26 +56,32 @@ export function PWAInstaller() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      console.warn("ZiCash PWA: Install trigger requested but no prompt stashed.");
+      console.warn("ZiCash PWA: Attempted to trigger install, but prompt is missing.");
       return;
     }
     
-    console.log("ZiCash PWA: Initiating browser-native install dialog");
-    // Show the browser's native install prompt
+    console.log("ZiCash PWA: Triggering native system installation sheet.");
+    // Show native prompt
     deferredPrompt.prompt();
     
-    // Wait for the user to respond to the prompt
+    // Wait for user outcome
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`ZiCash PWA: Native dialog response - ${outcome}`);
+    console.log(`ZiCash PWA: User response - ${outcome}`);
     
-    // Clear the stashed prompt
+    // Clear stash
     setDeferredPrompt(null);
   };
 
   return (
     <>
       {deferredPrompt && (
-        <PWAInstallBanner onInstall={handleInstallClick} onDismiss={() => setDeferredPrompt(null)} />
+        <PWAInstallBanner 
+          onInstall={handleInstallClick} 
+          onDismiss={() => {
+            console.log("ZiCash PWA: User dismissed install banner.");
+            setDeferredPrompt(null);
+          }} 
+        />
       )}
     </>
   );
